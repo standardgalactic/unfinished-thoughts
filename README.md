@@ -43,6 +43,6 @@ Stay tuned for our official launch date, and get ready to savor the taste of inn
 #CattailRootTortillas #SoftailShackos #TasteOfInnovation #SustainableFlavors #FoodRevolution
 
 <p align="center">
-  <img src="softail-shackos.jpg)" width="500px"/>
+  <img src="Images/softail-shackos.jpg" width="500px"/>
   <p align="center"><i></i>Softail Shacko's</p>
 </p>
