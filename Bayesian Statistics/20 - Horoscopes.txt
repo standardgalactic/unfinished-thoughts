@@ -1,0 +1,1012 @@
+Welcome to lecture 20 of Statistical Rethinking 2023. This is the lecture I
+probably should have given at the very start of the course. The constellation
+Orion is one of the most prominent constellations in the night sky. It's
+visible from every part of the Earth and every human society has identified it
+and named it. The closest star in the constellation is Bellatrix and she's
+about 250 light years from us. It's implausible that this constellation
+directly influences human affairs in a physical way and yet the influence of
+this constellation on human affairs has been massive through traditions of
+divination and horoscopes. This is one of the most magnificent horoscopes I know
+of. The horoscope of Prince Iskander, grandson of Tamerlane. This is an
+elaborate example but even the simplest horoscopes use facts about the
+positions of the different constellations during particular events like
+births and weddings to portend the future and provide advice and comfort to
+people. Now it's important to understand that horoscopes are not arbitrary. They
+have an internal logic. People go to school to learn how to produce them. You
+really have to know your stuff, know the constellations and put things
+together in a right way. There are many many wrong horoscopes. And this is true
+of other divination techniques like tarot card reading. There are traditions of
+sequences of draws and these build-up narratives about a person's life.
+Or reading of tea leaves where the clockwise motion of time through the
+bowl and the recognition of particular patterns is used as as well to build up
+a narrative. These traditions have logic and they produce advice which is
+seemingly correct and potentially actually useful for people because it's
+vague. It can accommodate the many diverse lives of the people who use these
+techniques even though there's nothing about the technique itself which
+inputs detailed facts about the person. I'll say this again. These techniques like
+horoscopes or tarot card reading or reading of tea leaves can produce
+seemingly useful advice plausible advice because that advice is vague and it
+must be vague because the inputs are also vague. Yeah this doesn't mean they're
+useless because the advice could still be emotionally comforting and encourage
+people to contemplate their life and improve it. But that connection between
+the vagueness of the inputs and the vagueness of the outputs is a necessary
+feature of these traditions. There's a fourth tradition which also has this
+pattern to it and that is statistics in the sciences. These sorts of flow charts
+I showed you this one in the very first lecture take only the most superficial
+features of a study and the data and then are meant to guide you in the ways
+that you would then process the data to get answers about its meaning. The inputs
+are vague. There's really no scientific model involved in a diagram like this.
+No generative model of any kind and therefore the answers are also vague.
+That doesn't mean they're wrong because they may encourage you to move forward
+and it may produce some knowledge but they're very low on scientific power.
+So now maybe you think I'm making fun of statistics when I say this but I assure
+you I'm not. The first reason is I respect all four of these traditions on
+this slide. They don't have to be correct in their details in order to be useful,
+right? So I argued constellations and tarot card reading and reading of tea leaves.
+They don't actually have to have access to the future to be improvements in
+people's lives if they're conducted responsibly and the same is true of basic
+statistics. It doesn't have to be bad just because scientists don't know what's
+going on and the inputs are vague and the outputs are sometimes even vaguer but
+we can think about many of the features of statistics in the sciences as being
+part of this horoscope syndrome in a sense and let me explain what I mean by
+that. In a fortune-telling framework in order for it to be plausibly correct to
+provide useful advice the advice has to be vague because the only kind of advice
+that seems correct that you could produce from the vague input into these
+fortune-telling techniques must itself be vague. If you take only a person's
+birthday it is very difficult to predict every detail of their life and how it
+will unfold and so the predictions need to be vague enough to fit a very wide
+range of cases. Nevertheless useful advice can be embedded in that vague
+advice. Don't take unnecessary risks, be careful who you marry and so on. It's
+not bad advice, it's just a vague. The other thing about fortune-telling
+techniques is they tend to have an exaggerated importance. They want to be
+taken seriously because they're about well your future and people then tend
+to take the advice maybe a bit too seriously as well and it's also true
+that people don't like fortune-telling that portends doom. They want it to be
+hopeful and so there's this combination of exaggerated importance and optimism
+involved in such things and statistics as it's practice in the sciences is often
+like this. It's like it comes across in the superficial way like a fortune-telling
+tradition. The inputs are vague because there's no scientific model and it's just
+features of the data and as you know the associations in the data are just never
+sufficient independent of the scientific facts to make scientific sense. And so the
+advice that a statistics course like this one or a statistics textbook or a
+statistician at a help desk at a university can possibly provide you is
+necessarily vague if they want to be correct and actually help you. They
+often have to be vague because they don't know the scientific facts that you
+do that would allow them to provide you more powerful advice because it's only
+those scientific facts the scientific model underneath that will make the
+statistics powerful. So I want to make a strong point before getting into the meat
+of this lecture that it's really not possible to offload our subjective
+responsibilities and doing science on to objective statistical procedures even
+though it might be comforting to do so because it's often much easier to defend
+an objective procedure that the computer will perform than it is to defend our
+subjective choices which give meaning to those objective procedures. I'll say
+that again. It is often easier to defend the objective procedure than it is to
+defend the assumptions, the subjective assumptions that give meaning to the
+outputs of that objective procedure to say that science scientific data
+analysis gains its power through the expertise of individual scientists in
+drawing scientific models that justify estimates and those that expertise is
+the subjectivities. When I say subjective all I mean is that people disagree and
+they often disagree because some people know more than other people. There was
+nothing wrong with that and when I say objective I just mean that everybody
+does it the same way everybody will do Bayesian updating the same way or at
+least we will all agree that there's exactly one right way to do Bayesian
+updating yeah but most of science and the most powerful parts of it are these
+subjective responsibilities and there are a lot of them not just in generating
+scientific models but many other aspects as well so these the subjective
+responsibilities are the topic of the rest of this lecture and I want to give
+you some general advice but it's going to be horoscopic yeah in the sense that
+I've used it on the previous slides meaning I don't know enough about your
+particular research area to give you detailed advice so I'm going to have to
+be vague but I'm going to try to be useful provide vague advice with the
+vaguest of input that you can tailor and customize to your particular cases. So
+to begin imagine a typical scientific laboratory like this one now it's a bit
+of a mess and but people are getting some work done they left their tools out
+there are some there's some graduate students in the back there's a dog and
+in laboratories there's a lot of activity of different sorts people are
+educating one another and they're doing experiments they're taking measurements
+and they're analyzing data in every aspect of this work multiplies together in
+some complicated way to determine the quality of a scientific result there's
+no part of it which can be neglected when we try to understand the cultural
+evolution of scientific beliefs. There's a tendency like in this course to
+really focus on the objective parts that we can write down and analyze
+mathematically and say whether they're right or wrong given different
+assumptions that's what I call the quality of the data analysis and this is
+of course extremely important because if you get this wrong the rest of it's
+meaningless but the other parts you could say the same for if you get them
+badly wrong it doesn't matter how good your data analysis is yeah so just a
+couple of examples the quality of the theory obviously matters a whole lot too
+I keep arguing if your theory is bad then the estimate doesn't mean anything at
+all the quality of the data measurement really matters the reliability of your
+code also matters you can write bad code this is why I keep talking about
+testing testing is incredibly important yeah documentation is also important
+future view will need documentation of what you did I promise and your
+colleagues of course need documentation as well to understand the meaning of
+your measurements and analyses and then when we communicate with our colleagues
+and with the public we write reports sometimes journal articles sometimes
+books sometimes talks and when we report there are obligations subjective
+responsibilities and how we do these reports so that our work is transparent
+and useful and others can build upon it so in the remainder of this talk I want
+to give you three types of horoscopic advice that deal with these subjective
+responsibilities outside of the data analysis itself and the first will be
+about planning of research the subjective responsibilities in that regard then
+in how we actually do the work itself and then finally in the reporting of that
+work all of the elements of planning a research project are equally important
+because each multiplies the possibilities of the others I'm going to go
+through just a selection of the aspects of planning to highlight some principles
+which I think are important you or someone else could make another list and
+those elements of the other list could be equally important but this is my list
+I'm going to talk about goals what are we trying to do in the first place it's
+important to be explicit about that and then talk about theory and the things
+that theory does for us in terms of justify how we acquire the data and how
+we analyze it and then the ethical responsibilities to document and make
+shareable our results so goals in this course I've spoken a lot about
+estimates the thing that we're trying to estimate goals are a bit broader than
+just quantitative estimates of course I don't mean to fetishize quantitative
+data analysis but this is a statistics course so I'll constrain my comments to
+quantitative analysis for the moment on the right here we have a sort of cartoon
+version of the relationship between what we're trying to estimate that is the
+estimate shown there at the top right the porcupine cake and then there's some
+method we're going to use to estimate it that's the estimator in this metaphor
+it's recipe and then we end up with an estimate which is inevitably not exactly
+what we were after in the first place but hopefully resembles the estimate
+enough to be of use it's important to be clear in the beginning of a project
+what exactly we're trying to estimate because if you put this step at the
+end after you've done the data analysis you can get almost any answer you want
+and that's not good for anybody once we have an estimate stated in general terms
+we actually need to say which assumptions are we going to make which are
+going to make it possible for us to have a way to construct an estimator and the
+metaphor the recipe metaphor breaks down a little bit here but you can think
+about this as being the constraints on ingredients that we're going to use and
+the equipment that you have available but really inside of a research project
+this is where we make our causal model our scientific theory and the estimate
+must be identified inside of that causal model in order for us to justify any
+statistical analysis which will do with it and that's been the case in the
+majority of the samples in this course but let's think a little bit more about
+that because what I haven't said a lot about in this course is where theories
+come from and I don't have enough time in this lecture to really do justice to
+that question it's a crap in and of itself the construction and inspection of
+scientific models but it may be useful just to give you a crude taxonomy and
+say some things a few more things about the heuristic causal models that we've
+used in this course so I tend to think about there being four main levels of
+theory building and none of them is better than any of the others they're
+complementary because they zoom in and out at different levels of detail
+different effective scales and help us understand and develop intuitions in
+different ways but all of them are analytical and that's what makes them
+logical theories that is they all specify or imply algebraic systems which
+can be analyzed for their implications the first of these is the heuristic
+causal models or directed acyclic graphs that I've used in many of the
+examples in this course at this level really all we have is variables which
+are potential causes and arrows coming from them indicating influences but
+this is a lot because what the DAGs allow us to do is say if we're not willing
+to assume anything specifically about these influences these arrows what can
+we deduce anyway and the answer is a lot as you've seen the second level are
+structural causal models that's every time we've done a synthetic data
+simulation in this course we produced a structural causal model that is a DAG
+plus some set of specific functions that identify the influences in precise
+mathematical ways even more can be deduced in these cases because there are
+many cases in which the DAG cannot decide if there's a way to produce an
+estimate estimator for our estimate but once we have made structural
+assumptions often we can so as I mentioned before monotonicity is a very
+powerful assumption that often a lot allows identification and so lots of
+analysts are willing to make that and it's often scientifically reasonable the
+third are full dynamic models like the ordinary differential equation models
+that I've copied on the slide that you met in the previous lecture in lecture
+19 many scientific theories involve dynamical systems equations and these
+sorts of models have lots of implications seen in different scales and
+in different variables and different spatial and temporal resolutions and
+finally I think about agent-based models as being one of the most fine
+grained ways to construct a theory dynamical systems models tend to average
+over some collectives they they think about rates and zoom out at some level
+of detail agent-based models model every decision-making entity by itself
+they can't be analyzed analytically at least not usually although there are
+some tricks but they are very powerful way to see the implications of
+assumptions in complex systems all four of these approaches are worth
+practicing together although not every project of course requires them all but
+you have to have some level of theory building in any project now the question
+is where do these models come from how do you learn to make them there's no easy
+answer to that except to read models I'll say that again I think the best way to
+learn to write models is to read models and you you develop an understanding of
+their grammar and their vocabulary and in this linguistic metaphor eventually
+you become fluent but it takes time and you have to be patient I'll say a little
+bit more about the DAGs here so there are some heuristics for heuristic model
+building and this is not a complete list here but I want to give you a short list
+of a way you can proceed to build a DAG for some particular analytical problem
+in the simplest cases this is only a starting place and you will need
+iterations and to show you results colleagues but this is a good start I
+think it's been great when I do consultations and I'm working with
+scientists and I'm trying to elicit from them they're late in causal models
+because all scientists in my experience have well-informed late in causal models
+about the systems they study they just need some nudging to make it formal so
+there's an order in which I tend to go the first is to think about well let's
+have a clear statement of the estimate that is the treatment in the outcome so
+you can just draw the treatment in the outcome and I'm going to use the UC
+Berkeley admissions example from earlier in the course just an example here but I
+think you'll see the abstract structure so here G influence say the gender of an
+application influences his probability of admission and then we built things
+around it so first we think about other causes of the outcome so in this case the
+department also influences the chance of admission because departments vary in the
+numbers of slots that they have relative to the number of applications they
+receive and then there are other effects that is that there may be influences on
+variables other than the outcome so in this case a gender probably also
+influences the department because male and female applications are sourced into
+different departments because people send them there this is a simple sort of
+dad we could see there could also be relationships with other variables in
+the dad as well and you think about those in terms of other causes and other
+effects but there are also things which are unmeasured that are worth thinking
+about and so you should consider all the pairs of variables and whether there may
+be hidden compounds that is unobserved common causes among them so in this
+triangular DAG on the right but with G, D, and A there are three pairs of
+variables and each of them could have an unobserved common cause but only one of
+them is actually scientifically plausible and it's the one that links
+department with admissions and what could this unobserved common cause be well
+if you remember that lecture I argued that one likely unobserved common
+influence on admissions chances and department choice is the ability of the
+applicant and that leads them to sort in other ways but even if you haven't
+identified it is worth worrying about these things why aren't the other
+combinations that is why have I excluded some unobserved common influence on say
+gender and applications because gender is not something that is influenced by
+something in this system at time of admission that would also influence
+application right we're reviewing gender is fixed in this particular model so
+it's the identity of the variables like that that helps you structure these
+models it's your scientific knowledge always of what the variables represent
+that helps you decide which errors are reasonable and exclude others because if
+you can't use that information then there are a huge number of possible DAGs
+that arise from simply flipping the directions of arrows but most of them
+are scientifically nonsense okay let's come back to the porcupine and move
+through the list here so once you have a scientific model whether it's a DAG or
+something more detailed you can use that to inform your sampling plane you can
+write synthetic data generating engine and you can sample from it and you can
+decide how much data you need and so on because you will also have justified an
+analysis plan using the techniques that I've showed you in this course things
+like the backdoor criterion to try out the analysis on your synthetic data
+because you have a generative model now and you can decide how much data you
+need in which units how balanced and so on as important as it is to get all of
+the first four steps in this list correct if you don't document it chances
+are it won't be worth very much other people need to know what you did so that
+they trust it and you will probably need to reference exactly what you did in the
+future because you will want to do it again or you will want someone else to
+be able to build on your work so documentation is important and you should
+be documenting at every step as you go and not at the end because it will be too
+hard at the end you will remember if you're a normal person exactly what you
+did at each step one of the love your ease that comes from scripting your
+analyses and writing code to do these steps is that to some extent some minimal
+extent it's self documenting but we can do much better by putting additional
+comments often we need more comments than there is code so we understand the
+intention of each particular block of code and that'll help us future us when
+we want to look back at our own code and reuse it and it'll help your colleagues
+because they'll understand what you did and understand the reasons for it
+finally I think it's equally important to point out that it's really not okay
+to use proprietary data analysis software anymore I guess if you're in
+industry there may be legal reasons that you need to and I understand those
+constraints but certainly for academics people doing basic research especially
+you should there's the best specific software is free and open and if you
+want people to be able to use your code and inspect your analysis they need to
+be able to run your code so using some extensive proprietary data analysis
+stack like Stata to single something out it's not really ethical I'm afraid and
+I know that sounds like a harsh opinion but it is my opinion it's not ethical
+because the point of doing science is that what we do can be inspected by our
+colleagues and your colleagues in many parts of the world cannot in cannot
+afford to data but they can afford are because it's free same goes for data
+formats if you can't open your data then they can't use it and they can't trust
+what you did but that's there's lots of open data formats commas separated
+formats are perfectly fine your future self will also thank you for using open
+formats and open software because you may not have access to the proprietary
+software that you used in the past when you switch jobs or institutions and many
+of my colleagues who have in the past used proprietary data formats have found
+themselves unable to open their own data at some point in the future okay last
+thing I want to say in this section about planning is to say a little bit about
+pre-registration some of you have heard of this pre-registration is a kind of
+scientific documentation research documentation in which we write up and
+publicly distribute prior documentation of our design and our analysis plan this
+is before the data have been collected or at least before they've been inspected
+in a detailed way and it's meant to draw a clear epistemological line or I
+should say epistemic line between the decisions about design and analysis
+which we've made in the absence of the data so let me say that more eloquently
+that the problem is that many research design decisions and aspects of
+scientific analyses are made with detailed knowledge of the data itself
+their data dependent people are choosing methods of statistical analysis and
+data processing which are conditional on the particular sample they have in
+possession and this is very dangerous for inference it tends to increase false
+results because if you really believe in your hypothesis you will process the
+data transform it for example in particular ways and analyze in a
+particular ways to maximize the statistical power that you have and maybe
+that sounds good we like statistical power the problem is when you're doing
+that you're implicitly conditioning on the idea that you're correct that your
+hypothesis is correct and when you maximize power you're also increasing
+the rate of false positives and so then if your hypothesis is wrong you're
+increasing the chance that you'll conclude it's right anyway so you want to
+think about this in a more transparent way I think of it this way suppose you
+were the world's best scientist and you always propose correct hypotheses and
+this was known well then in that case it would be reasonable for you to do
+whatever you could during data processing as statistical steps to find the
+effect you believe in because your beliefs are always correct and that's
+what I mean by data dependent transformations and analysis the problem
+of course is that nobody's like that and we propose lots of false hypotheses the
+history of science demonstrates that almost all hypotheses are false and but
+some are true and we need to have methods that balance the risks of false
+discoveries and finding the real ones or missing the real ones I should say okay
+so pre-registration is is is a epistemological tool to draw an epistemic
+line between the decisions we make prior to looking at the sample and the
+decisions we make afterwards but it doesn't constrain you to change the
+analysis afterwards because often there are good reasons once you've seen the
+data to change your mind it's just important that those decisions be
+transparent because they have very different importance now the pre-
+registrations good I have nothing against it I've done it myself however it
+doesn't address what I think of as the most pressing problem in data analysis
+in the sciences and that is that people can't justify their analysis at all so
+the fact that they justify it prior to seeing the sample does nothing to improve
+my opinion of it to be honest it does little to improve data analysis lots of
+pre-registrations are just typical causal salad and what was really needed
+here is theory that constrains the ways that we decide which analysis we're
+going to do and theory used through tools like the due calculus and backdoor
+criterion to lead to statistical analysis which can credibly get us the
+estimates we want okay let's talk about the details now the thing about data
+analysis is that when you're doing it there's a lot of scaffolding involved
+lots of little bits and jumps and starts and movements forward and back and by
+the end of the project you bring the scaffolding down and you present the
+results but Jesus wasn't built in a day and we all know that there's a lot of
+skill involved in simply putting this thing up in the first place even though
+once it's finally up you can't see how it was done so I want to talk a little
+bit more about that about the scaffolding that goes into the actual work
+and I showed you a little bit of that in this course but I think I can still give
+you a few more hints that are useful to horoscopic advice but I'm going to focus
+on four things that is that how we control our work in the project I'll
+explain what that means in a moment the incremental testing that we need to do
+as we go as we put up the statue documentation and what would that look
+like and then review and I don't mean peer review here in the traditional way
+just bear with me so for the meme on the right of this slide what I'm trying to
+get across the stick in your memory is that scientific data analysis scientific
+research is often quite chaotic and and we can do a lot better
+it is we should be drawing the owl in a professional incredible way that we
+wouldn't be embarrassed to explain to our colleagues now in this course I've
+I've sketched out a number of times this basic four-step way of working this
+kind of workflow where we at the beginning we express our theory as a
+probabilistic program what does that mean when we wrote a synthetic data
+simulation that's a probabilistic program and then the second step we
+prove using logic just algebra which is the kind of logic that the planned
+analysis could work conditionally now that is we we have the planned analysis
+and we have synthetic data so we can show in some sense that it would work
+conditionally if our assumptions were true and then third we test the whole
+pipeline on synthetic data that is data processing and everything else that comes
+out of the synthetic simulation we have our estimate and we have by step three
+also working code and then finally in four we run the pipeline on the actual
+empirical data there may be new adjustments here because there are
+things about the real sample you hadn't anticipated but that's okay you've
+documented this the history is open you can rewind a bit and fix the steps and
+come back in having this history be open and saved gives you credibility if you
+were helps you work in a way that you wouldn't be embarrassed to report to the
+public and that's very important in a publicly funded profession like the
+sciences so you can tell what I'm getting at here is that typical way the
+scientists work is too often as if it were some kind of hobby rather than a
+profession and data are often processed not to mention collected in fairly
+reckless ways let's say that there's a dangerous lack of professional norms in
+many of the subfields of the sciences and particularly in scientific computing
+it's often impossible to figure out exactly how data were processed or
+exactly which statistical models were run and it's often also impossible to know
+if the code works as it was intended to work because it's never been tested in
+any serious way so there used to be a time in the laboratory sciences I
+suppose there still are laboratories which are fairly sloppy on safety but in
+general the laboratory sciences has stronger norms about safe conduct so many
+of you will know what a pipette is the pipette is used to transfer liquids and
+samples and you'll see the gentleman on the right there and you'll photograph it's
+got a pipette in his mouth and he's drawing some liquid into it using
+suction from his mouth this used to be a common way to make this work you do not
+do this it's very dangerous because you could end up with some of the solution
+in your mouth and this is a bad idea and if you're not concerned about your own
+safety you have to be concerned about the purity of the sample because of course
+things come out of your mouth into the pipette as well so no pipetting by mouth
+many of the casual self-informed habits of scientific computing are the
+metaphorical equivalent of pipetting by mouth and we must stop doing them how do
+we do that well again the laboratory sciences have gone through revisions
+here as has software development and we can take cues from both of those areas
+so as I said there was a time when pipetting by mouth was considered fine
+people did it all the time but many laboratory cultures have developed into
+management protocols where there's sample registration and workflows and
+databases that are used to track all the work in the lab so they know
+exactly who did what when and this is a kind of control workflow control that I
+call versioning the same thing goes on in software engineering for large computer
+science projects where even if there's only one programmer but especially if
+there are multiple programmers working on the same project you need to use them
+sort of versioning version control and version control is a great way to have
+both backup of your work and accountability now say some more about
+this in the next slides the same time we want to build up complex projects one
+piece at a time and I hope I've convinced you in this course that even the
+simplest sort of statistical analyses can be complex in their details you have
+pieces of the workflow that precede some sequence think about fine one two three
+four drawing the owl sort of idea and you should be testing each of these
+incrementally so that you don't get to some later point and find it doesn't
+work and then not be sure what thing upstream is broken if you test each step
+before moving on it makes work much easier and it give you much more
+assurance both for yourself and for your colleagues that is that your analysis
+is actually working as intended let me talk about these first two things but
+the last two on this slide I'm not going to say much more about just say with
+documentation you really should be commenting everything that you do
+because you may not remember even in a few months exactly why you wrote the
+code you did and then for code review at the bottom code and materials you could
+adopt this principle for business called the four eyes principle and that is the
+idea that at least two people should take a look at every piece of your
+research project and so if you're doing your project by yourself that's that's
+quite rare in the sciences these days but if you are you can get into a
+reciprocal four eyes arrangement with a colleague who also needs the same
+service from you and this can be very minimal you simply take a glance at their
+analysis code and tell them whether you think it's sufficiently commented for
+example or have them explain it to you and this often magically uncovers
+problems in the code that can then be fixed before they do damage let me take
+a talk about the first two much more there's a lot to say about this I want
+to give you some examples so version control version control is is a database
+of changes to your code and your data files and even your documentation it's
+a managed history of your scientific project you don't overwrite anything you
+merely update it and all the changes and when they happened and who made them are
+stored in the version control database the most common of these is this
+architecture called git g i t shown in the upper right of the slide which is a
+piece of open source software that manages such a database you probably
+already have it on your computer but if you don't you can use it through the
+website github which makes it quite accessible just entirely drag and drop
+in fact through the browser at the same what's the alternative I should say
+alternative version control the alternative is the clumsy habit that
+many people fall into naturally because their computer leads them into the
+standard but dangerous path of duplicating files and modifying them and
+then you end up with project folders full of a bunch of copies of your data
+and your code and you can't tell which is which this is a very bad situation to
+be in testing is equally important and goes hand-in-hand with version control
+what you should be doing is setting a set of milestones for the development of
+your project both its code and the data processing and you should be testing
+each of these milestones before moving on to the next I'll say some more about
+that so if you've been taking this course then I think you have visited or
+should visit the course website which I maintain on github I show a screenshot
+of it here and this is a version control database of the course files and links
+and it really is not necessary for a project like this but I just use this as
+an example to familiarize students with with version control and and gith one
+of the things that happens from this is that the whole history of my maintenance
+of the course website is public and you can go look at it on the website
+I'm showing you at the top part of this slide all of the commit commit is a set
+of changes that I have chosen to timestamp and mark this is up to you and
+these are the milestones of the project of maintaining the course and you'll see
+that the first commit was on october 3rd of 2021 that's when I made the course
+website the course began in january you can see that starting in january there
+lots more commits began in a steady stream until march now with when the
+course is ending and for each one of these commits you can look in the database
+and see exactly what was changed for example at the bottom I'm showing you
+one of the most recent commits where I simply added the links for lecture 19
+for the recording and the slides for code projects of course it would show
+exactly what code you changed and who did it
+most researchers don't need all of git's features git can do a lot of things you
+can manage multiple branches of your project and then merge them back together
+it handles multiple users it it's very fancy but most researchers don't need all that
+what you do need to do is develop your list of milestones and commit changes
+after each milestone and maintain the test code as part of the database as well
+so you can run the tests all of the tests after each milestone I'll say that again
+you maintain the test code as part of the project because after each milestone you want to run all
+the tests again because sometimes gremlins appear and affect things in the previous parts
+but if you're running the tests you'll have that sense of security that your code functions
+there are also things you you should not do and and git helps us avoid doing these things
+you should not replace raw data with processed data the whole idea is that you use code to
+process data and you maintain that in the version control and so you can always repeat all the steps
+in the data analysis and show them to your colleagues and question whether that was the
+right thing to do and do it another way if necessary if you overwrite raw data with processed data
+which people do for example when they work in spreadsheets you can get into into trouble real
+fast because you won't know what was processed and what was measured
+I want to say a little bit more about testing and what these mysterious milestones are
+so I want to give you an example to reference so the idea is that a complex analysis needs to be
+built in steps so all of lecture 15 was intended as an example of something like this and to remind
+you lecture 15 was the social networks lecture and in that lecture we drew the conceptual model
+the DAG very early in the lecture and we had our estimate very early and therefore a design of
+the eventual statistical model but the statistical model was fairly complicated it had two rather
+different kinds of covariance matrices in it and there was lots to explain and test and so I built
+it up incrementally just to remind you of those steps and you can go back and rewatch this lecture
+maybe at double speed if you like or just flip through the slides the first milestone in that
+lecture was this the synthetic data simulation we needed some data to test the statistical model with
+in the process of writing that synthetic data simulation also served to debug our thinking
+about the causal model the second milestone is the dyadic reciprocity model this was not
+going to give us our estimate because we knew it was a confounded model
+but it was the first step we needed to develop the first bit of the golem we needed to engineer
+and then we tested that dyadic model on synthetic data the third milestone was to add
+generalized giving and receiving that is to deal with the confounds by stratifying by
+generalized giving and receiving and then we tested that on synthetic data and then finally
+we added explanatory variables that is wealth and association index and then we tested that as well
+for really big software projects like stand itself the stand math library is the heart
+of stand it's the part that does the calculus for you and this is a big project by scientific
+standards at least and in projects like this there's typically more testing code than there is
+actual library code so if you go look at the stand math library at least at the time I'm
+recording this lecture there are about five megabytes of library code that does that gets
+compiled down and then executed when you use the stand model but there is another folder for tests
+and it's over eight megabytes in size and the stand team spends all the time writing test code
+because they want to be sure that this code works because otherwise it will not only be
+bad for them it'll be bad for the rest of us likewise my rethinking package also has a bunch
+of test code there's a test folder you can look at it and every time I'm about to make a change
+and publish it I run the whole test folder and essentially tests the whole course and make
+sure that make sure that all the examples and some additional examples work as intended
+but for cases where we're doing smaller projects just developing data analysis pipelines you
+don't need all that but you still do need some testing and so here's a minimal example from one
+of my own analyses here's a little bit of consulting I did for a professional society
+where I developed a model to help rank conference presentations
+and it's an ordered logen kind of model and if this is a public repository you can find it on
+github under my github account as CES Rater 2021 what are the pieces in this repository so the first
+thing here there's a documentation folder where if you look in there you'll find a nice pretty
+latex document that has the mathematical version of the model and its justification and also reports
+of the testing that that are done by the code to follow then the second line here the simulation
+code this is the synthetic data simulation that I use to test the model and validate it
+the next file down the validation code uses data produced by the simulation code to
+show that the statistical model's function is intended and then there's the production code
+which is the analysis code that is actually used to produce report on real data
+and then you'll see there's other materials in here there's the anonymized data which can be shared
+which has all the actual names of the presentations and presenters removed and then a template data
+that was simply used to explain what the data should look like and then the stand models themselves
+and I have two states here your project may have more you may have only one but this reflects
+the way in which I build statistical analyses I typically start with the simplest version of the
+model I can which only has a few of the pieces which I intend to originally have to eventually
+have in the full model and then more complex versions all the way up and I've tested each of these
+on the synthetic data I think this is in a in a sense the kind of minimal image of a data analysis
+project that you want to have in mind and the kind of minimal project folder that you might use
+although the details in organization might differ
+how are you supposed to learn all this is one thing to see screenshots and be told there's
+this mystical thing called git well you're in luck because there are lots of really good materials
+online for learning how to do this these tools are in use constantly in the sciences and in
+industry and you can learn them online by watching videos and taking self tests and and so on
+and it's and it's for the most part free the best materials I know are from the data carpentry
+series and you should go to their website just google data carpentry and you'll find lots of
+really good materials there as well as a potential to sign up for workshops if you're interested in
+those things or host your own so for example you go to data carpentry.org and you look under
+materials for ecologists I know a number of people who watch my course are ecologists and I'm always
+thinking about your needs you'll find lots of things tailored to you which will help you organize
+your data and process it do visualization and and and so on all of these skills are things that if
+you spend a little bit time now learning them they'll serve you for the rest of your career
+wherever that may take you whether it's into or out of industry or back and forth as as many of my
+colleagues do now. Okay one last thing in this section that I want to say so that people make
+jokes about excel all the time I know I do because it's a funny piece of software it's also really
+powerful there's one of the funny stories about excel is this story from a couple years ago where
+various genes the names of genes so genes in the human genome are given names
+monocurses allow us to reference them and link papers that refer to them and so on well
+a few years ago it was decided that some of the genes would have their official names changed
+and the reason is because excel was mangling the names and Microsoft had no interest in fixing
+this behavior and it was messing up science so various audits had found that a fifth of genetic
+data in papers had errors that were introduced by excel how does this happen well you may have
+heard that excel likes to convert things into dates it has this little pushy artificial intelligence
+in it which looks at everything you type and tries to guess what format it should be in it's very
+difficult to turn this off and it tends to turn a large number of gene names into dates and this
+completely erases the raw data that was typed in it's gone forever and then people would do their
+analyses get the wrong results and then even publish the raw data that had been mangled by excel
+and that's how these audits find this rate of a fifth this is a serious problem yeah if I told you
+there is a scientific literature in which a fifth of the papers simply had invalid data that was
+produced by poor data processing that would not give you confidence in it okay people have been
+complaining about this behavior for a long time it's been known about for decades but Microsoft
+has no interest in the academic sector I don't think that's not where their money's coming from
+and this is a minor use wasn't worth their time so instead what happens is the human gene
+nomenclature committee decided to rename the genes that were affected and that's that's what happens
+you see this example so they have genes that were named things like step one or march one
+and they were renamed so that they would not trigger Microsoft excel's date conversion
+so what do I want to say with this I think using Microsoft excel to store and process your data
+is the equivalent of pipetting by mouth it's not okay it's really just not okay
+excel's very powerful and I respect that power and there are things that are safe to do with it but
+you have to work in a careful way you got to put on your hard hat and you have to use the pipet
+properly so for example primary data entry in excel is okay if you use constraints on the cells
+and you use tests but you've got to be conscientious about it because excel loves to think for itself
+and convert your data and corrupt it but what you should absolutely never do as a professional
+researcher because it's not professional conduct it's the equivalent of pipetting by mouth is to
+process your data in excel you should be using code yeah that's what you do you enter the data in
+excel you save it as comma separated values and then you never open it in excel again
+and I know this sounds harsh lots of people say this when I tell them this I've been saying this
+for years but it's simply not professional to use dangerous tools yes it's convenient to pipet by
+mouth it's quick and most of the time it'll be fine but that doesn't make it professional and
+it doesn't make it permissible stop using excel
+okay let's take a break and go take a walk think about the things I've said
+um and when you come back I'll still be here
+um
+welcome back let's deal with the third part of the horoscope of this lecture and that is
+reporting and many aspects reporting but I'm just going to talk about five of them
+uh some in more detail than others the first of these is sharing materials then I'll move on to
+talking about various kinds of descriptions and reports from the methods to the data to the results
+and finally just a little bit and way too little about actually making decisions instead of simply
+describing uncertainty sharing materials uh is extremely important and there's nothing that I'm
+going to say here which is going to surprise you you can guess how I feel the paper is an advertisement
+it is always too minimal for your colleagues to figure out exactly what was done it gives an
+outline of what was done and it gives a summary of the results but no paper can be long enough
+and detailed enough so that your colleagues could actually repeat what you did or inspect the details
+in enough detail so that they can really believe it the data and its analysis are your actual
+research products and those need to be communicated someplace in full detail if you've done the version
+control that I talked about before the break then congratulations it's all done for you
+you nearly need to point your colleagues at the repository where the version control was done
+and they can see the whole history of your project
+what this means in practice is quite simple actually if you work responsibly so that you
+are maintaining version control and testing as you go in your project and documenting as you go
+by the time you have written your report your paper you're ready to share the project itself
+not just the advertisement and then it's simply a matter of making the code and data available
+through link and not under any circumstances with this magic phrase by request as we all
+know what that means that means you ain't going to get it now of course some data are not shareable
+I work in the human sciences I'm very sympathetic with that I work on many projects where the raw
+data cannot be shared however typically a lot of detail about the data can be shared a synthetic
+version of the data can be shared so that your colleagues can verify that the analysis works
+as intended and the code can always be shared and so that's a minimal sort of circumstance
+so that any ambiguity in what was really done can be resolved through the code and I've known a
+number of published papers where it only became clear what was done or what was not done when
+we looked at the code itself this is a very important thing to do sharing these materials
+also makes it possible for you and your colleagues to build on what you've done directly it saves
+a lot of work reduces a lot of uncertainty so it helps research be cumulative and let's face it
+before long many if not most professional organizations are going to require archiving
+of code and data for all scientific projects at least those that use public funding and so you
+need to develop a way to satisfy these requirements now not just because it's the only ethical thing
+to do but soon it will be required so describing methods in this course we've looked at a lot
+of statistical analyses and I've described them in in much more detail than you will typically be able
+to devote to any of them in a paper in a report now this is one of the reasons of course that we
+provide the code because the code is the full documentation of your methods at least the statistical
+processing part of your methods but what you say in the paper is also important because you can
+provide useful summaries of what was done here's what I think of as my list of minimal
+information that a report of a quantitative data analysis have and you may want to provide more
+than this again I think of this as the minimum the first would be somewhere either in the main
+paper or in a supplement the mass stats notation of the statistical model I think this is necessary
+because there's more here than in the code in the sense that these mass stat notations have a
+grammar to them that's universal if you've learned it and it's software independent
+and so future you or other people can rewrite rewrite your model as intended and alternative
+software if you give them the statement it'll be much harder to get this level of grammatical
+abstraction out of your code in most cases because as you've learned in this course for any one
+mass stats stat model like the one on the right of this slide there'll be multiple ways to program
+it different kinds of parameterization centered non-centered so on so it may be the supplement
+but better in better in the main paper because of course this is your golem and your golem is
+what's producing the estimate second you want a clear explanation in the text of how this model
+provides your estimate right what and this is going to reference in most cases some causal model
+and some logic about lack of confounding or identification of causal effects
+third you want to have a clear statement about what algorithm was used to produce the estimate
+for any given statistical model there are many different ways to produce useful estimates from
+it in this class we've used Markov chain Monte Carlo at least for the second half of the course
+to produce estimates but in the first half of the course we used an approximation of the posterior
+there are yet other ways to do it non-basin ways and they're good too
+but you just want it to be clear because sometimes choice of algorithm matters
+in effects the kinds of compromises fourth some statement about diagnostics and tests
+so that the readers know that you considered the possibility that the machine didn't work
+but that you've collected some diagnostics that are reassuring if not foolproof
+reassuring that the machine has functioned as intended and then finally it is a professional
+courtesy not yet a requirement unfortunately but at least a professional courtesy that you cite
+the software packages that you've used it is a lot of work I know to write scientific software
+it requires a lot of testing and use and it becomes a full part of a person's job once they do it
+just to maintain it these people work real hard and they build foundations for the rest of us
+cite them because if you don't cite them they don't get professional credit at least not
+if they're in academia and without that professional credit people will stop doing it cite the software
+I want to give you a quick and boring I'm afraid to say but quick and boring and sufficient
+example of a methods paragraph that we might do for the social network model on the right of this
+slide now I'll go through it piece by piece and remind you what the function of each sentence is
+so to begin to estimate the reciprocity within dyads we model the correlation within dyads and
+giving using a multi-level mixed membership model and then some textbook citation meaning
+you will find some textbook whether it's my own or somebody else's or maybe a journal article which
+is specialized on mixed membership models that readers can follow up on to learn more about
+this kind of model the purpose of this first statement is to say what we're trying to estimate
+to remind the reader of that and then the type of machine we're going to use to do it
+to control for confounding from generalized giving and receiving as indicated by the dag
+in the previous section we stratify giving and receiving by household this is a statement of
+why we think this model gives us the estimate we want because it's got a way to control for the
+confounding which hadn't been identified in a previous part of the paper the full model with
+priors is presented at the right we estimated the posterior distribution using Hamiltonian Monte
+Carlo as implemented in stand version 2.29 and then you have a citation to the stand development
+team there as well we validated the model on simulated data and assess convergence by inspection
+of trace plots our head values and effective sample sizes this is where you're talking about
+diagnostics to say that you did check whether the change worked at all and then the diagnostics
+for thoroughness are reported in appendix b and all results can be replicated using the code
+available at link and then you have a link to some repository someplace or to a supplemental
+if the journal requires it that way this is not in any sense the model because there are other
+ways you could order the information here and some parts of this could certainly stand to be more
+thorough than other parts and of course there's there's aspects of data processing which you'd
+have to mention and other parts of the paper and so on but I wanted to give you a template you can
+use in your mind to at least think about something that would be normative and sufficient in many
+fields but if you're concerned about this and you're a bit confused about what information to
+provide just imagine you were the reader and provide the information that you would like others to
+provide for you so Bayesian models have priors and this is a virtue priors do lots of useful
+things for us but we need to justify those priors just like every other part of the model and we
+spend a lot of time in this course doing that talking about how the constraints on variables
+give us constraints on priors and how prior predictive simulation gives us the way to understand
+the implications of our prior and design useful priors that are not conditional on our data but
+nevertheless incorporate valid scientific constraints pre data constraints you want to
+say something about this in your paper as well so for example priors were chosen through prior
+predictive simulations so that pre data predictions span the range of scientifically plausible outcomes
+in the results we explicitly compare the posterior distribution to the prior
+so that the impact of the sample is obvious and I'm repeating on this slide on the right
+the example from an earlier lecture the second half of the Gaussian process lecture
+where I explicitly compared the prior distribution for the Gaussian process kernel
+to the posterior from two different models
+okay now it's unfortunately true that when you do statistics in the sciences
+you will often get reviewers who don't know a lot about statistics but are extremely opinionated
+about it this happens to everybody so when it happens to you congratulations you're just like
+the rest of us I wanted to say a little bit about this though because in particular when you start
+using the sorts of models I explained in this course whether you're fitting them with Bayesian
+algorithms or not there is a class of reviewer who just doesn't like statistics and seems to have been
+taught at some point that if the if the scientific study were good enough it wouldn't need statistics
+or only the most minimal statistics at all and they're just suspicious of complex stats I had a
+reviewer once who actually wrote good science doesn't need complex stats this is a ridiculous
+statement and it's worth being able to rebut this but you don't rebut it to the reviewer you're not
+going to change the mind of a reviewer like this you're talking to the editor and what do you say
+to an editor when you get this kind of comment what you say look our causal model shows us that
+there is likely confounding and that we need to stratify by variables a b and c and that requires
+statistical complexity and so this physical complexity is not something you've chosen
+ad hoc it's something that's demanded from the scientific model itself it's also true these
+days a lot of us work with fairly large data sets tens to hundreds of thousands of million records
+at a time and when you have big data you have a lot more unit heterogeneity and a good analysis
+is going to deal with that unit heterogeneity in some way that is the scientific rigor that we can
+apply in big data sets is greater if we're just running the same simple linear regressions on a
+million records we're wasting a lot of scientific opportunity so again this comes from the causal
+model unit heterogeneity is often a competing cause or even a possible confound for inference
+and we want to model that and this requires statistical complexity as well because you
+may have different kinds of units nested within one another in the model furthermore
+just because some simple statistical procedure can give us the same kind of qualitative inference
+as a more complicated one that doesn't mean we should use the simpler one and why because the
+more complicated one typically is going to check for various problems the kinds of confounding and
+unit heterogeneity that the simpler one will simply ignore and you can get the right answer by being
+lucky in science but that's not a professional attitude right we need to justify our answers
+that is knowledge is justified true belief not just true belief if you cannot justify the answer
+to our colleagues it's not a result so we have an ethical responsibility in research and data
+analysis to do the best thing we can and if it turns out that doing the best thing we can even
+though it's a little bit harder gives us the same answer is the easy thing that doesn't mean we did
+something wrong it means we did something right in any event if you remember nothing else from
+this little sermon here just remember that when you have reviewers that have silly challenges to
+your statistical choices change the discussion from one about statistics to about causal models
+and that is good because it puts you on a stronger footing you can justify your statistical procedures
+from a scientific position not from just some arbitrary cultural place where people have been
+taught statistical rituals ways of reading tea leaves and cups things that cannot be justified
+because they're essentially supernatural so change the discussion always the scientific models
+the causal models and proceed forward again from there so I said before you're writing for the
+editor and not the reviewer and this helps a lot in my experience and one of the things in writing
+to the editor is that the editor has an interest at least a good advert does in the whole field
+and the comprehensibility of the papers that will be in their journal so it can often help to persuade
+an editor that your analysis makes sense both for the topic and their journal if you find other
+papers in the discipline or that very journal that have used Bayesian methods or similar models
+even if they're Bayesian or not when you explain your results you're likely to have a lot of
+readers who are not so familiar with Bayesian statistics that's fine they're good people
+but you can explain the results in ways that avoid confusion and what I mean by that is
+don't use non-Bayesian terminology don't use the words significant for example explain the results
+in Bayesian terms with all the uncertainty and one of the easiest ways to do this is simply
+show posterior densities instead of intervals and this avoids a lot of problems it doesn't mean
+the readers will understand everything but they'll avoid some all too easy misunderstandings
+and that's that's something worth achieving one of the things you can do to help curious readers
+is give them some place to go to read a bit more and almost every scientific discipline now I should
+say every scientific discipline has some good papers written for people in that discipline
+about Bayesian statistics and how it's useful in their field and so you probably know one already
+for your field and that's what you should be saying when you say you know readers who are
+unfamiliar please go read this because it's not the job of your paper to teach people Bayesian
+statistics Bayesian statistics is entirely normative it's a mainstream way of doing data analysis
+the sciences and in industry and in government you don't need to justify it necessarily but you
+probably do need to help people a bit who are unfamiliar with it it's the same sense in which
+if you use calculus in a paper it's not fair for a reviewer or an editor to object to the use of
+calculus because the readers are unfamiliar with it calculus is the right tool likewise you use
+Bayesian statistics just because some reader is unfamiliar with it that's not a legitimate objection
+Bayes I say is ancient hundreds of years old it's normative and in practical matters for complex
+multi-level models it's really the only practical way for individual researchers to estimate those
+models in the first place okay a little bit about describing data this will be less involved so
+sample size by itself is not a lot of information people like to talk about big data meaning there
+are lots of records but the structure of those records is really important for how people
+interpret your study because it affects the kind of well statistical information in the data
+consider a really extreme contrast say a data set that has a thousand records but they all are
+from one person versus an equivalently sized data set which has one observation from a thousand
+different people these are very different data sets each of them has a sample size of a thousand
+so what can you do well describe this structure and what you're trying to do is get across in a
+heuristic way a concept like the effective sample size for your study which is a function
+both of your estimate what you're trying to learn and the hierarchical structure of the data how
+many units how much variation there is among them and how many observations per unit
+you can communicate this to your readers very efficiently by simply describing that cluster
+structure and how many observations are available for each cluster or how much the observations
+vary across clusters it can be useful to say as well for particular variables at which level
+of the data hierarchy they're measured what does that mean commonly there are some variables which
+are only measured for the whole cluster all right and they're invariant across all observations in
+that cluster but there'll be other variables that are measured at the micro level within clusters
+and therefore vary within clusters and this information is very important because it changes
+the way we think about the model and the kinds of inferences that can be made finally missing
+values many many studies never mentioned that there are missing values in the data but of
+course there are and the software automatically drops all the cases containing missing values and
+this is never mentioned either you have to tell your reader how many missing values there are
+which variables have them and how you've treated the missing values and justify it causally
+okay describing results i could do an entire 10 week course just on describing results so
+apologies for for boiling it down to just a couple slides here the focus of your results
+in a typical scientific study of course there are going to be useful exceptions but in a typical
+study the focus are your estimates and those are to be presented in an orthodox fashion using
+marginal causal effects and i've given you a number of examples in this course of how to compute
+those and what they mean conceptually it can also be very useful when you're describing your results
+to warn the readers against causal interpretation of control variables remember the table two
+fallacy quite often control variables cannot be interpreted causally they may be confounded
+or they may be only partial causal effects and therefore they're not useful scientifically
+for the purposes of the paper when summarizing effects and visualizing them densities are better
+than intervals uh why well intervals um have arbitrary boundaries uh they're just visual
+guides there's nothing and nothing special happens at the end of the interval but readers
+will often think that something magical happens there like the estimate becomes significant or
+if the interval contains zero then it's not robust and other kinds of illogical superstitions
+if you draw densities people can still engage in the acrobatics of seeing if the density includes
+zero but there's no arbitrary boundary and it becomes visually obvious that there's just a
+gradual change in probability as you move from the middle to the outside of any posterior distribution
+even better than densities quite often are sample realizations so when the posterior
+distribution contains whole functions not just singular scalar values then drawing realizations
+of those functions from the posterior distribution that is regression lines or curves or splines or
+social networks as you see animating on the right of this slide uh drawing multiple realizations
+from the posterior communicates with the uncertainty often much better than trying to draw some density
+because you get to see the shape of each individual realization and that communicates
+a lot more information keep in mind always that the point of scientific figures is to help your
+readers make comparisons and so you design them for the comparisons of interest
+there's a huge amount to say about that i just want to give you a couple of guides i think
+like with lots of things in research one of the ways to get better at it is to read other people's
+stuff so some of the most interesting work on visualization that i come across recently is
+from jessica holman and colleagues here's a paper i recommend to you on sample realizations looking at
+how uh presentation variability um uh from what they call hypothetical outcome plots which are
+like draws from the posterior uh that people interpret these more accurately that they
+understand the uncertainty better using these hypothetical outcome plots you can see in the
+figure on the slide um and this is an empirical literature i think that's what's great about
+this is that they're not just philosophizing about data presentation but they're testing it out on
+people and seeing the accuracy of the impressions that people get and then on the right there's a
+book i recommend to you one of the ways to make better visualizations is to analyze bad ones
+and here's a here's a nice book entertaining examples both from research and the public sphere
+by alberto chiro both good and bad charts how charts lie and there are lots of books in this area
+as well that you might find useful okay just a little bit about making decisions in this course
+i've avoided as much as possible making decisions about the analyses meaning when we've got the
+estimate at the end there was nothing to do with it it was a basic research question the way i've
+always presented it occasionally i talked about interventions like in the case of the emissions
+data but for the most point i've avoided the swamp which is actually doing something with
+statistics once you've got the answers uh this is a big and important area of work and i just
+want to give you a little bit of a flag in the sand about it here so in most academic research
+the point of your report is to communicate the uncertainty you're postponing a decision because
+you want to allow your colleagues to make their own minds up about what your results mean you may
+give them suggestions about what you think they mean but you need to give them as much
+information as possible that they can make up their own minds in industry however and in some
+parts of applied academic research as well instead the goal of the report is to say what
+we should do now that we have estimates from the model and this requires some additional steps
+and i want to say here is that producing the posterior distribution is much easier than then
+deciding what to do with it there are additional problems in this area as well for example you
+might have a boss who really doesn't tolerate uncertainty doesn't understand statistics and
+doesn't want to hear any wishy-washy language about about not being sure what's going on or
+what to do and this happens some of my colleagues in acquaintances in business where their bosses
+really just interpret any sort of acknowledgement of uncertainty as an admission of weakness but as
+analysts we know that's not true admitting uncertainty is is a strength but we need to
+have a way to use that uncertainty to make decisions because we have to make decisions
+the field of Bayesian decision theory again this is one of these topics it could be its own 10 week
+course this is a big field if you google that phrase you'll find lots of helpful things about it
+there are many books and online guides and many many papers the basic intuition is that
+the additional thing we need to do to make decisions after after running a Bayesian model
+is to state the cost and benefits of the various outcomes that that could come from the generative
+process as we've estimated it and then we use using the uncertainty and the posterior distribution
+we compute the posterior benefits of any particular hypothetical policy choice
+what does that mean well you can think about a policy choice as an intervention
+so if you have a causal model and you've you've defined your estimate and you now have an estimate
+in the form of a posterior distribution you can run simulated policy interventions and then you
+will get simulated outcome distributions for those interventions and then because you're mapping
+outcomes to cost and benefits you can get posterior distributions from your interventions
+of the cost and benefits of those interventions sounds complicated there's a simple example
+in chapter three which will prime your imagination a bit about it and as I said if you're interested
+in more there are lots of examples that you can find by searching for Bayesian decision theory
+this is a very flexible sort of approach it mixes and matches with lots of complex techniques
+for example it can be integrated with dynamic optimization techniques as well
+it can you can do this because a generative Bayesian model is a generative model and so
+it contains uncertainty but then that can be folded into other sorts of procedures that don't
+usually admit uncertainty you just get posterior distributions of outcomes from them multiple
+realizations remember and then you can proceed making choices that achieve the benefits and
+avoid the costs that you're interested in there's a lot of detail here in a horoscope lecture that I
+can't get into but of course in the weeds of these problems you have to decide exactly how the costs
+and benefits matter and the only thing I want to say about that just to warn you is that usually in
+human affairs we're not interested in maximizing instantaneous cost of benefits from a single
+intervention but rather some flow from the growth of some stock and or avoiding some particular
+disastrous outcome like extinction of a species and so you need that's what goes into your cost
+benefits and it's scientifically tailored sorts of costs and benefits
+okay I've been talking a lot about science here and really I think you get a sense that what I'm
+talking about this lecture is scientific reform there are lots of things about the sciences which
+are kind of reckless and a little bit dangerous there's science in the background and while we're
+spending all this time talking about science reform science keeps going on crashing what can be done
+to put the brakes on this thing well I don't have any good answers there but I think one of the first
+conceptual things we have to do is recognize that a lot of what goes on in the development of
+scientific methods and statistical traditions is not logical it's institutional and sociological
+it arises from population level processes of cultural evolution because scientists are members
+of a community and most of them really don't understand the structure of that community
+in any detailed way they're participants in it so here's the most cartoonish model of science
+that I know it's one that I've published and in this cartoonish model our little mythological
+scientist first chooses some hypothesis to test and there are both novel hypotheses they innovate
+on their own and then there are also hypotheses in the literature they might select to try and
+replicate or do some follow-up on and then they design a study an investigation from this and
+there's some result that arises from the details of their investigation and and their statistical
+procedures the way they process the data then they write a report and it goes into peer review
+and it suffers some fate if they choose to submit it of course because as we know many negative
+results are never even submitted for peer review they're simply flushed or filed away forever
+as we all know different kinds of results receive different probabilities of being communicated to
+the scientific public to the scientific community and also to the public all of these are processes
+which contain both virtue and well the opposite of virtue I don't want to say evil but bias is
+things that distort what we're learning about nature that is to say one thing that you can you
+can imagine is that no matter how hard we work on our statistical procedures to perfect them
+to get all the bias out of them these other processes the ways in which we select our
+hypotheses and the ways at which our results are communicated or not put bias back in the system
+and since follow-up investigations depend upon what's in the scientific literature the whole
+thing can be biased in very powerful ways now I said this is a cartoon model real science is not
+like this in any detailed sense but it's a caricature that captures some important aspects
+and even a simple model like this can produce lots of illogical and negative things that happen in
+research communities here's a real thing about research that I think is interesting it can
+actually be explained by really simple cartoonish models of the sociology of science so this is
+the paper that came out in 2021 and what the authors did is they looked at papers in three
+different broad disciplines that nature science papers published in nature and science on the
+left if that's a discipline I guess it's a glory seeking discipline then papers and economic
+journals in the middle and then psychology papers that were included in the what's called the
+replication markets and and what they did in each of these is they looked at papers that were
+eventually having where people attempted to replicate them and either failed or succeeded so
+the the black trends or cases where people attempted to replicate these things at some point
+and they failed to do so and so the result is now called into question we don't know its status
+that it's not necessarily false but that so far people have not been able to repeat the original
+result and then the blue trends are papers where the averages of papers where they were eventually
+replicated people have been able to repeat the results and in many cases multiple times
+and you see in each of these broad disciplines broad categories that the papers that were
+eventually not replicated have enjoyed higher citation counts year after year since the since
+the time of their publication and even after the point the vertical black line there is the point
+in which the replication was attempted for each paper and you'll see even after it's failed
+replications we don't know for nature science yet there but for the case of economics and the
+psychology replication markets the the papers that have failed to replicate still enjoy higher
+citation rates than those that have been replicated this is a little bit well disappointing yeah we
+would like a scientific literature in which the most popular papers the ones that are cited the most
+are also the most reliable papers but this does not appear to be the science that we have maybe
+it's the science we deserve but it's not the science we have what explains this phenomenon
+there are lots of different causal processes that could produce this that's the first thing I want
+to assert science is at least as complicated as any statistical analysis you're going to do
+and it's going to have collider bias and selection biases and confounds and all the other stuff that
+makes it difficult to interpret empirical patterns like the one on the screen but let me give you
+one possible explanation to prime your imagination and it uses some of the tools you've learned in
+this course so this is an example it's actually from the book on page 162 so imagine we have 200
+papers or or grant proposals that vary along two dimensions the first on the horizontal here is
+their newsworthiness which means how much public interest and public importance the result will
+have that could be its potential for patents or or just how much it thrills the public
+because thrilling the public is of course a service that research can provide right entertainment is
+a service it increases human welfare just knowing about nature it increases human welfare right
+even if it's of no economic use and then the other dimension is the trustworthiness of the result
+and you can think of this as the extent to which the the result is reliable that the methods are
+good and that if it was if the study was inspected in a detailed logical way it would turn out to be
+the correct result or if someone attempted to replicate it in this case whether it would be
+likely to replicate now i'm going to assume that these two dimensions are completely unrelated to
+one another so i've randomly drawn 200 papers where there's no correlation between newsworthiness
+and trustworthiness at the level of the individual paper or proposal but now suppose the journal
+selects only the top 10 percent and they do so through some additive combination of the two
+dimensions they subjectively rate the newsworthiness and trustworthiness of each paper and then the top
+10 percent shown in red here are accepted and now what you can see even though there's no correlation
+in the overall population of papers and proposals there's a strong negative correlation in the papers
+we see there's where we don't see the submissions we only see the ones then make it through the
+bottleneck we see the accepted papers in red and in that population the published papers there's a
+negative correlation between newsworthiness and trustworthiness just like we saw in that 2021 study
+there's the papers that are the most exciting the most far to the right on this are the least
+trustworthy the least likely to replicate and the ones that are least newsworthy on the left at the
+top of this graph are the most trustworthy but it's a side effect of selection uh about the
+bottleneck of how papers are chosen to be communicated and of course that tickle in your spine is a
+collider this is a result an example of collider bias so think of this little causal graph on the
+right of this slide there are two causes by which that influence whether a paper is published in
+this example newsworthiness and trustworthiness and so when we condition on publication that is we
+only see the red papers here that means conditioning or selecting on publication we're conditioning
+on a collider and that induces an association a strong negative association in this case between
+newsworthiness and trustworthiness but it's a non-causal effect this is not evidence that
+uh more newsworthy papers are actually worse in the work when they're produced yeah these these
+these features could be completely unrelated to one another inside laboratories inside offices
+but then at the population level they end up having a disassociation with another
+through the process of publication it doesn't mean it's okay but it completely changes the
+kind of intervention we might do I hope you see that so my point is we've got to be careful if we
+want to stop the crashing car of science as we talk about it we've got to choose our interventions
+quite carefully here the truth is that no one really knows how research works it's a very complicated
+thing every piece of it is complicated and we spend majorities of our careers just figuring out those
+pieces and the the science of research is really in its infancy if I was going to offer you some
+final horoscopes in this lecture horoscopes about research as a whole as a set of institutions
+and a culturally evolving process I would say that there are some easy fixes though which are
+unlikely to do significant harm and quite likely to do significant good
+the first is that we should not be doing any statistics at all without some
+transparently communicated causal model that justifies the statistical analysis and the estimates
+this allows for open criticism and it just for ourselves it helps us debug our own thinking
+while we're producing the study itself too often statistics in the sciences it's just causal
+salad it's just a bunch of variables and they're thrown into some machine some coefficients come
+out and there's coefficients are given a causal interpretation this must stop it is never acceptable
+two it's reasonable as a set of professional standards to insist that we prove that our code works
+at least in principle of course we can't be sure that we get the right answer for many research
+project that's why research is fun but we can be sure that in the closed logical world of our
+code and our synthetic data simulation that the pieces fit together and produce the kind of
+desired answer we're looking for so we can prove our code works in principle three we can share as
+much as possible I say as possible because again I work in the human sciences there are many reasons
+that you cannot share data it will always be the case with our lots of things that can be shared
+and I think a majority of the benefits of sharing come from sharing a little bit that is the code
+and just some partial set of the data set so that people understand what has gone on or just even
+a synthetic data set is a huge help but often we can do a lot more even if we can't publicly share
+the data we can provide a way for our colleagues to inspect it privately and as is done with medical
+databases fourth beware proxies of research quality like citation count because I hope I've convinced
+you that there are many plausible ways in which proxies can become distorted by bottlenecks and
+endogenous collider selection and the like if we're judging one another's contributions
+through proxies rather than through the rigor of the work and the logical
+workflows from the causal models to the methods to how the results are presented
+that we're doing a disservice to our colleagues and also to ourselves
+I want you to keep in mind here that these are just horoscopes they're vague and so in any particular
+case you're going to be able to do better and make better suggestions but I tried to select four
+things that I thought could apply to most of the sciences and most research in industry as well
+in terms of doing more going beyond horoscopes what I would say and this is a hopeful message
+is that many of the things you dislike about academia or about research and industry if that's
+where you are is that most of those things were once well-intentioned reforms people thought
+the impact factor was a good innovation and it would be an objective way to compare journals
+but has turned out to be a nightmare so we should be careful what we wish for and think carefully
+about impacts and yet use theory and analysis to think about policy proposals for research using
+research itself thanks for your attention I hope you found some value in this course
+I really enjoyed teaching it I'll see you next year

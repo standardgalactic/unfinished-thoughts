@@ -1,0 +1,1045 @@
+Welcome to lecture 11 of Statistical Rethinking 2023.
+In this lecture, we're going to continue learning new and useful ways to model important kinds
+of measurements.
+The mathematician George Polia is famous for, well, his math, but he's even more famous
+for teaching math and is making mathematicians teaching them ways to solve new problems.
+In this book, pictured on the left of this slide, how to solve it has been used for generations
+now of mathematicians.
+In the first few pages of the book, there's a two-page spread, which is an outline of
+the method.
+And this is not an algorithm, how you can solve anything, it's a set of heuristics for dueling
+with unknowns.
+I think the structure of it is a really useful thing because it reminds me of what we're
+trying to do in a course like this one.
+I can't tell you exactly how to solve your modeling problems, but I can give you examples
+and I can give you heuristics that will help you stumble through.
+So the first step here in Polia's scheme, we want to understand the problem.
+In the second step, you try to come up with a plan to solve it.
+It seems obvious you need to do these things, but if you read the smaller parts of each
+of these stages, you'll see that there's conjectures and guesses and ways to check your
+guesses.
+So we solve unknown problems.
+If you're doing research, you're on the edge of what's known, no one can tell you exactly
+what solution will work.
+And then we carry out the plan and finally we check our work, we make sure it functions.
+The line that he's most famous for and is often quoted is this one here that I'm highlighting
+at the top of the screen.
+If you cannot solve the proposed problem, try to solve first some related problem.
+Could you imagine a more accessible related problem, a more general problem, a more special
+problem, an analogous problem?
+This is excellent advice in all kinds of tasks.
+If you're stuck, you should not try to move forward.
+You should move laterally.
+In statistical modeling, that'll often mean trying a simpler model first, one that you
+can get to work before coming back to the one that you really want to work.
+In terms of research, it often means that we'll deduce that we can't get the estimate
+we want.
+The estimate that is desired is not possible with the sample that has been provided to
+us.
+And the example from the previous week was meant to really thrust this upon you and present
+it as ordinary.
+This is a quite typical sort of issue where in this example, I asserted it is plausible
+that we can estimate the total causal effect of gender on admissions probability, but it
+is quite implausible that we can do the mediation analysis and separate the direct effect from
+the indirect effect.
+And in that case, you can't get what you want.
+We should be open and honest about that.
+And instead, move laterally.
+What can we get?
+Well, we can do sensitivity analysis.
+We can try a different study, different kinds of measurements.
+We could measure things on the mediating paths between gender and admission, between gender
+and department, and so on, ways to get at it that the administrative records don't provide.
+All fields have these sorts of obstacles where you can't just move forward in a straight
+line, and you have to go laterally, philosophers.
+Just a few pictured here have been, one might say, obsessed with ethics from the start.
+On the left, we have Aristotle, and then there's Hume.
+I think center bottom is Hume, right?
+And then Kant is the pensive-looking figure in center top, and then I think that's John
+Stuart Mill on the right, and all these individuals have written extensively about ethical systems
+and contrasted them, and a series of debates about how human society should decide what
+is right and what is wrong.
+And one of the most famous, for better and worse, examples of ethical philosophy is the
+so-called trolley problem.
+So you've probably heard of this, it's become something of a meme on the internet in recent
+years, but let me explain it to you.
+So in the trolley problem, this is a thought experiment that's supposed to confront you
+with a moral dilemma.
+So the idea is there's a runaway trolley.
+Why is it runaway?
+Don't ask.
+It's just runaway.
+You have to accept the premise, and you are standing next to a switch.
+Why?
+Well, don't ask.
+It's just part of the setup.
+And if you do not pull the switch, the trolley will keep running straight forward, and it
+will strike five slow-moving people on the track.
+Why are they on the track?
+Again, don't ask.
+It's just a setup of the dilemma.
+If you do pull the switch, it will be diverted to the sidetrack where it waits one slow-moving
+individual who will perish.
+Should you pull the switch?
+Now, the interesting thing about these dilemmas, first of all, is when you confront someone
+with them, they want to change the rules.
+It seems like a wholly unacceptable sort of scenario.
+Ethical dilemmas in our real lives are not like this.
+When we're struck with a dilemma, we seek something to disambiguate it, to find something
+that makes it clear that it's not really a dilemma, find more information.
+But these philosophical trolley problems are set up to be dilemmas, to confront our intuitions,
+and get us to consider different factors by which, well, why is it a dilemma?
+What principles are being put in competition in these scenarios?
+And people disagree quite passionately about what the right answer is.
+There's a large number of differences.
+Some people will say, it is monstrous to pull the lever.
+You should behave as if on the left, and leave it alone, is not your place to choose who
+dies.
+And other people will say it is monstrous, not to pull the lever.
+The philosopher responsible for unleashing trolley problems on us, well, that's a bit
+unfair.
+The first philosopher to write about them is Philippa Foote.
+And in this article from 1967, and introduced the first trolley problem.
+And it's been a long time since I've read this, but I think it was proposed just as
+a way to consider basic principles of action.
+And when it is ethical to take an action versus not.
+Very quickly on that, it became added to by, well, very quickly, a decade later, another
+philosopher, Thompson, introduced another scenario of the trolley problem, the same
+kind of setup based upon Foote's original story.
+But this time it's called The Fat Man.
+I'll explain this one in a little bit.
+And in the not content with that, he also added The Fat Villain.
+These stories, growing increasingly ridiculous, are opposing additional principles, or highlighting
+additional principles, these sorts of thought experiments that philosophers enjoy.
+They can't analyze ethics in the real world, that's way too complicated, but we can analyze
+trolley problems.
+Right?
+So this is the lateral move.
+In 87, we get the loop, which is a really weird one.
+And now there are probably endless numbers of trolley problems, and you could ask a large
+language model to invent new ones all day long.
+So there's now a big experimental literature on trolley problems, actually, and this is
+the database we're going to use as an example today.
+What does it mean for, to have experimental trolley problems?
+We don't actually set up runaway trolleys and have people pull lovers.
+That would be horrifying.
+What we do instead is we create a series of different scenarios, trolley scenarios, large
+numbers of them.
+Not all of them involve trolleys.
+You can have scenarios that involve organ transplant decisions and so on.
+But they contain principles that are in opposition.
+And so you can ask people then to respond to them and say, the action that is taken in
+the story, say we say here for the original trolley problem, the foot trolley, the person
+does not pull the lever and then you can ask a large number of people whether they think
+that is morally appropriate, just accept their intuitions about these things.
+And there are now probably hundreds of papers looking at subject pools and confronting them
+with these things to empirically study the intuitions of trolley problems, which again,
+this is a lateral move in ethics because people aren't confronted with constrained problems
+like this, ethical dilemmas like this in their real lives.
+And so we don't know exactly what these experiments measure.
+But you can certainly study how people respond to trolley problems.
+So a couple of principles that are present, three major principles that are present in
+this literature that people try to analyze as features of stories, latent features of
+stories that people intuit and unconsciously use to guide their reasoning about how appropriate
+action is.
+And the first on the left is the so-called action principle, which is that taking an
+action is less morally permissible than not taking an action.
+If something horrible is going to happen just as you as a bystander, well, that's not nearly
+as bad as something horrible happening because you took an action.
+In the middle, there's intention.
+So the original trolley problem on the left of the foot example, if the lever is pulled,
+the trolley is diverted and the one fellow on the sidetrack perishes.
+But his death is not necessary, it's not intended, he just happened to be on the track, right?
+If he wasn't there and you pulled the lever, the five would still be saved, right?
+In the middle, the so-called loop scenario, which is much more recent, I think from the
+80s, the same basic scenario and if you don't pull the lever, the trolley continues straight
+ahead and kills those five people at the bottom of the screen.
+If you do pull the lever, it's diverted and it kills the one and when it hits the one
+on the loop there, it is stopped.
+The trolley is stopped by the impact.
+And so the death of the one man on the sidetrack is actually necessary to save the five and
+this is the intention aspect of it and this seems more monstrous to most people responding
+to these sorts of scenarios.
+And then the worst of all is the contact principle, intended actions are even worse if they involve
+direct contact with another person.
+So in this case, the trolley will go under this footbridge towards the five but you happen
+to be on the bridge, again don't ask why, it's just part of the weird minds of philosophers,
+they come up with these things and you are standing behind a very large man who you can
+push over, don't ask how, onto the track and then the trolley will hit him and stop and
+save the lives of the five.
+So this is like the loop but it involves direct pushing and so that's the contact principle.
+There are hundreds of trolley scenarios that people come up with and here's the largest
+study that I could get answers to, to a study from 2006 which recruited voluntarily on the
+internet 331 individuals to go through a large number of these trolley problems and give
+their intuitions about how morally permissible, how appropriate on a scale of one to seven,
+the action described in the story was, they know the age, the gender and the completed
+educational level of these individuals and there are 30 different problems that each
+of them answered and these trolley problems are structured in the experiment so that these
+principles of action, intention and contact are varied, left in or out of different stories
+so that you might try to estimate the association or the causal force actually between these
+moral principles, action, intention and contact and judgments of appropriateness and that's
+what we are going to examine.
+This is a real lateral move in ethics.
+You can study trolley problems but it's much, much harder to study ethical decision making
+in the real world in part of course because it's communities not individuals that typically
+judge what's ethical.
+But the psychology of individuals and these little ethical dilemmas is interesting in
+and of itself especially if you're a cognitive psychologist and you're interested in how
+people make judgments here and people get pretty upset about some of these stories because
+they're upsetting.
+The kind of outcome variable you get in this scenario is a very weird thing.
+Like I said the responses are judgments of how appropriate an action is from one to seven.
+They had to choose an integer, one, two, three, four, five, six or seven and they didn't choose
+anyone they want so this is not a count variable, nothing's been counted here, it's also not
+metric because it's not continuous and it's bounded between one to seven and its distribution
+is very strange for lots of reasons.
+Think about why.
+So here's the basic estimate setup and then I'll come back to the issues with trying
+to model a variable like this.
+We would like to know how the treatment, so you think there's a story and the story is
+like a treatment and it has certain features and we're interested in estimating the association
+between the treatment and the response.
+The response is the judgment of appropriateness.
+The treatment is whether there's action, intention or contact added to the story.
+And there's also the fact that there's a story itself whether it's about a trolley or
+whether it's about organ donation and that may also impact people's judgments about the
+appropriateness of the action in it for sure so this is the aspect of the story which is
+a competing cause of responses, some just in general contexts are more upsetting to people
+or more appropriate to people.
+And then there are all the competing causes that are the aspects of the person making
+a judgment.
+So the treatment is randomized and the story is randomized and we can plausibly measure
+the direct causal effects of those things because this is an experiment.
+But the features of the individuals are not randomized and this is not a randomized sample
+and we're going to come back to this later.
+So we have the education, the age and the gender of each individual, each of the 300
+and so individuals and these variables are also related to one another causally.
+So there's an individual's gender over there.
+These are adults who are responding and so an individual's gender has through gender
+socialization influenced their education and the individual's age is almost certainly
+a cause of their completed education level simply because older people have had more
+chance to complete more education.
+So we have relationships among these other variables.
+So often people ask me how do you draw a dag and I give some set of heuristics about how
+to do it sort of in polio style and here's an example I think of a useful thing.
+You think about starting in the beginning with just the simple estimate that you want
+and then thinking about competing causes that have been measured and then thinking about
+arrows that are to be drawn among those competing causes as well.
+And then we might go on later and we'll do this at the very end of the lecture I believe
+to think about yet other variables here and potential confounds.
+This is an experiment so you can rule out a lot of confounds but we're going to add some
+confounds.
+So I think just like halfway through we'll add some more.
+But we can leave that aside.
+We have another problem to solve first and we're going to divide and conquer.
+This kind of variable is called an ordered category that the ratings of appropriateness
+is categorical.
+That is the numbers don't indicate counts or magnitude.
+They merely indicate discrete categories.
+The one, two, three, four, five, six and seven are not.
+Seven is not seven times bigger than one in any metric sense that you can measure in the
+real world.
+It's an intuitive judgment from the person who's responding.
+And there are lots of things that are categorical like animals, cats, dogs, chickens.
+But those categories aren't ordered.
+What we have are ordered categories.
+We know that seven is more than one.
+We just don't know how much more it is.
+It could be more than seven times more appropriate than one in the mind of the person responding.
+We don't know the distances and the distances between these categories, even if they're
+ordered, doesn't have to be the same.
+So these are things like good, bad and excellent, right?
+Let me try to give you an example to bring this home a bit.
+You think about the distance between any particular sets of values like say let's compare the
+distance from 45 and 6 to 7.
+There's no reason to believe that in the psychology of the person making this response that these
+distances are the same, right?
+That each is just one unit worse than the other.
+It might be quite easy for a story when you add a feature to it or remove a feature to
+go from four, which is right in the middle, to five.
+But it might be quite hard for something to get to the maximum category because lots of
+people when they do these sorts of experiments reserve the end points for the really extreme
+things.
+Some people don't use the end points at all.
+The other feature of these things that's quite unusual and makes them difficult to model
+is their anchor points.
+Like you'll see, what I'm showing you on the right is for the whole data set, just the
+histogram for the whole data set that we're going to look at, the whole Charlie data set,
+and you'll see that across all the subjects and all the stories, four is by far the most
+common response.
+And you can think of this as the meh.
+I'm not sure.
+It's not totally appropriate.
+It's not totally inappropriate.
+I'll pick the middle number.
+We call this an anchor point, and the anchor points are certainly important to model.
+You need a distribution that can recover these anchor points, and we haven't seen one yet
+in this class because there is no classical distribution, which will have this shape.
+We're going to need something else, and we're going to rig up some machinery for it to work.
+The other thing to note, and we're not going to deal with this necessarily in this lecture,
+but we'll deal with it later when we get some more concepts, is that different people have
+different anchor points.
+Not everybody is necessarily going to, on average, choose four.
+Some people might rate everything more appropriate.
+In fact, there are typically a small number of subjects in all these experiments that
+just rate everything as totally appropriate, all sevens.
+You might think those people aren't paying attention, and maybe that's true, but that's
+what they did.
+We need some way to cope with that as well.
+This is like the wine-judging example from the Markov Chain Monte Carlo lecture a couple
+of weeks ago.
+It's the same kind of thing.
+If you think about this in terms of an internet meme, which will help you remember it, I hope,
+if we had some objective distribution of how good something was, and say that goodness
+is normally distributed in the world, people break up this goodness into ordered categories
+that they subjectively assess them by.
+Say you had a perfect Android, it would be objective about this.
+It might just say, you know, on the far left, you have junk, and then something's okay.
+The middle plus or minus one standard deviation is pretty good, and then good, and then awesome
+stuff in the very end.
+Americans famously are very enthusiastic people, on average, and tend to think that
+lots of stuff is awesome, and so the American subjectivity would look more like this, and
+this is the anchor point problem, right, in the reporting on these things.
+And then Eastern Europeans, many of my most favorite people are Eastern Europeans, have
+the flip side of the American.
+It's quite difficult to elicit a positive verbal assessment for many Eastern Europeans,
+even though the underlying reality is the same.
+This is the anchor point issue.
+So how do we deal with this?
+Come back to the tide machine engine metaphor, there's going to be some machinery, like what
+you see on the right of this slide, that we're going to build, that can combine together
+in nonlinear fashion, in the guts of the machine, to produce, well, the tides, to produce the
+images you see on the left, and have proper order categories, and we're going to be able
+to put predictor variables inside that machinery, so that we can predict responses that through
+associations with other variables, like the treatments in the experiment.
+The key to getting the gears into the tide machine is to stop thinking about the outcomes
+in terms of a histogram like this, as an ordinary distribution, and think about it as a cumulative
+distribution.
+What does that mean?
+Well, you get a cumulative distribution when you just add things up, and so we don't have
+the probability of, say, five, but instead we'll have a distribution where it's the probability
+of five or less, and that's what I've done on this slide, is I've taken the histogram
+on the left, and I've just stacked it progressively, moving left to right, so it's now a cumulative
+categorical distribution, and the probability of five or less is given by the five bar.
+The height of which is just the height of five, and four, and three, and two, and one,
+added together.
+Okay.
+I know this seems a bit like madness, but if you're going to use these sorts of models,
+and they're very common in psychology, and political science, and parts of anthropology,
+then you should have at least acquainted yourself once with the weird machinery underneath
+them.
+Your computer can push all these, push all the math for you, but you need to understand
+what the coefficients mean, and you need to push them back out onto the prediction scale
+as well.
+Okay.
+So what we do then is we build log odds parameters that correspond to this.
+So we're going to work on log odds again, because that gives us a continuous parameter
+space to work with, like in the binomial models.
+So these are going to be logit link models, again, like with ordinary count models, and
+that means we need to translate the cumulative proportion that we get by just stacking up
+the histogram on the left.
+You'll see that those red dash horizontal lines all intersect the vertical axis at some proportion
+or probability, right?
+So again, focusing on number five, you follow the five bar up, and then over to the left
+in about 70%.
+So the cumulative probability of five is about point, five or less is about point seven.
+And then on the right, I've just redrawn this, but now with these blue lines, and we
+follow it down to the other axis, and I don't have an outcome on the other axis now, instead
+I have cumulative log odds.
+And you get this just from using, well, converting that probability on the vertical axis to log
+odds.
+And just remind you what are log odds?
+Well, there's the probability of the thing divided by the probability of it not happening,
+right?
+So it's just a value on the vertical axis divided by one minus that value, and then you take
+the logarithm of that ratio, and that's the cumulative log odds, just like log odds,
+but cumulative.
+Okay, this is really weird, but what this gives you are a set of parameters on the cumulative
+log odds scales that are called cut points, and we're going to estimate these as a way
+of estimating the shape of the distribution, any arbitrary categorical distribution we
+like, and it will still have the ordered property.
+And that's what we get, these things called cut points.
+The number of cut points you need is one less than the number of outcomes, because you
+get the last one for free, right?
+It's whatever is left over, and that's what I'm trying to show you on the right now.
+The values that kind of exist between these cut points, one, two, three, four, five, six,
+and seven, live in the gaps between the cuts, and then the last one is off at infinity,
+because all of the space above the last cut point must be the last outcome, which is seven.
+I appreciate how weird this is, and you can review these slides a couple times now and
+get the idea, and there are examples coming, of course.
+To predict the data, we have to do this now in reverse again, which I know, it seems like
+madness.
+We had it on the discrete scale originally, and then we went to cumulative, and now we're
+going to have to come back.
+And the reason is because if we don't go to the cumulative, we can't enforce the ordering,
+so now we have enforced the ordering and estimated the cut points, and now we have to come back
+and predict discrete observations, that is, the categories one, two, three, four, five,
+six, or seven are discrete outcomes.
+So what we want is the probability of some response, equaling some value k, where k is
+any number from one to seven.
+And this will be given to us by a difference between two cumulative probabilities.
+So let me show you what that means, it's something a little more graphical.
+So say we observe some respondent, reads a trolley problem, and then they say, yeah,
+that's a three.
+And so the probability of seeing a three, having estimated a certain set of cut points,
+say the ones on the screen, is the probability that it is a three or less, minus the probability
+is two or less.
+So let me show you what that looks like.
+Here's the probability that it is two or less, and here's the probability that it is three
+or less, and the difference between them is the probability is exactly three.
+Yeah.
+Again, I know it's weird.
+The machine, the gear is inside the tidal machine engine, but this works.
+It gives us the features we want, and it's designed to do exactly that.
+It gives us discrete categories, and it enforces them to have a certain order.
+When we build the model, I was told you, is cumulative log odds.
+You can think of this as just a categorical model, where the probability of any particular
+category comes from these cumulative log odds, and or the cumulative log odds of any particular
+category is equal to some parameter on the log out scale here, alpha sub k.
+So there's a cut point for all, well, there's six cut points in this example because there
+are seven categories.
+Okay.
+We've got the machinery ready to go.
+What we don't have yet is a linear model, and the order categorical model is a generalized
+linear model, but there's no linear model in it yet, and we haven't seen a way to put
+predictor variables in there that we can stratify.
+There are different ways to do this, actually.
+First thing you can do is just stratify the cut points.
+You could have a different set of cut points for different values of predictor variables,
+say for each of the different experimental treatments.
+You could simply have a different set of cut points.
+That works.
+The other thing you can do is you can use something called an offset.
+Each cut point will get an offset that basically stretches the histogram so that the average
+judgment, the average response is either bigger or smaller as associated with some metric
+predictor variable.
+Because if you have a metric predictor variable, you can't stratify the cut points by it, right?
+You need some other modulation to get to happen here, and so I want to show you how that works.
+We're going to add an offset phi sub i for each observation i, and it's going to be added
+to every cut point inside the log odds model.
+So I'll remind you what's going on so that we're going to have some phi sub i is going
+to be a linear model.
+In the simplest version, it's just a coefficient times a predictor variable, beta times x sub
+i, but then you could add more terms, plus gamma times z sub i and so on, just a linear
+model.
+But notice there's no intercept.
+There's no alpha there.
+The reason is because the alpha is already taken care of.
+Those are the cut points that are being estimated.
+Then the cumulative log odds of each possible outcome of each of each k is defined as its
+personal cut point, alpha sub k, plus phi, where phi is the same for all the possible
+responses.
+This is usually abbreviated when we write the mathematical version of these sorts of
+models, as that r sub i is distributed as an ordered logit with parameters phi sub i,
+which is the linear model, and a vector of cut points alpha, and that saves you having
+to write all this mess that's up on the screen.
+What does this do?
+Well, let me show you a little animation to give you an idea of what's going on.
+So I've redrawn this relationship between cumulative log odds on the horizontal axis
+here and cumulative proportion on the vertical, and so if you're looking at the vertical axis,
+you're seeing the histogram.
+That is the size of the gaps between the dashed red lines or is the relative proportions
+of the different responses, and the same is true on the horizontal axis, on the cumulative
+log odds axis, but it's all distorted and stretched because it's on the real number
+line now.
+So I've put this black dot on the horizontal axis to give you an idea of a value you can
+track, and we're going to change the value of phi away from zero, and it's at zero right
+now.
+It's the value of phi, and we're adding it to every cut point to get the graph on the
+screen, and what you're going to see is if phi changes, the histogram distorts.
+So the first thing we could do is scale it up, and I'll show you the histogram at the
+same time in the ordinary case on the right.
+So the first thing we could do is make phi bigger, take it from zero to two, and then
+you see what happens is it moves all of the cut points up, and goes bigger, and this creates
+a bigger space at the bottom, and so more judgments are for the lowest category now,
+because everything gets squished up at the top, and then the mean actually goes down
+as a consequence of that.
+We go the other way, the opposite thing happens, and now the highest category seven gets more
+of the space because there's a bigger gap left for it up top.
+The consequence of this, that bigger fees give you smaller average responses, and smaller
+fees give you bigger average responses, as a consequence of that, typically when we model
+these things, we subtract phi from every cut point.
+I just think about flipping it to sign so that you get the anticipated behavior, but
+you don't have to do that, you just have to push predictions back out of the engine.
+You want to avoid interpreting coefficients.
+When I do the modeling, I'm typically going to do that flip, so I subtract phi instead
+of adding it to make the interpretation easier for you, but some software doesn't do that,
+so you just need to double check and make sure you know what's going on.
+Here's the idea of what happens when we've got a metric predictor.
+We can essentially squish the histogram up and down and model if subjects are doing this
+in response to some metric.
+Here's the story so far, and we're going to start off easy with a model that only looks
+at the association between the treatment and the response, and I show it on the right
+here.
+It's an ordered loget, and phi sub i, it's an additive combination of indicator variables
+for the three treatments, that a sub i is action, c sub i is contact, and i sub i is
+intention, and each story has been coded for these things, and these coefficients, beta,
+are going to measure the association, partial associations.
+I give each of them a normal distribution prior with a rather tight standard deviation,
+and the cut points are a normal zero one.
+Here's how the model looks in ULANG code, there's nothing particularly new to say.
+The d-ord loget distribution takes care of figuring out how long that vector alpha needs
+to be, so alpha, the symbol alpha there is actually going to be a vector, as you'll see
+when you run this model, and you look at the precy output, the coefficient summaries, you'll
+see that there's going to be more than one alpha, there'll be one for all the responses
+minus one, because the last response seven doesn't need a cut point.
+So let's look at the chains, this is the weirdest thing about chains that you often get is that
+when the model starts, it goes wild, it explores a very large parameter space in the beginning,
+and that's what you see these chains doing in the gray warmup period, and that means
+when it finally gets humming, it's in a very narrow range, and it's very hard to assess
+what's going on in these trace plots.
+One way to deal with this is to cut off, don't display the warmup, and then the trace plot
+could be inspected more easily, but this is not a problem with tracplots, and so again
+this is my plug for these trace rank plots, or tracplots, they don't have that problem,
+and these look good.
+Okay, so I told you there'd be alphas, and there are, there are six of them, there are
+seven categories, so there's six alphas, those are the cut points, and those are on the log
+scale, so if you applied an inverse logit function to each of those values, minus 2.82, and so
+on, you would get proportions, the predicted proportions of the total sample, and then
+those coefficients of BC, BI, and BA, those are things in fee that are skewing ratings,
+and so here in this version, in my d-word logit function, I have some tracking fee,
+and so those negative values mean lower responses on average, yeah, and so each of these features,
+which you can tell from this, is associated with lower ratings of appropriateness, that
+is, if you add contact, intent, or action to a story, it makes, on average, participants
+that it was less appropriate.
+But what actually happens, metrically, on the outcome scale, well, we need to plot predictive
+distributions, as always, and with these sorts of models, that is really not a lot of fun,
+because you have to go through all that tied machine engine again, but as you might expect,
+there are functions to do this for you, so if you're using my package, you can use the
+sim function, but in other software packages, we'll have something similar, so that you
+don't have to do it all by hand, but you could do it by hand, because I have just taught
+you all that you need to know, that you would need to review it and play with it a bit,
+but it would be possible to do it because you have learned how to develop statistical
+solutions and test them on synthetic data, yeah.
+Here's a simple bit of code here that will make the graph on the right, and this is the
+posterior predictive distribution for a counterfactual treatment, where a story that contains no
+action, no intent, and no contact, and those are judged quite appropriate, on average,
+and the vast majority of subjects gave four or higher, and seven is the most common response.
+We can then do other counterfactual simulations here, to look at the causal effects, so imagine
+taking a story and adding intent to it, now when I say that, I make it sound like it's
+simple, but different stories will require adding intent in different ways, and those
+treatments might not all be equivalent, so you have to keep in mind here that this is
+a psychology experiment, and psychology is full of monsters, yeah.
+We're assuming that all of these interventions are equivalent when we add intent or action to a
+story, but if the stories are different, it's hard to believe that that's always going to be
+exactly true. Still, we can make progress, this is the lateral thinking, remember?
+Okay, if you add intent, it brings the average rating down, yeah, you see that the spike on seven
+goes away, and then in the middle column here, what I've done is I've taken the baseline story
+in the upper left, and I've added action, so adding action also takes away the high ratings at the seven,
+and then you add intent to that as well, and it's doubly worse, and now we get a spike down in one.
+Four is still the most common, though, and then finally, we can do the same thing, we can add
+contact, and then add that, combine it with action or intent here, combine it with intent,
+and you'll see that this is, contact is the worst of all, yeah, contact and intent,
+the combination of contact and intent gets the lowest ratings across the whole sample.
+Okay, competing causes, though, lots of competing causes in this experiment, the people are not a
+random sample, the story is the randomized competing cause, and we can plausibly deal with the story
+effect, that is some stories are just on average, rated higher or lower is more or less appropriate,
+it's not a confound, but it is reducing the efficiency of our estimates of the treatment
+effects, and so usually you want to include something like that, and we can do that, we can
+stratify by story, and then we might be interested in measuring the effects also of the other competing
+causes which are associated with the individual respondents, we know their education, their age,
+and their gender, and each of these is strongly associated in this sample with the with the
+responses, and we can model those as well. The thing about that, of course, is that
+in a technical sense, it's not at all difficult
+to stratify the beta coefficients in the feline by gender, and estimate the total effect of
+gender just that way, if that was our goal, so that's what I've just done in the notation on the
+right, I've subsetted it so that there's a B sub A for each gender G on line I, and technically
+you already know how to do this, you've been doing these sort of categorical vectors of parameters
+since, well, very early in the course, right, the second week, I believe, the problem here is not
+the statistical one, it's the scientific one about whether we really think we can do this,
+get this estimate, so here's the statistical solution just to show you it's possible,
+then we'll talk about what we think we're actually estimating here,
+so we just bracket each beta coefficient by G, and you do that in the declaration of the priors
+as well, and then we get vectors for B A, B I, B C that are of length, the number of genders that
+are in the sample, and you can run it, and you'll see you get these vectors back, and then you can
+push past your predictions back out, and you can measure causal effects of intervening on these
+things, like here, yeah, for gender one in this sample, I think gender one is women,
+on average, so in these two plots, I'm considering a story which has intent and contact, and then
+on the left we have the counterfactuality for gender one, and on the right for gender two,
+and the difference shapes, you can think of as the causal effect of gender for this type of story,
+and you can see that gender one gives lower ratings of appropriateness on average than
+gender two does, okay, but is this the causal effect of gender, or more appropriately of
+gender socialization, right, so that's what we're talking about, I don't think it is, and it's often
+true in these sorts of papers that they'll report the sort of subject-level variables as causal effects,
+but this is hardly ever easy to believe, and the reason is because it's a voluntary sample,
+and these things that you can measure about the individuals are also causally associated with
+participation, that is to say that gender and age and educational level are reasons for participating
+in a scientific study online, yeah, normal people have other things to do, but if you're from a
+particular cultural background, have particular sets of interests, you may be interested in
+participating in a bunch of online trolley problems, and so this participation variable,
+we can add it to the graph, and think about sample selection using the same causal framework we've
+been using since the first week of the course, and the thing about participation is it is implicitly
+conditioned on, our sample is already selected on participation, it's like we stratified the
+sample by it and threw away all the people that don't participate and we don't get to
+observe them, and P is a collider, yeah, and since it's conditioned on,
+association flows through it among all the features E, Y, and G, and so education and age
+and gender are associated in this sample and they co-vary through the collider P, and that means it
+is not possible to measure the total causal effect of gender, but we can get the direct effect,
+right, remember the backdoor criterion, your due calculus, we can't measure the total causal
+effect of G because we've got these non-causal paths through participation through the collider,
+right, it's not a backdoor, there's no arrows entering G, but we do have non-causal paths because
+P is a collider and that path is open because the existence of the sample stratifies on
+participation, but if we stratify by education and age at the same time that we stratify by
+gender, we can plausibly estimate a direct effect of gender.
+So that means we want to add these two variables, here I'm just showing you the histograms in this
+sample of education level, on the left in red there are eight levels of education that were
+reported from the sample running from, you know, just primary school to some college and bachelor's
+degree, you can see right away that most of the individuals who are participating in this are
+college students, yeah, but there are not all of them, there are a lot of people who finished
+college a very long time ago in this sample, and you can see that from the age distribution on the
+right, and this is this age distribution, one thing to notice about it is it looks nothing
+like the age distribution of a population, yeah, there are many fewer 10-year-olds participating
+than if you took a random sample of individuals, yeah, there are some 10-year-olds,
+and so this is not a random sample, you knew that, but that's okay, you can make inferences
+about random samples, but this is one of the problems, one of the indications that these
+variables are associated with participation. Okay, how do we put these predictors into these
+metric predictors into the model? You could just add them as ordinary regression variables,
+but I have a better idea, and after the break I'll introduce you to it.
+Welcome back. For the break I introduced some metric variables that we probably don't want
+to treat as metrics, that is education and age, and an ordinary metric variable is just a continuous
+variable, you put it in a regression, and it assumes that every unit change in that variable
+gives the same change in association with the outcome, but we don't want to assume that,
+we don't want to assume that because say for education it's implausible that every
+additional year or stage in this case of educational completion has the same
+change in association with the outcome, and we all know that some college and finishing
+college are very different life events, and only finishing high school and attending college are
+quite different associations of people as well. Education is actually itself also an ordered
+category though, just like the outcome variable, but we want to use it as a predictor, not as an
+outcome, but we'd still like to enforce some kind of ordering in how we estimate its effects,
+so in principle we want a parameter for each level of education, yeah, just like we had a
+cut point parameter for each response in the outcome, but we need to do it on the other side
+of the equation now. Okay, I'm going to walk you through this, and just take its flow, and then
+you can back up and watch the slide again, it's not as awful as it's going to look just to prepare
+for what's going to happen on this slide. Okay, the basic idea is that we start out at the first
+level of educational completion, level one, which in the sample means elementary school,
+they're in elementary school, and there are individuals in the sample who were in elementary
+school. In this case we start out with the basic linear model, fee equals zero, there's just some
+cut points, and there's a default category, and then we're going to add levels of education,
+we're going to add to the value of fee, and every completed level of education is going to have its
+own increment, so when an individual graduates from elementary school and moves on to middle school,
+they get an increment to their fee value of delta sub one, and delta sub one is a parameter,
+and we have to estimate it, let's assume it's positive, could also be negative, but it's a value.
+When that individual then goes on to some high school, we add to that another parameter delta
+two, and now their prediction is delta one plus delta two. This enforces the ordering, and it makes
+the effect monotonic, meaning that it goes in one direction, either education increases association
+or decreases it with the ratings on the outcome here, whether things are more appropriate or less.
+And so on, finishing high school we add delta three, and so on for all the others, some college
+adds a delta four, and then college a delta five, and then a master's delta six, and then level eight,
+the doctorate adds delta seven, and so the prediction for someone who's got a doctorate in
+this example is all of the deltas, yeah, all of the cumulative effects of all the educational
+completion, and this is what we call an ordered monotonic predictor, and in principle it just
+means having a lot of parameters that get turned on depending upon the value of the predictor of
+the education variable. To make this fun the model though, and easier to interpret, what we typically
+do is we say that this last one, the biggest value is equal to some coefficient beta sub e, which is
+the maximum effect of education, and then we rescale all the deltas so that they're between
+zero and one, they sum to one, so that when we sum up the parameters, all the deltas for the
+doctorate, they always sum to one, and then we can just multiply by the maximum effect.
+And this is what it looks like, so now the linear model phi sub i is going to equal,
+well there may be other effects here as well, but if we only were modeling education it would
+look like this, the first thing is there's this coefficient beta sub e, which is the maximum
+effect of education, we estimate this from the data, we get a posterior distribution for it,
+and then each observation i is, that beta sub e is multiplied by a sum of a certain number of
+these little deltas, and how many of them, well depends upon your education level, yeah. If you're
+at the first education level you don't get any of them, because then that sum is zero and there is
+no education effect, because that's baked into the cut points that we started with the intercept,
+but if you're at education level two, then you get one of the deltas and so on, all the way up to
+the doctorate where you get all of them, and we scale the deltas in the model so that the sum of
+them is one, and we'll say how do we do that, well there's this parameter type in modeling that we
+call a simplex, and a simplex is just a vector of values that sums to one, like a probability
+distribution, and we can define our delta parameters as a simplex, and then their sum is constrained
+to always be one, so if one gets bigger the others have to get smaller,
+and there's a probability distribution for simplexes, and it's called the Dirichlet distribution,
+and you're permitted to say that distribution any way you like, but I'm going to say Dirichlet,
+and Dirichlet was a man, and he did lots of stuff in mathematics, and among them is he
+derived this distribution, and this is a distribution for distributions, I'll say that
+again, it is a distribution for distributions, when you sample from a Dirichlet distribution,
+you get a probability distribution, that is a vector of probabilities, and since it's a
+probability distribution, it's a vector that sums to one, it's a simplex, and so we can use Dirichlet
+as a prior for our deltas, and to get some intuition about what it means, it's the distribution is
+parameterized using a set of positive values, here I've just chosen a bunch of twos, and the same
+number of them as you want categories, and we want seven levels here, because we have seven deltas
+to estimate, and if you set them to two, that isn't saying that they're all the same,
+it's think of this as the bigger these numbers get, the less variation there is in the distributions
+you draw, and so the fact that they're all the same simply means that there's no prior
+expectation about which is bigger than the others, I'll say that again, they're all two,
+and that means there's no prior expectation about which are bigger than the others,
+if we make those two bigger, like ten, then you get the differences among them are smaller,
+this is like saying there's more confidence, still we're not sure which are bigger than the others,
+and we're more confident that they're closer to one another in value, and if you made all the
+all the a's infinity, then they would all be exactly equal, yeah, maybe one over n, maybe one
+seventh, you could also give them different values, they don't allow us the same value,
+and that's like having prior expectation that some are bigger than others, and that's what
+I'm showing you on the right of this slide now, okay, that's our Dirichlet distribution, it's a
+distribution of distributions, and it's used a lot in machine learning, and you can just make
+good use of it here to constrain the delta vector, so that it's a simplex, and that's what
+I do here, so when you write it out as a math stat model on the right, you can just write that delta
+is the vector delta is Dirichlet, with some prior a that you need to define somewhere
+where it is a vector of positive reals, and in the Oolong code, we do a couple of new things here,
+the first is I recode education into the appropriate levels up to top, the original coding is quite
+different, it's a bunch of arbitrary levels, and so I've recoded it so that there are order
+categories now, I define the Dirichlet prior there, and I pass it in as data, as a vector of
+seven twos, that's what rep two comma seven is, and then inside the Oolong model, we've got the new
+machinery, you'll see the beta sub e times the sum of the delta j's from one to capital e, where
+capital e is the individual's education level, that's that sum, like literally just right in the model,
+and then down at the bottom we've got the simplex delta Dirichlet, and then right above that there's
+this little bit of bookkeeping that makes the sum work nice, where I put a zero on the front of the
+delta vector, so that an individual whose education level is one gets a sum of zero, I'll say that
+again, that delta j append row line down there, second from the bottom, is just a little bookkeeping
+trick I use so that to make the sum behave nicely, so that it puts a zero on the front of the delta
+vector, so that an individual education level one gets a sum of zero, they get the first element
+from that vector, and we don't need to estimate that zero. Run this model, it runs fine, you should
+give it a try, and you get a bunch of deltas out of it, yeah, and those deltas represent
+proportions of the total effect, belonging to the total effect of education, belonging to each
+level, and you'll see that they do vary quite a lot. Okay, right, but keep in mind in this model
+that I've just run, we really can't interpret the total causal effect of education, because I have
+not stratified by gender, and if you look at the dag that I've drawn, the dag indicates that there
+is a backdoor path. Two of them, in fact, one is through gender, and the other is through age,
+yeah, and so we need to simultaneously stratify by both the proper adjustment set to estimate
+the effect of education, we need to simultaneously stratify by age and gender. I think you know
+how to do that, you already know how to stratify by gender, and you could add that into this model,
+and in fact that would be a fantastic exercise for the student, and also with age, with age
+there's some more choices to make about modeling as well, you could also do that as an ordered
+category, that would be a lot of deltas, but that's okay, your computer won't complain.
+So if you were going to stratify by gender and add age in, here I'm just going to do example where I
+add age, it's just an ordinary metric variable, it would be this model here, so that each of the
+beta coefficients is stratified by gender, so everything is interacted with gender, total
+interaction model, and then I added y sub i age on the end there as well, and then this is the
+adjustment set, so that we can estimate the effect of education. Here you go, you can run it,
+lots of little priors and codes here, but this is the minimum sort of thing you need to do
+for the estimate of interest that is education. The trick here I want to show you, and it's
+important, if you run this model it's going to take longer than any other model you've done in this
+course, so a lot of parameters here, and there's lots of calculations going into each probability
+calculation, right, has to run the sum and a bunch of stuff, so it takes longer, and so I'll show
+you an example here of multi-threading, this little option you can do in ULAM and lots of
+markup chain Monte Carlo software of using spreading chains over multiple cores, and that's
+what multi-threading means. You know your computer has cores in it, probably eight or more, and each
+of them can run a chain on its own, but you can also take a single chain and run it on multiple
+cores simultaneously if the code is structured correctly, and that speeds things up. It doesn't
+quite double the speed using two threads per chain, but if you're lucky you'll get like a 30
+percent improvement, and so in this case four chains times two threads each is eight cores,
+and you get a pretty substantial speed up, so there's one example here, this model running on an
+old laptop, one thread each, you'll see that the total time for each chain is around 10 minutes,
+and then with two threads each the total time for each chain is a little under seven minutes,
+yeah so that's, you might think that's not a big deal and it isn't, you could have just
+take a walk and ignore your computer for that long or let this run in the background,
+when you get to really big data sets and and say the top one was a day and then the bottom one is
+closer to half a day, then that's a big difference. All right, there's a lot of coefficients in this
+model, and again you want to resist the urge to interpret them directly, but you can you can eyeball
+and see that the delta education contributions are different, they've changed because the stratification
+with age and gender makes a difference in this case, yeah let's walk you through kind of the basic
+idea of what all this mess means, again you want to push out posterior predictions, but it's nice to
+just test your understanding, these treatment effects are only our direct effects, right,
+of gender on treatment, because there's there's a gender one and gender two, that's what you want
+to read those as for each, and so those are gender contrasts, but it's only the direct effect,
+right, because we stratified by education and so there's no indirect effect, yeah we have to do
+that in fact for gender because of the participation gone found, the collider.
+Same is true for here education, there's a direct effect of education moderated by gender,
+and then our age effect, yeah, and the thing about the age effect of course is that
+this is only a direct effect as well.
+Yeah, because any indirect effect would be confounded,
+and then we have all the deltas at the bottom.
+Okay, this is a pretty complex model, but that complexity is required, I hope you can see we
+have specific queries and estimates, and because of the complex structure of a convenience sample
+with voluntary participation, we're going to have to do a bunch of stratification
+just to get any plausible causal effects of the individual characteristics, and it may not be
+possible to do total effects of those characteristics at all, as in this example, that's quite common.
+To do causal effects for a sample like this, you do post stratification, that is you do what I've
+been calling marginalization quite often, and you probably don't want to use the distribution
+of education and age and gender in the sample because it's very strange, you'd want to have
+some target population in mind with a certain distribution of education, a certain range of
+ages, and the structure, the covariance structure of those things, that is that 10-year-olds don't
+get a randomly sampled educational completion, there are no 10-year-olds that have finished
+college, well I shouldn't say that, there probably are a few, but not very many.
+So you want to take some care in thinking about what the target population looks like
+with respect to these particular variables, and then you can simulate
+causal effects for that particular population, that is what the contrasts in moral judgments
+would be for particular age distribution of populations if you add action or contact to
+some scenario. Right, so that's the problem one, that's what I just got done saying, you don't want
+this sample because it's got the cursed P or cursed participation, you need to post stratify to a
+new target that has different associations because the associations among education, age, and gender
+in this sample are contaminated by the collider of participation, and they don't represent any
+realistic population, right, this is the selection bias, it's like the restaurant problem, right,
+bad restaurants in good parts of town, good restaurants in bad parts of town, that's not
+a feature of restaurants, it's a feature of selection, and your sample is also selected
+in a weird way, and so there will be associations between the variables education, age, and gender
+which are weird like that and don't represent real human populations.
+And yeah, and the problem too is you should not set all ages to the same education because
+not all people of the same age have finished the same education, so you need to think quite
+hard about what a real population is going to look like, and you might want to look one up, yeah.
+Okay, we can't, one of the problems in post stratification here is what we might need
+to do to have a society that's fully simulated is have the arrow from age to education which we
+cannot estimate from this sample, so if you're going to do that you need to get it from some other
+source, yeah. All right, let me try to sum this up, I know this has been a bit much but
+this is still easier than real research, yeah. No matter how complex, all of this post stratification
+stuff is still just a generative model, and you take the posterior distribution, you push it back
+out of the model and you get predictions, so I've taught you how to do that, if the models can get
+arbitrarily complex, the task is still the same, and there are convenience functions which you
+almost all the work for you anyway, in this case SIM, you just have to set up the target correctly
+and the composition of predictive variables, so to remind you, all this emphasis in this
+course on generative models is not some fetish on my part, it is needed, absolutely needed,
+we need the generative model to plan estimation because otherwise we cannot justify a statistical
+model, I'll say that again, you have to have a generative model to plan estimation because
+otherwise you can't justify a statistical model, right, you have to figure out an adjustment set
+and you have to justify some functions that go into the statistical model, some functional forms,
+and then we need the generative model again to actually compute causal estimates because the
+parameters are not causal estimates, they're like the gears in the tide machine engine that let us
+compute the causal estimates, and those causal estimates depend upon the whole constellation,
+if you will, of predictive variables in nonlinear models especially, like this one.
+Okay, there's more to this story, and I don't want to dump a bunch of extra code on you,
+but I want to stimulate your imagination about this because we're going to deal with these issues
+eventually, there are lots of elements in this sample where there are things we call repeat
+observations, the most obvious one is the stories, there are 30 different stories, there are trolleys,
+there's organ donation, there's car accidents, there's a bunch of different gruesome scenarios
+that the twisted minds of philosophers have come up with in these 30 stories, and these 30 stories
+are varied to add and subtract action, intent, and contact, so in a sense the features of the
+stories are themselves a repeated thing and a competing cause, and as I mentioned earlier,
+we like to do something with that, and in principle we can, we can add this to the model as well,
+and then the other one, very similar, is the individuals themselves, there are 331 individuals
+who have responded, and we've been talking about the features of these individuals, their education,
+and their age, and their gender, but there's a bunch of unmeasured things about these people,
+in fact most of the things about these people that matter for their responses are unmeasured,
+however we have repeated observations from these individuals, and so there is some hope actually
+that we can estimate these unmeasured competing causes from the individuals, yeah, these are not
+confounds because the treatments are randomized, so I've updated the DAG to add you up there,
+but it's a competing cause and it can be a very powerful competing cause, some individuals think
+everything's appropriate, other individuals are angry at everything, if we can estimate that out,
+we can get better estimates of the treatment effects, and so we're going to try to deal with
+that in the next lecture, and we're going to learn some new, very fun machinery to do it, and I hope
+to see you there.
+Hello, are you there? All right, I'll do a bonus. My voice is giving out, but I'll see if I can
+make it through this. I want to say a little bit more about post stratification, which I mentioned
+at the end of the lecture, this is a really important topic for doing not just causal inference,
+but basically every aspect of sub scholarship I think that is driven by quantitative data,
+I want to launch into it by talking about another paper, this paper by Hernan et al,
+entitled The Second Chance to the Causal Inference Right, has this table, in fact I think the whole
+paper is basically written around this table, talking about distinctions between different
+kinds of data science tasks, so in the columns here we have the categories, they enumerate,
+there's first description on the left, so for example question of description,
+how can women age 60 to 80 years, would stroke history be partitioned in classes defined by
+their characteristics? The idea here is that you've got a sample and you're just classifying it,
+describing the sample, and then in the middle we have prediction, what is the probability of
+having a stroke is the example they give, and then on the far right causal inference,
+where we ask what causes stroke, and these are important to distinguish, of course I've often
+distinguished these as well in this class, in particular the difference between prediction
+and causal inference, and each of these tasks requires different designs, because you might
+want different kinds of data, or to code different aspects of the data you already have,
+and then finally there are different analytical approaches for each of these as well.
+Okay, all this is well and good except that the table is completely wrong, as wrong is a strong word,
+I'm sure the authors of this paper are going to agree with everything I'm about to say,
+the table is wrong because description and prediction require causal inference as well,
+and so pulling it out into its own column on the far right there I think risks misleading
+readers into thinking that if they declare that their study is descriptive or predictive,
+that they don't have to worry about DAGs or generative models, and I think in almost all cases
+that's incorrect. Let me give you two examples to whet your appetite, and then I'm going to
+spend just a little bit of time, these bonuses need to be short,
+introducing you to a framework for thinking through these problems.
+So here's a study from 2021, this was during the COVID-19 pandemic,
+there was a lot of monitoring going on to follow vaccine uptake of what proportions of
+populations in different parts of the world have been vaccinated, and there were lots of ways that
+they were being collected, there were really big surveys, the largest is the Delphi Facebook
+survey which had a quarter of a million in 2021, a quarter of a million participants,
+it's a pretty big survey, there's this census household poll survey in the United States of
+about 775,000, and in this rinky dinky Axios-Ipsos poll of only about a thousand individuals
+running through time, turned out to be the most accurate compared to the CDC benchmark,
+shown in gray there. So what this paper lines up for you or the reasons for this is that the
+bigger surveys are less representative of the population, they had a lot of sampling bias
+about who was likely to answer, and that is that people who had been vaccinated were more likely
+to answer polls asking about your vaccination status, not to make your bias. The smaller Axios-Ipsos
+poll was more representative and therefore produced much better estimates even though it was
+multiple orders of magnitude smaller than the big surveys. Okay, quality of data is more important
+than quantitative data, that's not a news flash for anybody, maybe you're prepared to understand
+that, but bigger samples amplify biases, and that's the thing to lock in your mind right now.
+This is a descriptive question we've got on the screen, this is not a causal inference question,
+and yet what's really important for the quality of these studies
+are the causes of the samples and why they differ from the populations we're trying to describe.
+Causal inference is here as well. Another example, now in the other direction, so sometimes
+the problem with the sample is that it's non-representative, but a non-representative sample
+can be better than a representative one, and how could that possibly be the case, you might think.
+Well, there are other aspects of it, other aspects of data than just representativeness,
+like for example whether it's a panel and we can follow individuals and get data on changes,
+and so on. So here's an example I like, that's a predictive task, it's about predicting the
+20-called election. This is in a distant past now, most of us want to forget about this.
+Barack Obama faced off against this guy, Mitt Romney, you might remember him,
+and it was a pretty tight election right to the end, and then Obama ended up winning with
+a little over 50% of the vote nationally. But lots of polls thought Romney could win
+right up until the end, and most of the polls were off, they underestimated Obama's support
+nationally. There's this funny little poll that outperformed, the bigger ones on average,
+that was run on Xbox. So Xbox is a video game platform, some of you may know it, basically
+it's like a Windows computer in a tiny box, it's under your television I guess, and what
+they did is they had this completely voluntary poll that ran on Xbox in the months running up to
+the election where users could decide to answer the simple question shown on the screen, if the
+election were held today, who would you vote for, and they got to choose it. And every time they
+logged in, they would be asked if they wanted to participate in the polls again, and so you got
+to track the responses of individual users, at least individual accounts. This is a highly
+non-representative poll, I probably don't have to tell you, Xbox players are a subset and a
+non-random subset of the general population. So you wouldn't expect the raw data from such a thing
+to be descriptive or predictive of the election, but if you model the sampling characteristics
+correctly and do the post stratification properly, it turns out that this kind of
+non-representative poll can be better than a traditional representative poll. And so here's
+the summary from this 2014 paper by Wong et al, which lays out the sampling methodology and how
+they processed the data and did the post stratification, and they show you that the traditional
+polling averages shown there in the blue dash trend underperformed the Xbox averaging after
+the post stratification if we compare it to the actual outcome of the election. So you would make
+better predictions using this crazy unrepresentative Xbox data. So it's not unrepresentative,
+it's necessarily the problem. And it can be, but again, you just have to think about what makes
+the sample unrepresentative and you can correct for that statistically. And that's the job of
+post stratification, but that requires thinking about the sample and how it differs and why.
+And these are causal questions. So here's our basic problem.
+Description and prediction and causal inference all have targets, they have estimates.
+And the basic problem is that the sample is not the target and so we have to process it somehow
+to get at that target. Post stratification also sometimes called transport. This is a set of
+methods for extrapolating from the sample to a population. That's extrapolation can be a causal
+inference, it could just be a description of the population or it could be a prediction for the
+population, but all those tasks are fundamentally the same and they require thinking about the causes
+of the sample. So I've often mentioned this philosopher of science, Nancy Cartwright and
+her motto that no causes in, no causes out. And I'd like to amend that to no causes in,
+no description out either. There's no dodging this and description and prediction require causal
+reasoning as well. Let me make this a little bit more specific. I'm not going to go through
+coded examples of this, of these things, but I want to give you some conceptual anchoring so you
+can remember this and you can deal with the coding issues when you need to. The coding issues are
+just post stratification like I've done in examples in the class and there's nothing new to say there.
+It's just a simulated intervention with particular distributions of predictor variables. But the
+thing to understand is the things you need to post stratify by depend upon why you think the
+sample differs from the population. Here's a simplest example I could think of. Imagine there's
+a population and there are four age groups in the population and they have, I've just creatively
+labeled A, B, C and D and they're present in the proportions, proportional to the areas of the boxes
+after on the screen. That is, there are more young people in A and then slightly older people in B
+and fewer in C and then fewer yet in D. Okay. And then you draw a sample from this population so you
+call a bunch of people on the phone and you ask them about, you know, when is the, when did they
+plan to replace their refrigerator or something important like that. And the proportions in your
+sample don't represent the proportions in the actual population. This is nearly always the case
+because participation is voluntary, who answers their phone and so on. That's normal. So post
+stratification can deal with this issue, absolutely. But the right thing to do and whether you can
+actually estimate the thing you want in the first place depends upon the reasons that the sample
+differs from the groups. Just the fact that the sample differs from the age groups is a statistically
+over-determined phenomenon. What does that mean? There are lots of different causal processes
+that will result in the pattern on the screen and you have to deal with those in different ways.
+So you can't just use the distributions to decide what to do. You have to think causally.
+This is done all the time in predicting elections. As mentioned before, this technique called multi-level
+regression and post stratification. Something's called Mr. P or MRP is used constantly by
+organizations like YouGov. They get non-representative samples both on the internet and on telephone
+and they have to post stratify those to predict the elections because the people responding
+are never responding in proportion to the proportions of those people, types of people in
+the voting public. Now, so that's a very standard industry use. Every day someone is doing Mr. P.
+and often in a Bayesian way too. Okay.
+Let me introduce some notation that's often used in this literature to help us think through the
+distinctions because I just asserted that just because the sample differs from the population,
+that doesn't tell you exactly what you need to do statistically. Sometimes it's perfectly easy to do
+post stratification because there's a benign reason that the sample differs and sometimes the reason
+is not so benign. You're in the bad place. Okay. So imagine we are just doing some polling. Yeah.
+And say age is associated with attitude. It influences it causally to speak casually about it.
+And a typical sort of situation is that your sample differs in its age distribution from the
+population you're trying to describe because people of different ages are less likely to respond.
+And so one way this is indicated in DAGs is with something called a selection node. This selection
+node is a little s in a box and it points at the variable that the sample is selected on. In other
+words, participation in the survey, the probability of entering the sample is influenced by here
+x, which is age. Or you could say what the selection node is saying is the sample differs
+from the population because of what it's pointing to. Yeah. Okay. This is ubiquitous in research,
+even experimental research, right? As I tried to indicate in the lecture,
+preceding this bonus section, there was voluntary participation. So even though the
+treatments were randomized, the features of individuals are not. And the sample is selected
+on those features because they influence participation. And this can lead to all kinds of casual errors
+because people will commit the table to fallacy in such papers. And they will present all
+coefficients as if they were causal effects, even if there was no randomization.
+But that's not the end, right? I mean, randomization is great. I think it's wonderful
+whenever you can do it. But we can also do inference without it. And most of the important
+problems in the human sciences, it would be unethical and impossible to do randomization.
+And so we need methods to think through these things. The truth is that many sources of data
+are filtered by selection already, like crime and health statistics. These sorts of databases
+are contaminated in all sorts of ways by sample selection. I mean, crime statistics are often
+just faked. But health statistics can also be like that. And you have to think carefully
+about who made those databases and the likelihood that a certain event could enter them in the
+first place. Employment and job performance have similar issues if you're trying to do
+economic analysis. Museum collections is something that I'm an anthropologist. I think
+museum collections are tremendously valuable. Biologists also think about museum collections
+as being invaluable. And you've got the same sorts of issues with museum collections, not just
+things entering the collection, but the rate at which things leave collections, too, because they
+decay or break or get hidden in back rooms and effectively lost. In any case, in all these cases,
+the right thing to do depends upon the causes of the selection. So you have to think through
+the particular context. So let's go back to our selection by age example. So one way you might
+think about this happening is young people don't answer their phones, which I think is
+the thing. I don't know about the rest of you, but if someone calls my phone and I don't recognize
+the number, I never answer it. That's just not going to happen. I'm more likely to throw my
+phone across the room. And so I don't show up in these polls. So on the left here, we might have
+selection on age. Young people don't answer their phones. And so you get a sample that is
+over representative of older individuals, and they tend to have different attitudes.
+And so you need to post stratify by age when you make a prediction. So you have a stratified
+estimate of the association between X and Y in each age group, and then you can reweight
+by the ages in the target population you want. Okay, so that's a solvable situation.
+A much less benign situation is the one on the right of this slide. Imagine instead,
+the problem is that there's selection on the outcome. That is anarchists don't answer their
+phones. Yeah, they're not going to answer your poll, man. And in that case, really there's nothing
+you can do to fix this. In that case, the outcome variable has been selected on and post stratification
+doesn't fix anything at all. And so this is the most distinct and harsh example I could give you
+this distinction between a case which is perfectly recoverable on the left and one where nothing can
+really be done on the right. Nothing can be done on the right. It's because the responses that you
+need in order to predict that it's the responses of the anarchists simply aren't in your sample.
+So reweighting by age is not going to fix it.
+You can get more exotic things, of course, you're used to me now, adding some exotic stuff.
+So in realistic studies, you typically have measurement error at the same time as all the
+other stuff and also potentially missing data. And so suppose, for example, young people don't
+answer their phones and they misreport their age. Yeah, in many parts of the world, people simply
+don't know how old they are in the first place, right? Because they don't track birthdays. And
+that may surprise you to hear that if you're European or North American, but in many parts
+of the world until very recently, nobody even thought about keeping track of birthdays because
+it didn't have any legal benefits to do so. Yeah. In any event, so then we've got this additional
+simultaneous statistical problem of trying to stratify by something we haven't even measured
+directly. We only have some noisy measure in the reported age, but we don't want to stratify by
+reported age. We want to stratify by actual age. And so we've got this sub problem of estimating
+the unobserved age. And this is a late variable problem that I'll talk about in future weeks.
+But the important thing is to draw out your assumptions, your causal assumptions,
+about how the sample is produced. And then we process this the way we've been processing
+everything else in the course. I'm going to do something now I resist doing always in the course
+and that is like one of my own papers. But I'm more comfortable doing that in this case because
+I did no work on this paper. All the work was done by my co-authors, the Dominic Dethner and
+Jolior Horror. And this is a paper that goes into much more detail about the cases that I just
+presented and situates it particularly in the context of cross-cultural research, which is the
+passion of mine. And this is in some APA journal, I think, which I imagine most people don't have
+access to. But if you follow the URL on the bottom left of this slide, you can get an open access
+copy of it. Okay, let me try to sum up a little bit. I think the basic issue here is that
+descriptions are causal analyses as well. That's what I want you to take away from this.
+Many questions are really questions about post stratification and how to do the post stratification
+and whether it's going to work at all depends upon causal assumptions like everything else.
+And that's why I was unhappy with that three column table at the front. Now again, I think the
+authors of that table will agree with everything I just said. I hope I've convinced you about
+descriptions. Post stratification for causal effects I think is just as important and you
+probably don't need persuading of that. This is an example of vaccines, right, where often
+causal effects are measured in one population, but you'd like to think about deploying the
+vaccine in another one. And therefore, if the age distributions, for example, differ in different
+countries, then the frequencies of side effects or the benefits of the vaccine will vary between
+countries. So in an older population like Germany, the benefits of vaccines will be higher.
+If you're doing descriptive research in humanities, as is something I think is really
+important, digital humanities research in history, for example, and you're just trying to do some
+description of time trends like say the monetary supply in ancient Rome. This is actually a really
+difficult causal inference question because the probabilities of coins, of particular dates,
+entering into collections is going to depend upon a bunch of features and decay rates and just the
+way measurements are done and production and so on. And this is often true. Even basic vital
+statistics often trends are caused by just changes in the way things are measured and so you have to
+think carefully about the production of the data. And then comparison is a kind of post stratification
+as well where you're thinking about applying an inference from one population to another
+and what difference would it make if it was in another population.
+So I think about it in research, especially in the human sciences and the humanities. We've got all
+these different incredibly diverse ways to get measurements and data from surveys and ethnographic
+work in my field and even satellites these days where we can monitor human populations from space.
+And all these different data sources have their own biases and different ways that the sample that
+ends up on our computers differs from what we're really trying to describe and so we have to think
+about the measurement and what causes the sample very closely. And I think if this is my motto is
+we want honest methods for modest questions and we describe them modestly and transparently so
+people can critique them and fix them and we can move forward. So here would be my proposal
+for something to start. For thinking about instead of heuristics for working through these issues
+in a broader range of projects in different fields. I call it my simple four step plan
+for doing honest digital scholarship although you'll notice that there are five steps on the slide.
+The first is what are we even trying to describe and now maybe this seems obvious it should be step
+one but there are a huge number of papers which do not do this and it is very difficult to see
+exactly what they're trying to describe. They simply have a data set and they're going to make
+some summaries of it. But what are they really trying to describe and what's the target population?
+Yeah there needs to be a clear description of this. And second what's the ideal data for doing so.
+If you were a god and you could just divine the truth what data would you provide?
+Third what data do we actually have? And it's nearly always not number two.
+Yeah there should be something different and thinking through that is extremely important
+and that's step four. What are the causes of the differences between the ideal data and the sample?
+And then five I called this the four step plan because I think five is wholly optional. It is a
+huge accomplishment just to do number four and communicate it. But a lot of what we're doing
+in this course is number five and that's the statistical strategies. If we've got a causal model
+because we worked on it in four is there a way we could use the actual sample we have
+plus our model of what caused it to accomplish to get our estimate to get number one. Okay thank you.

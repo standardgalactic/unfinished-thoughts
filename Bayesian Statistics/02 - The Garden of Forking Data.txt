@@ -1,0 +1,1426 @@
+Welcome to the second lecture of statistical rethinking 2023.
+In this lecture, we're going to examine the basis of building Bayesian estimators,
+but we're still going to stick with the AL, the workflow that integrates scientific modeling.
+The data context in this example will be trying to estimate the proportion of our planet, the Earth,
+that is covered by water.
+You probably know that most of the Earth's surface is covered by water, about 70% actually.
+But imagine you didn't know that, and what you had was a globe that you could throw in the air
+and you could, when you caught it, see where your finger landed
+and mark down whether that spot was water or land.
+We could do this repeatedly, spinning the globe many times, and eventually build up a sample.
+How would we then use that sample, a set of points categorized as water or land,
+to estimate the proportion of the globe that is covered in water?
+It seems like a silly example, and it is, but it has the same structure,
+the same inferential structure and sampling structure as many very important scientific problems.
+It's going to be the simplest sort of example that will let us go through the Bayesian workflow
+and develop an estimator and allow you to learn how Bayesian estimation works.
+Our estimate is the proportion of the globe that is covered by water.
+Here's an animation of the idea I just introduced you to.
+We're going to throw the globe up in the air or spin it a number of times,
+and when it comes to rest, we're going to mark where our finger is on this globe,
+and we're going to mark down whether that point is water or land, like in the animation on the screen.
+We can do this any number of times, we'll just do it like 9 or 10 times here.
+Now the questions that we'll develop and answer in this lecture are,
+how should we use the sample to get at the estimate to develop an estimator?
+To produce an estimate.
+And then once we have that estimate, how can we produce a summary of it?
+And it was very important in that summary is how we represent the uncertainty of our estimate,
+because estimates in Bayesian inference are never points, they are distributions.
+If that's a new idea, hang on, it'll become clear by the end.
+So the workflow of this lecture, just like the workflow of your research,
+is going to follow these five stylized steps.
+We're going to start by defining the generative model of the sample.
+This is a generative model of tossing the globe.
+We're going to, in that context, define a specific S-demand.
+That S-demand, I've already said, is the proportion of the globe covered by water.
+Then third, we're going to design an estimator, a statistical way of producing an estimate.
+And this is where we're going to spend most of the time today,
+because we need to bootstrap Bayesian inference in the context of this example.
+And then fourth, we're going to test.
+Testing is very important, because everybody makes mistakes.
+It's no problem if you do, but you want to get used to testing for them and fixing them.
+So in the fourth step, we're going to test our estimator using our generative model.
+If the estimator cannot work when we know the answer,
+then it's certainly not going to work when we don't know the answer.
+And then finally, I'm going to show you a little bit about how to summarize Bayesian estimates,
+which contain basically nothing but uncertainty.
+But nevertheless, that's the best kind of estimate you can get.
+Okay, let's build up a generative model of sampling the globe.
+One way to go about this, and the way that I think is easiest for beginners,
+is to think conceptually about what you know scientifically about how the sample is produced.
+And we want to incorporate that knowledge,
+expertise that you have as a scientist, into a generative model,
+a causal model of how the variables were produced.
+So here, in this example, we have four variables,
+and variables can be data, things you can observe,
+or there can be things that you want to estimate and can't observe.
+In this particular globe-tossing context, there are four.
+There is P, the proportion of water.
+I'm just going to use the lowercase letter P to represent it for proportion.
+This is colored in red because it's our estimate.
+We're paying special attention to this thing, the proportion of water on the globe.
+We can't measure this directly.
+It cannot be observed, at least not with human senses,
+but we can measure it indirectly through the other variables.
+The other variables are the number of tosses in,
+W, the number of water observations,
+and L, the number of land observations.
+And these variables are related to one another.
+And what we want to do now in producing a generative model
+is write down those relationships, the causal relationships among these variables.
+Don't think about statistics.
+Think scientifically about how the sample is produced.
+So let's start with N.
+So N is something that's under your control as the experimenter.
+N is how many times you toss the globe, or spin the globe,
+or however you decide to randomize it.
+N influences W and L because the more times you toss the globe,
+the larger the values of W and L can be,
+whatever the proportion of water on the earth is.
+So we draw arrows from N to W and L,
+and these represent causal influences.
+And what you can think about this is if you were to intervene on N and change N,
+this would induce changes in W and L, at least on average.
+However, if you change W and L by, say, fabricating your data,
+or making a mistake in recording the data,
+it will have no influence on N the number of times you toss the globe.
+So these arrows represent causal influences,
+and they tell you the consequences of intervening on these variables.
+That is, an intervention on N would also be an intervention on W and L indirectly,
+but not reverse.
+So we say N influences W and L.
+Likewise, P, the proportion of water on the globe, influences W and L.
+If there's more water, you're going to get the variable W will be larger.
+And if there's less water, the variable L will be larger.
+So again, we have two arrows that go in a particular direction,
+because again, if you fabricate W and L,
+or you just make mistakes and write the down wrong,
+we'll deal with that later on.
+That doesn't change the proportion of water on the globe.
+However, if you intervene on the portion of water in the globe by, say,
+creating a new continent and sticking it in the middle of the Pacific Ocean,
+that will change the expectations of W and L.
+So these arrows indicate influences,
+and those influences then allow us to predict the consequences of interventions
+on particular variables.
+To make this generative, say what we have on the screen here is a DAG,
+a direct-to-day cyclic graph, and DAGs are not generative in and of themselves,
+but they're the first step, because they're a way for you to sketch your scientific knowledge
+and make it explicitly causal.
+And then that makes it much easier to develop a generative model,
+which will then make it easier for us to develop an estimator.
+So what the DAGs shows are functional relationships,
+but it does not say what those functions are.
+And so one way you can read what this DAG on the screen says
+is that the variables W and L are some function f of the variables p and n.
+W and L depend upon both p and n.
+And if you change either p or n, you will change on average W and L.
+So now we want to write that function.
+What is this function f?
+And now in some cases, your scientific imagination is the limit.
+But in this case, our scientific knowledge determines what f is very rigidly.
+And so I want to build this up organically, what this is,
+to show you that you already know what the generative function here must be,
+just because you understand the basics of sampling.
+And we're going to build this up in the context of developing the estimator
+and developing Bayesian inference.
+And then you will see what this function is, what it basically has to be,
+just by drawing out what you already know about how the sampling process works.
+And then we're going to use that to develop Bayesian inference.
+And I want to show you how simple Bayesian inference really is
+and how it produces an estimate.
+So Bayesian data analysis, which is Bayesian inference applied to scientific data analysis,
+is very simple and very humble.
+It is nothing more than these three things.
+For each possible explanation of the sample,
+we want to count all the ways the sample could happen,
+given a particular explanation.
+Those explanations with more ways to produce the sample are more plausible.
+And what the Bayesian estimate will be is an accounting of the relative plausibilities
+of all the possible explanations of the sample.
+It seems weird, but that's all there is, and it's the best you can possibly do.
+So let's draw this out and see how it works.
+So we're going to keep tossing the globe.
+What I want you to think about, though, is this metaphor I call the garden of working data.
+This is based upon this fantastic story from Borges about the garden of working past
+in which there are many possible stories that come from choices in people's lives.
+And likewise, in a data set, there are many possible data sets that can arise
+depending upon what happens in the process of sampling.
+And some of the things that happen in the process of sampling are natural processes,
+and some of them are things that we choose as scientists,
+but all of them affect the sample that arises.
+In order to do data analysis, we need to think about all the things that could have happened
+and then look at the number of ways, the relative plausibility of the thing that actually happened.
+So let's draw this out.
+We're going to draw the garden of working data as applied to the globe tossing problem.
+So rewriting the essence of Bayesian inference for the globe
+for each possible proportion of water on the globe.
+Those are the possible explanations of the sample, the thing we're trying to estimate.
+We want to count all the ways the sample of tosses could have happened.
+That is the sequence of watering land points.
+And then those proportions, that is the possible explanations of the sample,
+with more ways to produce the actual sample that did happen are the more plausible ones.
+So we're going to do this. I'm going to show you how this works.
+Now, there are lots of possible proportions of water on the globe.
+In fact, there are an infinite number of them.
+Every real number between zero and one, and that's an infinite number of numbers.
+So that's a bit much to start with, and infinities are not fun to count things for.
+So let's start with something simpler.
+Let's start with a four-sided globe.
+I know this sounds weird, but there's no reason I can't call this a globe.
+It's a four-sided die.
+And we're going to imagine one particular simple possibility that the proportion of this globe
+that is covered by water is 25%, which means that if there are four sides to the globe,
+one side is covered with water, as in this excellent diagram I have drawn.
+Now, we're going to toss this globe or roll this die, as it were, and we can sample from it.
+And there are, for a four-sided globe, there are five possible proportions of water,
+and only five, because we're imagining that whole sides are covered.
+First, none of the sides could be covered in water,
+and what the open white circles here represent is land sides.
+Second, one out of four could be covered by water.
+Those are 25% that we're going to proceed with as a working example in just a moment.
+Third, half of the sides, two out of four, could be covered in water.
+Fourth, three out of four, 75%, and finally, all sides, water world.
+Now, we're going to imagine we've observed in three roles of the globe, water, land, water, in that order.
+And we're going to draw out all the possible ways that that sample could have arisen
+for each of these possibilities on the D4 globe.
+So we're going to start with the 25% one and work that one completely so you understand it,
+and then we'll come back to these possibilities, these five possibilities,
+and we'll do the same procedure for each, and then we'll compare them, and then we'll have our estimate.
+I'll show you how that works.
+So the first possibility, if we're assuming, and we assume for the sake of the data analysis,
+we're not committing, but we're assuming for the sake of the data analysis that the globe is covered 25% by water,
+and that means one out of four tosses, we will observe water.
+And so that's what we're drawing here.
+We're imagining at the bottom of the screen, we tossed the globe for the first time,
+and there are these paths through possible data sets that branch out from the origin at the bottom.
+On the left, there's a water sample, and there's one way to get that, and every four tosses,
+and then there are three ways to observe land, because there are three land sites.
+And then we tossed the globe again, and now we don't go back to the origin,
+but we branch out from wherever we were in the Garden of Forking data.
+So if we had observed water, for example, the first time, then we're on the far left,
+and there are four paths that branch out from that, and they are the same four paths,
+because the tosses are independent.
+That is scientific assumption, but it comes from our knowledge of how the sampling procedure works.
+And likewise, for the paths that started with land in the inner ring, each of them has the same possibilities.
+And then a third possibility, the Garden gets even bigger,
+and you can see how this will just keep going, and there will be many, many, many possible data sets for a large sample.
+Each of them branches out.
+So in the inner ring, we have four possibilities, and then each of them has four,
+so that's four times four is 16 possibilities in the second ring,
+and then we multiply by four again, and we get, I think it's 64 possibilities total.
+And that's a lot of possible data sets that could arise.
+And the question is, which data set did we actually see, though?
+The data set we actually see, as this is its first example for observation, water.
+And so let's trace that out.
+Where is the first water observation?
+Is this path here highlighted in red?
+So the others aren't relevant now, though they were possible, but this is the one we've actually seen.
+So this is the path.
+The other paths are foreclosed to us.
+We will never walk down them, at least not in this experiment.
+And then the second observation is land, and we trace those.
+And there are three paths by which that could have happened.
+We don't know which they are.
+In a sense, this is the relative number of ways we could have seen land.
+There are three ways for every one waterway.
+And then the third observation is blue or water, and then for each of the paths that are still in play,
+that still exist where we observe land on the second toss, there's one way to observe water.
+And so in the end, there are three ways out of all of these 64 ways to observe this sample,
+assuming that the globe is covered 25% by water.
+Say that again.
+There are three ways to see this particular sample of water, land, water,
+assuming that the globe is covered 25% by water.
+Now, the goal here is to repeat this counting procedure.
+All we're doing is counting the paths that are consistent with the sample.
+We're going to do it for all the other possibilities.
+So let's do that now.
+So we go back to our table, and we can write in that for each of the possible globes in the column on the left,
+we want to know how many ways it could produce the sample of water, land, water.
+And what we've done so far is for the second one, 25% water, that we've computed that there are three ways.
+Now, let's do it for the others.
+Two of these are really easy.
+We can just do them on the screen.
+Let's think about the top one, all land.
+There are zero ways to produce this.
+I'll let you think about that for a second why.
+Well, the reason there are zero ways for this particular assumption of all land to produce the sample is because the sample contains water.
+So there's absolutely no way for this particular possibility to be produced.
+For this sample to be produced by this particular possibility.
+The same is true on the other extreme, the bottom of the table.
+If the world were completely covered in water, then we would see no land, but we've seen land.
+And so there are zero ways to produce this one.
+So these two are eliminated.
+They're simply completely inconsistent with the sample and they're out of the running, but there are two more that we still need to do calculations for.
+So let's do those now.
+The third one is 50% water on the globe.
+Let's draw the garden again.
+The garden looks different now because there are two blue paths for every two land paths, for every two white paths.
+And we can draw the full garden and then we can trace out the paths again.
+The first one is blue and then that gives us two paths in play in the inner ring.
+And then in the middle ring, there are two land for each of the blue paths still in play.
+So now we're up to four paths that are in play in the middle ring.
+And then in the outer ring, again, we observe water and there are two ways to observe water for each of the surviving paths in the middle ring.
+And so we end up with one, two, three, four, five, six, seven, eight surviving paths in the outer ring.
+Eight ways out of 64 to observe the sample given the assumption that the globe is covered 50% by water.
+Let's do that again now for the last possibility.
+75% covered in water.
+We draw the garden again.
+This time there are three blue for every one white.
+Draw the three rings, trace out the possibilities.
+So three paths in play, only one way to observe land for each of those and then three ways to observe blue for each of the surviving paths in the middle ring.
+So we end up with one, two, three, four, five, six, seven, eight, nine ways to observe the sample given the assumption that the globe is covered 75% in water.
+And so we can summarize all this glamorous science that we're doing here.
+Five possibilities on our four-sided globe and we have counted up the relative number of ways that the sampling process, as we understand it, it's generatively could produce the sample we have observed, which is one water, one land, one water.
+And there are three ways for 25% to produce the sample.
+Eight ways for 50% to produce it and nine ways for 75% to produce it.
+Now, these ways, the counts are obviously arbitrary and we could multiply them by any constant and it wouldn't change anything.
+All that matters is the relative count.
+And we're going to deal with that issue in a little bit.
+I want to just bookmark that in your mind and not worry about that.
+But it's the relative sizes of these counts that matters.
+And the relative differences right now are quite small.
+But that's because the sample is small.
+And so there's not a lot of evidence about which one is bigger than the other.
+But that's a desirable feature of an estimator is that it isn't overconfident with small samples.
+And this is how Bayesian inference works.
+What you have just done is produce a Bayesian analysis.
+Bayesian analysis doesn't usually use raw counts.
+It uses probabilities.
+But this is exactly the same calculus used in Bayesian updating.
+We're going to reveal that as we march forward here.
+So I call the unglamorous basis of applied probability is that things that can happen more ways are more plausible.
+And when we have a data set and we have a model of what produces that data set,
+we want variations of that model that are more plausible to come to the fore.
+And that's what we do with Bayesian inference.
+So we have different possible explanations of the data.
+These are the possibilities in the table at the bottom of the slide.
+They are the different proportions of water on the globe.
+This is our estimate.
+We're trying to see which of these are more plausible given the data.
+And as I just explained, what we do is we just count up all the ways,
+according to our generative model, that the sample could arise.
+Conditional on each of these possibilities.
+And so you don't have to draw the garden every time.
+It turns out it's just simple multiplication.
+So in this particular case, you just think about how many ways each possibility could produce each data point.
+So let's start with the 0% one.
+There are zero ways to observe water on the first toss.
+There are four ways to observe land on the second toss.
+And there are zero ways to produce water on the final toss.
+So then zero times four times zero is zero ways for a globe covering completely land to produce this sample.
+Same for the 25%.
+There's one way for this proportion, one way out of four, for this proportion to produce water on the first toss.
+Three ways out of four for it to produce land on the second toss.
+And then, again, one way for it to produce water on the last toss.
+Four one times three times one equals three possible paths.
+Remember, we traced that through the garden visually, which is a nice way to be introduced to it.
+But when your computer does these calculations routinely for you, it's just doing this multiplication.
+And that's the way it works.
+And that's all the garden does is visually justify in a way how this multiplication works.
+For 50%, it's two ways to observe water times two ways to observe the land times two ways to observe the water for eight ways for 50% to produce the sample.
+And then the last two, for 75%, it's three ways for blue times one for white times three for blue for nine.
+And then for 100%, it's four ways for water, zero ways for land, four ways for water for zero.
+If there's one zero, it's all zero, because if ever a generative hypothesis produces an impossible observation, then it's impossible.
+So let's imagine updating our estimate.
+Imagine we draw, sorry, this is a little text draw from the back.
+I mean toss the globe.
+And we observe water.
+Same possibilities.
+And this is the knowledge we have so far.
+We have counted up that there are zero, three, eight, nine, zero ways to produce each of these possibilities in order.
+And we're going to now try to update these counts given one additional one.
+And the beauty of this now is since we just multiplying across the relative number of ways that each possibility could produce each particular observation,
+we just need to multiply our existing counts by the number of ways that each of these possibilities could produce water.
+So I'll do this one step at a time.
+So there are zero ways for the first possibility to produce a water observation, zero out of four.
+There's one way out of four for the 25% to do it, two for 50%, three for 75%, and four for 100%.
+And now we just multiply these numbers, zero, one, two, three, four, by the counts respectively of each of the possibilities.
+So it's zero times zero equals zero still for the first one, not surprising.
+It's three times one is still three for 25%.
+It's eight times two is 16 for 50%.
+It's nine times three or 27 for 75%.
+And it's zero times four is still zero, unfortunately,
+for 100%.
+So this is how we do the updating.
+And this is actually Bayesian updating, which you might have heard of, but it's no problem if you haven't.
+And now the relative counts are separating a bit.
+And each time we sample from the globe one more time, we can update these counts with each new data point.
+So eventually the counts get really big.
+So the sample we're going to work with for a lot of the examples here is this nine-toss sequence of water, land, water, water, land, water, land, water.
+I show it with the points labeling the columns on this table, the possibilities at the left.
+And so you can think about this again the same way.
+What I'm entering in this table is the total number of ways for each possibility to produce the sample, contingent on the sample up to that point.
+So the way to read this first line with all these zeros in it is for the first water toss, there are in total zero ways for this possibility of all land to produce it.
+Then land is observed, but there's still zero total ways because the water was observed first and it's still inconsistent.
+So we have zero for every observation, even though we're updating, it's still always zero for this one.
+I know not the best example, the next one will make more sense.
+So we can summarize this calculation, though, the way this calculation is done for a data set with, if you count them, there are six water in this sample
+and there are three land, and I count them in the columns at the tops of the table.
+All we need to do is take the number of ways this possibility could produce water, and we want to multiply that by itself, the number of times we've seen water.
+So in this case it's zero, so it's zero to the sixth, which is still zero, of course.
+And we multiply that by the number of ways that this possibility could produce land, and we do that the number of times we've observed land.
+So there are four ways out of four to observe land with this possibility, and so it's four to the third, or just four times four times four.
+This is still zero, as you know.
+The next one, this one will hopefully bring it home, what's going on here.
+We're just abbreviating the counting.
+There's one way out of four to observe land in this, so on the first toss, on the left there, there's a one because there's one way that this possibility could produce the observation of water.
+And then on the next toss, we see land.
+There are three ways for that, so it's one times three, so we get three.
+Now we observe land again, so it's times one, so it's still three, it's still three, it's still three.
+Then another land comes around, so we multiply by three now, we get a nine.
+Water, so times one, so it's still nine, and then a land, so it's times three, it's 27, and then we end with a water, and it's times one, it's still 27.
+But this number, 27, it's just one to the sixth, one because that's the relative number of ways for this possibility to produce water.
+And there were six waters, times three to the third, three because three out of four is the relative number of ways for this possibility to produce land, and there were three lands.
+So one's in sixth, times three is the third, and that's 27.
+450%.
+Every observation, water or land has two ways to produce it, so this is just a series of multiplying twos together.
+So we have two in the first one, and then we multiply that by two, we get four, we multiply that by two, we get eight, we multiply that by two, we get 16, 32, 64, 128, 256, 512.
+Programmers will recognize this sequence, right, the powers of two, it kind of rules your world.
+And this number, 512, is two to the sixth, times two to the third, or two to the ninth.
+For 75%, it's the same sequence, I won't belabor the details, but you'll see in the end we end up with 729 ways for the 75% possibility to produce this sequence.
+This sample of nine tosses, and that is three to the sixth, why three?
+Because there are three ways out of four for 75% to produce water, and there were six waters, times one to the third, why one?
+Because there's one way out of four for 75% to produce land, and there were three lands.
+And then finally, all water has a zero in it, and so it's four to the sixth times zero to the third, and it's zero ways.
+So now we have bigger numbers, we have zero, 27, 512, and 729. 25% is not looking very viable, there's not much evidence in favor of it, it is relatively much smaller.
+The other two are both large numbers, but 75% is pulling ahead. I should have highlighted this before.
+So for any possibility, call it P, the proportion of water on the globe, there's a formula implied by this far right column.
+So that is that the function that links W and L to P and N is four times P, that is some proportion P, say it's 50%, four times that will be two, that will be the relative number of ways out of four for it to produce water,
+that's the exponentiated to the number of times you've seen water, times four minus four P, which is the relative number of ways out of four that the process could produce land,
+exponentiated to the number of times you've seen land. This is just a generalized functional way of writing the calculation that we did in the table just above.
+So this is the function, and it emerges, this came from your scientific knowledge of the sampling, or rather your scientific beliefs about the sampling.
+All right, we could be wrong, this is still just a model, but given those beliefs about how the sampling works, this is the function we have to use, and this is going to be our estimator as well,
+because this function will produce the relative number of ways that each possible proportion could produce the sample, and then we want to compare those, compare those counts.
+Okay, we hardly ever work directly with counts, instead as you know, in statistics we work with probabilities.
+Probabilities, at least in applied mathematics, are typically just non-negative values to sum to one.
+There are fancier ways to define this, and all kinds of other things that mathematicians worry about in defining probabilities, but we're not going to worry about that.
+This is a pragmatic course. So think of them as sets of non-negative values to sum to one. Their numbers, zero or greater, and the collection of them, all the probabilities need to sum to one.
+So we work with probabilities because it makes things much more manageable, and it makes the arithmetic easier.
+And we get probabilities just by summing up a whole set of numbers, like our counts, and then dividing each number by that sum.
+And so to see why this is nice, as samples even get modestly large, the number of ways that a generative model could produce almost any sample is a very, very big number.
+So suppose, for example, we've tossed the globe 30 times, and we observe water 20 times and land 10.
+Suppose that the globe is, we're considering the possibility that the globe is covered 50% by water, so p equals 0.5.
+This will have 2 to the w times 2 to the l ways to produce this, or the 2s because it's 0.5 times 4.
+And this is a billion, give or take, a little over a billion ways for that sample to be produced.
+Why? Because there are many different possible ways, different paths, that it could go down and the garden expands geometrically with each additional toss.
+And so these possible ways, the size of the garden gets big extremely fast.
+When we normalize probability, we make this problem manageable.
+We don't get giant numbers that overflow our computer.
+So that's all we do.
+Probability, we just sum up all the counts, and we make them into probabilities.
+So like here in this table, we've got the possible proportions again on the left.
+I've presented them as values of p, or estimate the proportion of water on the globe.
+We've got our ways to produce the sample, number 0, 27, 5, 12, 729, and 0.
+If we take the sum of this middle column and divide each value in that column by that sum, we get the probabilities on the right.
+And I've plotted them in the bar plot on the right as well, and you can see.
+There's been no change of information here.
+We could always go back to the counts.
+You can multiply these probabilities by any positive constant you want and get the same information.
+All that matters is the relative amount.
+It's just very convenient to work with the probabilities.
+Otherwise, they will explode your numerical capacity of your computer.
+And this collection of probabilities is called the posterior distribution.
+It's posterior to the sample, to the updating we did in light of the data.
+The little bit of code here to give you an idea of how this is done and how simple it is just to reinforce that the algorithm is nothing more than dividing by a sum.
+In this little block of code, all we do is I define the sample first, and then I count up how many w's and l's there are in the sample.
+And then for each possible proportion p, I calculate the number of ways that it could produce this sample.
+And you'll see that on the line that starts with ways and has the s-apply function in it.
+Those of you who don't use r, s-apply is just a loop.
+It's just a function that loops over a list.
+And then we have the function that counts the number of ways there.
+We're exponentiating by w and l.
+And then we've got in ways a list of those counts.
+And to count the probabilities, we just divide every element of that list, that vector, by the sum of that vector.
+And then at the bottom, we see by, we produce the table, and it's the table that was on the previous slide.
+And if you plot the probabilities in the right-hand column, the table, you get the bar plot on the right.
+Okay, we have designed an estimator, a Bayesian estimator.
+And conditional on the generative model, this estimator is optimal.
+You cannot do better than this if your model is correct.
+And the model here doesn't mean the particular value of p.
+It means the generative hypothesis about how the garden is drawn, given a particular value of p.
+So now we want to test.
+I want to spend a little bit of time talking about testing, and then we're going to take a break.
+And then we'll spend the rest of the lecture talking about summary and analysis.
+And I want to talk about testing first, because this is a topic that often gets dropped from courses like this.
+But I think that's, I've come to believe over the years that that's a mistake to leave this out, because beginners need to know how to work.
+If not enough to understand the concepts and the goals, you need to be shown a procedure and a procedure that is hopefully going to reduce error and give you some confidence.
+So we always want to test before we estimate.
+And what I'm showing on this slide is a rubber ducky, and programmers will know this.
+There's this thing called rubber ducky debugging, where you put a rubber ducky on your desk.
+And when you don't understand why your code isn't working, you try to explain your code to the rubber ducky.
+Now obviously the rubber ducky never answers, at least if it does answer, then you should get some help.
+But just explaining your code out loud as if someone was listening often allows you to find problems in it.
+So I would say the rubber ducky is extremely powerful and fun.
+It is the world's best programmer.
+And we want to worry about this in scientific data analysis as well, because scientific data analysis is, in the vast majority of fields, a kind of amateur software development.
+There is scripting, and we want to document our code, and we need to worry about errors and have a reliable workflow that does some quality assurance.
+So we've coded a generative simulation, we've coded an estimator, and now we'd like to test our estimator with our generative simulation.
+And I want to give you the simplest example of how this goes about.
+And this is the kind of thing you want to do with every data analysis project you do as you develop this code.
+And there could be mistakes in either part, in either one or two.
+And so you test them together, and you try to find bugs.
+So here's our generative simulation.
+I'm going to write it as a function on the bottom of this slide.
+This sim underscore globe sim simulates the globe toss.
+And this is just the code version of this function that I've written on the screen, the W and L, or some function of P and N.
+You'll see there's this sim globe is a function, and it takes the arguments P and N, and in R you give these functions default values by putting them in the function header.
+And then I just use the sample command.
+And all sample does is you give it a list of possibilities, and it draws those possibilities according to certain specified probabilities.
+So in the sample line here, we've got the possible observations that could arise, water and land.
+There's no other possible observation but water and land from tossing the globe by assumption.
+We define the size as the number of tosses.
+And then there's a vector of probabilities, which is the frequency with which each of these possible observations arises in a large sample.
+And so we can run this function, and we can simulate our experiment.
+And you can do this as many times as you like, which is one of the nice things about writing a function like this, is you can do lots of design this way as well.
+So for example, you can just replicate this.
+We can draw a pin.
+We can simulate the experiment ten times for any particular proportion of water you like and any particular number of tosses you like.
+And this is a way to explore the design of an experiment as well as debug the code.
+So in the chapter, in the text, I spent some time talking a bit more about how to do this testing.
+One of the first things you want to do when you're testing your code is test it on extreme settings where your intuition tells you what the right answer is.
+So for example, for SimGlobe, if we make the globe completely covered in water, that means set P equal one, then we should only observe water.
+If you observe any land with P equals one, then there's a bug in your code.
+And the opposite for P equals zero, you should only observe land.
+And then another thing you can do is for large samples, like say 10,000 here and equals 24, the proportion of water in the sample should be very close to P if the simulation is working.
+So that's another thing you can test.
+And now there's a way programmatically to do a sweep across all the values of P.
+And I show you an example of how to do that in the text.
+Here I'm just showing you for P equals 0.5.
+Okay.
+So the motto here is if you test nothing, then you miss everything.
+So you have to do some testing.
+And all code has bugs.
+You just want the bugs not to influence the results.
+And so you need to test the ability of your code to get the right results.
+And so the simulation needs to honestly represent the generative model you intend, and that's the first thing you test.
+And then you write an estimator.
+And we're going to test that too, and we're going to test it using the simulation function.
+So we know what the simulation function needs to do.
+It's just this function that W and L, the number of ways to produce W and L is equal to this expression here.
+For P is W times 4 minus 4P to the L.
+So we just write a function that does that.
+I've already showed you this code, now I've just wrapped it in a function called compute posterior.
+And it accepts a sample, which is a list of W's and L's, and a set of possibilities.
+Here is this set for the four-sided globe, 0, 25%, 50%, 75%, and 100%.
+And then it just does the same thing as before for each of these possibilities.
+Now while we count up in the sample, what W and L are, and then we compute the ways for each possibility to observe the sample,
+and then we normalize those ways into a probability, and we return all of this as a result.
+So here's the function header, where the sample accepts the sample, and the number of possibilities are defined.
+So you can use this function to consider other possibilities.
+We'll do that in a moment.
+Count up how many W and L are in the actual sample you pass in.
+Remember, this function needs to work for any sample that you want to simulate,
+and then the number of ways that each possibility can produce this sample,
+and then convert it to the posterior distribution.
+This is why this is called post.
+So what you can do is you can just wrap stem globe in the compute-posterior function,
+and these functions work together, and you can simulate the experiment many, many times.
+And I encourage you to do this so that you see some of the variation.
+If you're just starting out with data analysis, you want to get a sense of the variation,
+the sampling variation across experiments and how that changes with sample size
+and the assumptions about the generative process.
+So this little tiny bit of code we've just done here is extremely useful.
+It lets you test the estimator where the answer is known.
+So you can verify here that compute-posterior is doing the right thing.
+That as the sample size increases, it converges to the right answer.
+That when the sample size is small, it correctly characterizes the uncertainty and so on.
+You can explore different sampling designs from this.
+So for example, if you wanted the answer within a certain precision,
+you wanted a certain amount of confidence about the range of plausible values
+for the proportion of water on the Earth, then you could decide from the simulation
+how many times you needed to toss the globe.
+And then every time you do an exercise like this with simulating from a generative model
+and using a program estimator to study its properties,
+you develop more intuition for how sampling and estimation work.
+And that is intuition that you will carry with you from project to project
+and will grow throughout your career.
+Okay, that was a lot.
+It really was, both a lot of work and conceptually.
+So I think we should take a break here.
+And I encourage you to really take a break, walk around, have a cup of coffee.
+And then before you continue on with the rest of this lecture, review what we've already done.
+This is one of the reasons I record the lectures.
+Find the parts that you're having trouble with, watch those parts again,
+and then come back here to the pause slide and continue.
+We've got a lot of more cool things to do.
+Okay, welcome back.
+Remember the four-sided globe.
+I showed you how to take a sample produced by this four-sided globe.
+And then for each of the possible proportions of water, 0.25.5.75 and 1 on this four-sided globe
+to compute the posterior probability of that possibility
+so that we had a posterior distribution, a Bayesian estimate of the proportion of water on the globe.
+But obviously there are more than five possible proportions.
+They're an infinite number.
+So that's what we want to do now.
+We want to analyze an infinite number of them.
+And that might sound intimidating, but actually it's the easiest thing.
+You already have the code to do it.
+We could imagine adding more sides to the globe.
+So imagine the globe had 10 sides and then it would look like this.
+This is a 10-sided die.
+And on this there are 11 possible proportions, 0.1.2 up to 1.
+That's better, but it's still not infinite.
+You could also imagine a 20-sided globe, a 20-sided die.
+Now there are 21 possibilities, 0.05, 0.1, 0.15, and so on all the way up to 1.
+There's 21s a lot and they're spaced by 5% each time.
+That's pretty good, good enough for government work.
+But it's still not infinite.
+We would like infinite.
+But this is the path to infinity.
+We need to use every possible proportion.
+How do we do that?
+Well, let's build up some intuition first about what's happening as we add more possibilities.
+So for the four-sided globe, there are five possibilities,
+and this is what our posterior distribution looks like.
+I showed you this before the break.
+When we have 11 possibilities on the 10-sided globe,
+you can see that there's a hill form in here.
+We get more possibilities.
+We get more resolution with those possibilities.
+The general contour of the answer hasn't changed,
+but it's a lot finer now.
+We can see what's going on.
+And then for 21 possibilities, even smoother still.
+With an infinite number, you can start to see that there's a shape that's going to a curve
+that will form that will have the basic shape of the bar chart on the right.
+We'd like to know what that function looks like.
+What does that curve look like and how do we derive it,
+given that we can't have an infinitely-sided die?
+Well, oh, I should say before I move on,
+you'll notice that the bars get shorter as we move from left to right,
+and that's because as there are more possibilities, there's less probability in each bar.
+I'll say that again.
+The bars get shorter as we move from left to right
+because the total probability in each bar plot is always one,
+because that's what makes it a posterior distribution.
+So as you have more possibilities, each bar has to get shorter
+because it contains less probability.
+The probability is spread out across more possibilities.
+And so on the far right, with 21 possibilities, the hill is shorter,
+but the total probability is still equal to one.
+Yeah, I hope that makes sense.
+Okay, well, of course, a globe is an infinitely-sided polyhedron, right?
+Everybody knows that.
+No, not everybody knows that.
+It's a weird geometric fact.
+As you take a polyhedron, a die, and you increase the number of sides,
+you achieve a globe when the number of sides is infinite.
+But of course, you get a fantastic approximation of that before you get to infinity.
+But we would like actual infinity here mathematically.
+Well, it turns out you've already got the function to do this,
+and we derived it before the break.
+You just need to take the proportion of water on the globe
+and exponentiate it to the number of times you've seen water
+times one minus the proportion of water on the globe,
+that is the proportion of land, and exponentiate the number of times you need land.
+And this product is the relative number of ways that any value p,
+any of an infinite number of possible values of p from 0 to 1,
+could produce any particular sample with W and L, water and land observations, respectively.
+So we've already got the function to do this.
+We don't need to enumerate each of them.
+We just need for all the values of p to draw them out.
+And so this is the function, actually.
+And the curve we want is determined by this function p to the W, one minus p to the L.
+The only trick, and you could plot that, take your favorite coding engine,
+scripting language, and just for particular values of W and L,
+make the x-axis p and draw that function.
+I'll do this for you in the next slide.
+The only trick here is making it a probability.
+And so for an infinite number of values of p, we need to add them all up, all these terms,
+p to the W, one minus p to the L, for every value of p,
+and divide each of these by that sum.
+That's how you normalize and make things probability.
+So the way you do that with infinite possibilities, the way you do a sum is an integral.
+Those of you who had calculus and in the book, there's a little box about this
+that you're curious about this integral.
+And it turns out that the answer is well known.
+This is something called the beta distribution.
+And we end up with this function here.
+I'll just say a little bit more about it.
+This is not a math course, but in the beginning here, it's nice to have some intuition
+where all this math comes from that you see in the papers.
+This distribution is just called the beta distribution for no good reason at all.
+Statisticians should never be allowed to name things because they always give it
+unmemorable and meaningless names like beta and gamma.
+So this distribution gives us the posterior probability of any particular value of p
+out of all the infinite possibilities from zero to one.
+And it's equal to a product of these two things.
+This first term with the factorials in it, those bangs or exclamation points
+indicate factorials.
+This is the ratio of factorials.
+This is the normalizing constant that we get by doing the integral.
+And it's just there so that the total probability sums to one.
+And then all the action, the shape of the posterior distribution,
+the relative numbers of ways that each value p could produce the sample
+come from this last term.
+And we've been working with this term since before.
+The break, p to the w, one minus p to vl.
+And that's where the action is.
+So let's plot the action here and see what it looks like.
+And let's do it one-toss at a time so you can see what this function looks like.
+So we've come back to our globe on the left.
+I'm going to start spinning it in a moment.
+And I'm going to take, I think, ten tosses.
+Yes, ten, it says at the top of the slide.
+And on the right here, I'm going to plot the posterior distribution.
+The horizontal axis here are all the possible portions of water,
+smoothly, continuously from zero to one.
+And we're going to draw the posterior distribution at every one of those points.
+And its height is going to be shown on the y-axis here, which is called density.
+Now, not probability.
+And that's because in applied statistics, probability theory,
+when you have an infinite number of possibilities,
+we call it density instead of probability.
+If you're interested in that a little more, there's a box in the book about y.
+Okay, we're going to take each toss, and then we're going to draw the function.
+And this is going to go fast, but I'll talk about it more.
+And you'll see what's happening is with each one, the curve moves
+because we end up multiplying by another value as we go.
+But this is exactly the same process that we did before.
+It's just smooth now because every value of p is considered,
+but we get the same hill that we had seen before.
+And the dashed line here is the value of the posterior distribution
+just before we got the new observation.
+And then the solid blue or red curve is the recently updated version from it again.
+I'm going to back up.
+I'm going to run that again.
+And then I'm going to have a still slide with the same concept on it.
+So first toss, we go from flat to that slant.
+Then we observe a water and a land, and it's a hill.
+A land, it goes to the left.
+A land, it goes to the left a little bit again.
+A water, it goes to the right.
+To the right again with another water.
+To the right again with yet another water.
+Land, it's just a little to the left.
+Water to the right.
+And notice it's getting taller here.
+It's also getting narrower, and that's because the total probability
+is getting concentrated in a smaller range of possible proportions
+because the evidence is accumulating that most of the globe,
+more than 50% is covered in water.
+Which of course you know it is from grade school.
+Okay, here's the slow motion version for the sample
+that we've been working with before the break.
+So in the upper left, we start out, we observe one water.
+The dashed black line there shows, in essence,
+the posterior distribution before we see any data.
+This is usually called a prior distribution.
+We're going to talk much more about this in the next lecture, next week.
+But for now, we start with a prior distribution where there's,
+every possible proportion is considered equally plausible
+before any data arrives.
+We don't have to do that.
+And again, next week we won't.
+But when we see the first data, then this function, p to the w,
+one minus p to the l, gives us this line.
+Because it's just equal to p.
+If you've just plotted the horizontal axis from 0 to 1,
+this is the line you get.
+And that's all that's going on.
+Because there's just been p, the function is p.
+p to the w, which is p to the 1,
+1 minus p to the 0 is equal to p,
+and that's why you get that straight line
+sloping up to the right.
+And then in the top middle, we observe a land,
+and now this function, the red curve, is p times 1 minus p.
+And that gives you this shape.
+You should go and try plotting this in R,
+or whatever software you're using.
+p times 1 minus p, for p is the x-axis variable,
+and you'll get this shape here.
+And this is the beta distribution.
+And then a w, and now it's p squared times 1 minus p,
+and that gives you the blue shape in the upper right.
+And then another w, and this is p to the third times 1 minus p,
+and you get that shape.
+Bottom middle, p to the fourth times 1 minus p.
+Bottom right, p to the fourth times 1 minus p squared.
+And so it moves a little bit to the left.
+The last three samples in our nine-tossed sample,
+another w, it goes up a little bit again,
+another land, and then finally the last quarter.
+And so at the end here, this curve, the shape of this curve,
+is only given by p to the sixth,
+because there are six quarters times 1 minus p to the third,
+or three lands.
+And that's where the shape comes from.
+Yeah, and then everything else, all the other,
+the fancy factorial term in the beta distribution
+is just normalizing.
+But the shape doesn't depend upon that at all.
+Okay, just a few lessons to draw out about this.
+This is your first encounter with Bayesian inference.
+One of the problems in learning Bayesian updating,
+which again is dead simple.
+It's just counting the number of ways the sample
+could have arisen and then normalizing.
+One of the obstacles for beginners in learning it
+is that you're confused by intuitions from non-Bayesian statistics.
+You need to leave that stuff behind.
+I'm not saying forever in your life.
+I'm not against you practicing non-Bayesian statistics,
+although I don't see why you would.
+It's just that you don't want to let it confuse you,
+because there are lots of things about Bayesian inference
+which are different, even though there are lots of things
+that are the same as well.
+And one of the things is there's no minimum sample size
+in Bayesian inference.
+Notice we've been updating each data point at a time.
+You get an estimate every time you toss the globe,
+and an estimate gets updated.
+The minimum sample size for Bayesian inference is one.
+Now, that minimum sample of one,
+like I show you on the screen here,
+imagine we've sampled only one land,
+is not very informative.
+But that's part of the power of this.
+It isn't for confidence.
+It's accurately representing the relative confidence
+we could assign or plausibility we should assign
+to each of the possible proportions,
+and that's all it's doing.
+But there's no sense in which there's a minimum sample size.
+This curve here, the red line,
+is a logical implication of the generative model,
+and it's correct.
+You may have heard that there are lots of non-Bayesian estimators
+where they only become correct as the sample size increases.
+That is not true of Bayesian estimates.
+The shape of the posterior distribution
+embodies all the information
+that the sample has about the generative process,
+about the proportion.
+In this case, the proportion of water on the globe.
+The sample size is not some extra number
+you need to carry with you or talk about.
+The posterior distribution embodies the sample size
+and the exact structure of the sample completely.
+And that's why when we observe more data,
+we don't need to go back to the original dataset.
+We can just take the posterior distribution
+and update it directly by multiplying
+by the number of ways the new data could produce.
+Each possibility could produce the new observation.
+Finally, there are no point estimates in Bayesian inference.
+The estimate is the posterior distribution,
+the whole distribution.
+And when we work with it,
+we're going to work with the whole distribution every time.
+So you may be tempted and it's fine
+for just the sake of communication
+to use summary points of distribution.
+So say for this posterior distribution on the slide,
+just as an example, there's the mode,
+which is the point, the value of the proportion of water
+where the posterior probability is maximized,
+and that's the mode shown here by the blue line.
+There's also the mean, which is the average value.
+You take each possible proportion of water
+and multiply it by its posterior probability,
+and then you sum all those products together
+and you get the mean, and that's the red line in this particular case,
+which is the sort of central value,
+the central probability value, as it were.
+Neither of these points is special as a point estimate.
+When we do calculations, we draw predictions from this,
+so we produce summaries.
+We want to use the whole distribution.
+There's no point that is sufficient.
+And of course, you can see why,
+is because there's a lot of probability on other points.
+In fact, almost all the probability is on other points.
+The distribution is the estimate,
+and we should always use the entire distribution.
+And in this course, when we compute things like causal effects
+or interventions or predictions,
+we will use the entire distribution,
+never a point from the distribution.
+I'll say that again.
+When we compute things from the posterior distribution,
+we use the entire distribution,
+never a point from the distribution.
+I'll show you how to do that in a moment.
+Last thing here in the mottos is
+there's no true interval in Bayesian inference.
+Intervals are not important in Bayesian inference.
+They are merely summaries of the shape of the distribution
+when you can't give someone the whole distribution
+or plot the thing.
+Now, there are an infinite number of intervals you can draw.
+So for example, here's a 50% central percentile interval
+that I've drawn on the slide.
+What this means is this is an interval
+that captures 50% of the posterior probability
+and leaves 25% to the left and 25% to the right.
+So it's the central 50% posterior probability.
+It represents the 50% most plausible values
+under some definition.
+But obviously, 50% is quite arbitrary.
+You could draw others.
+We could do 89%, which is my favorite.
+I use it a lot in the book.
+Or you could do 99%, which happens most of it.
+You could do 100% and then it's the whole distribution.
+And the interval, when we draw it,
+is just the lower and upper bounds.
+We've seen these intervals in lots of publications.
+There's nothing special about any of these intervals
+because the endpoints of the intervals are not special.
+Nothing happens at the end of the interval
+because the interval is arbitrary.
+Yeah, I'll say that again.
+Nothing special happens at the end of the interval
+because the end of the interval is in an arbitrary location.
+We use intervals just as a quick summary
+of the shape of the distribution.
+The interval is wide for a particular size
+of a particular probability mass of the interval
+than the posterior distribution is spread out
+as it gets narrower, the posterior distribution
+becomes more concentrated.
+But still the shape of the whole distribution that matters
+because nothing special happens at the boundary.
+And this relates to, again, fighting intuitions
+from non-basin statistics courses you may have had
+where 95% intervals are dogma, essentially.
+95% is a superstition.
+There's nothing special about 95%.
+Not even in non-basin statistics.
+It's completely arbitrary.
+Nothing magical happens at that boundary.
+If you're trying to derive an estimate,
+you want to use the whole distribution.
+So this is the point where I try to introduce
+a little bit of the sociology of doing research.
+Letters from my reviewers.
+So I publish basin statistics almost all the time.
+And usually there's no problem because basin statistics
+has become quite mainstream in the last decade, especially.
+And I hardly ever get grumpy reviewers.
+But once in a while I do, especially when I submit
+to psychology journals.
+And in one particular case, a couple of years ago,
+I had this reviewer who, over multiple rounds,
+was really just obsessed with the idea
+of my reporting 95% intervals.
+And here's a quote from their review.
+The author uses these Qt 89% intervals.
+I agree they are Qt, they're very Qt.
+That's one reason to use them.
+But we need to see the 95% intervals
+so that we can tell whether any of the effects are robust.
+Now, I'm not sure what this word robust is supposed to mean here.
+But there's nothing about the 95% intervals,
+which is going to give you any information
+about how robust the estimates are.
+That's not a property of the interval.
+It's a property of the estimator.
+And you can see what's going on here.
+This is the superstition placed into review
+that something special happens at the boundary.
+And for this arbitrary width of interval, 95%,
+because that's what the church elders have told him,
+if zero is inside that interval,
+then the effect is not robust.
+None of this is true under any paradigm
+of statistical inference, Bayesian, or not.
+The only thing that null hypothesis
+significant testing is doing is controlling type 1 error.
+That is not our goal here.
+We're trying to estimate something.
+The fact that an arbitrary interval contains
+an arbitrary value is not meaningful.
+We use the whole distribution.
+Posterior distributions don't do type 1 error control anyway,
+so you should never...
+That's what I told this reviewer.
+Eventually, they relented.
+Okay, let's continue on with our workflow.
+We have done 1, 2, 3, and 4.
+And now we're ready to actually analyze
+the real sample and summarize.
+While we've produced the posterior distribution,
+we've got an estimate in principle,
+and you need to know what to do with that.
+All you've seen it so far is a curve on your screen.
+There are lots of things you can do with a posterior distribution,
+which is a kind of estimate.
+And what you do with it depends upon your scientific purpose
+in the particular research project you're in,
+in which stage of the project you're at.
+So, but whatever you do with it,
+you're going to use the entire posterior distribution.
+So I want to spend some time now explaining how to do that,
+and it turns out to be incredibly easy
+for any calculation you'd like to do from any point
+in the posterior distribution.
+Any single proportion of water on the globe,
+if you can do a calculation for any single value,
+you can do that same regulation for the entire distribution.
+I promise you, and I'm going to show you how.
+And what this does and why it's important is because it averages
+over the uncertainty inherent in the posterior distribution.
+Yeah, it characterizes it correctly.
+Now, normally doing that would be a problem for integral calculus,
+because again, we have an infinite number of proportions of water,
+but I'm going to show you how to do it using sampling,
+so we can get a really good approximation
+of that difficult integral,
+and that means you can do your work.
+So here's what I mean by taking samples.
+We're going to literally sample from the posterior distribution.
+We're going to imagine it's a big bag of proportions of water,
+and each possible proportion of water occurs
+with relative proportion to its posterior probability.
+And so we reach in here a thousand times,
+and we draw from the beta distribution.
+That's what our beta is in our.
+We draw a thousand samples from it.
+And the 6 plus 1, 3 plus 1, this is just the way
+that the beta distribution arguments represent the data in this.
+And then post-samples is a vector of a thousand numbers,
+and they are proportions of water.
+And so we can plot that.
+So I show you on the screen here that the black dash curve
+is our beta distribution.
+That's the exact posterior distribution for the sample
+we've been working with.
+You recognize the shape.
+And then the red jagged bang.
+This is a very narrowly estimated density estimate
+from the samples.
+And I've done it this way to show you that it's a sample,
+and it's finite, and so in local areas it's jaggy,
+but it produces a great approximation of the general shape
+of the real distribution.
+And we can do our calculations with these samples.
+If you want a better approximation, just draw more of them.
+But I guarantee you this is a thousand sufficient for most things.
+What would you want to calculate from this?
+Well, typically we want to do predictions.
+So I'm going to walk you through a concept that's called
+posterior predictive distribution.
+A posterior prediction is a prediction for a future
+experiment or observation that's made from your existing estimate.
+So what we can do for a posterior prediction is we want to say,
+given what we've learned about the globe so far,
+what would happen if we took more samples from it?
+What would we bet, in a sense?
+We're going to get predictions about future samples from the globe.
+So you can imagine taking ten more tosses or nine more tosses.
+How many Ws do we expect to see in the next ten tosses of the globe?
+So what you can imagine is just randomly sampling any particular value
+from the posterior distribution, like I've shown you here.
+And these red vertical lines are just random samples.
+And you see it bounce around.
+You'll see it spins more time in the middle where the bars are taller
+because we're drawing random samples in proportion to the posterior
+distribution.
+So occasionally you get extreme values near one or lower values below
+0.4, but most of the time it hovers around to 0.7, where the
+posterior probability is highest.
+For each of these samples or any particular sample from the posterior
+distribution, we can compute something called sampling distribution,
+predictive distribution, is what I tend to call them, for a possible
+experiment.
+So what I would imagine here is that we're going to toss the globe nine
+more times.
+So that's why the horizontal axis is from zero to nine.
+And we're going to count the number of water samples in those nine tosses.
+So the possibilities are from zero to nine.
+And each of the black bars here shows the relative number of ways to get
+that particular value of W on the horizontal axis out of a very large
+number of experiments of tossing the globe nine times.
+This is called the predictive distribution.
+And this comes from, I'll show you in a couple slides, this comes from the
+SimGlobe function that we wrote quite some time ago before the break.
+And then the red bar in each of these shows you the central tendency.
+No, this is what I'm going to sample from this and we're going to show it in
+the next.
+And then we take a sample from these predictive distributions and we can
+add it in proportion to the height of those bars and we can add it to what's
+called the posterior predictive distribution that's accumulating on the
+right.
+This is a flatter distribution than the predictive distributions in the
+middle because it contains all the predictive distributions.
+It contains samples from the predictive distributions.
+I'll say that again.
+The posterior predictive on the far right is flatter or more spread out than
+the predictive distributions in the middle.
+Any of the one animating jumping around predictive distributions in the
+middle because it contains samples from all of the predictive distributions.
+But it contains samples in proportion to how plausible they are.
+And it contains samples from predictive distributions that are more plausible
+because when we start on the left we draw plausible values of proportion of
+water.
+We simulate from that an experiment and then we add that experiment to the
+posterior predictive on the right.
+And the posterior predictive distribution spread out like it is is accurately
+characterizes all the uncertainty in our estimate.
+Our estimate being the posterior distribution about what will happen if we
+do the experiment again.
+And you'll see lots of stuff given what we've learned so far could still
+happen.
+So let's run this faster just to help your intuition a little bit and you'll
+see how the samples in the posterior predictive accumulate.
+You can do this whole animation in a couple lines of code and it doesn't take
+any time at all and that's what I show you in the code in the book.
+I think it's on the next slide as well.
+But it's nice to get some idea about what's going on here.
+And this is just a numerical Monte Carlo way, a gambling way using sampling to do
+the integral calculus that we need to get the posterior predictive distribution.
+What you do if you did the integral calculus is you take an integral over the
+posterior distribution on the left and that would give you the proper weightings
+for the samples in the middle for the posterior predictive on the right.
+But this sampling process is much more intuitive and as these models get more
+complicated this will save your bacon because you can always use this approach
+to calculate anything you like from an arbitrarily complicated model.
+Okay, so here's the code. I said it would be pretty simple.
+We sample from the beta distribution and then to compute the posterior predictive
+distribution we just have to pass those samples into our sim-lobe function and
+count up the number of water.
+And in the red box up there in the code I've highlighted that we're reusing sim-lobe
+because it does our experiment for us.
+And we pass in P's that are samples from the posterior distribution and here
+I'm tossing the globe ten times and then all the code does below that is it
+counts up what happened across all distribution and then we plot it.
+And what I've showed you on the bottom is this comparison.
+The distribution of predictions for the entire posterior, that is the
+posterior predictive distribution is shown in blue and it's spread out.
+This looks like in the animations.
+And then the black bars in the background are just there for comparison to show
+you how more concentrated the predictive distribution is for any particular
+single value of P, any particular individual portion of water.
+And then the blue is more spread out because it considers more possibilities.
+It considers all the values of P.
+Okay, sampling is great and this whole course is going to use sampling and no
+integral calculus at all.
+I may occasionally mention it just to remind you that you are doing integral calculus
+but you're tricking your computer into doing it for you and that's really the
+best thing.
+So when we sample from the posterior we can compute anything we like for the
+entire posterior distribution.
+And as soon as we start using Markov chain mining Karlo or MCMC
+algorithms to fit more complicated models.
+And most of the time when we do, we fit complicated models, that's what we do
+because it makes them uncomplicated.
+MCMC only produces samples and so there will be no explicit sampling procedure.
+You will run your model and it will return samples and then you will already know
+how to process those because I will have taught you already before you need to know.
+Okay, things will compute in this course with sampling.
+Model based forecast, like the one I just did, that was the world's simplest
+forecast, it was just, but if we repeated the experiment.
+But we'll also do causal effects, counterfactuals and I think a whole prior
+predictions which we'll talk about next week quite a lot.
+Okay, let me summarize.
+We're almost at the end here.
+So Bayesian data analysis is just in its logical basis that for each possible
+explanation of the data, we count all the ways the data could happen.
+And then those explanations with more ways to produce the data are more plausible.
+And then we can do a lot with that.
+And I've given you this as a kind of intuitive approach, but as you know,
+if the generative model is correct, then you can't do better than this.
+There is no other way to use the evidence in the data to produce a better estimate
+that is more honest about the uncertainty.
+So this is optimal in what I call the small world, the small world of your model.
+If your model is wrong, well then all bets are off.
+And we'll talk a little bit about that in some later lectures about how we might
+worry about ways the model can be wrong.
+Okay, I call this the Bayesian modesty stance.
+Bayesian inference gives you no guarantees except that it's logical.
+That is, it honestly carries out the assumptions you put into it.
+And it does the best possible job that it possibly can, taking those assumptions
+seriously.
+And this doesn't tell us what really happens in the world, but it helps us
+tremendously to figure out what happens in the world because it lets us work with
+logical implications of assumptions and then compare those with data and do a
+theory development loop through that action.
+So this is a quantitative asset that activates our qualitative knowledge as
+scientists.
+It lets the subjective and objective work together.
+Bayesian inference is completely objective, but the inputs into it, like in all
+statistical procedures, Bayesian or not, are subjective.
+And that's good because subjectivity is expertise.
+Now we revise our beliefs when these things happen, and then we change our
+subjective beliefs, and then we activate the objective procedure again, and we see
+what the implications are of those changes in our subjective beliefs.
+And this is a powerful way to do inference.
+And I say any framework that is giving you more than this is hiding some assumptions
+that is letting you claim those more things.
+And so you could always make those assumptions explicit in the Bayesian
+framework and do the same thing as that other framework.
+Okay, thanks for your attention.
+I know this has been quite a lot, but this conceptual foundation here in the
+first week is going to let us do a lot of scientific modeling in the nine weeks
+to come.
+Next week we're going to start with linear models and more explicit causal
+inference problems, and I hope you join me for that.
+You're still here, but you have some place better to be?
+Well, I don't either.
+So let's do a bonus round.
+You want to have some more?
+Let's talk about misclassification.
+This is a topic that I always feel bad for leaving near the end of the course,
+but it fits in right here really well.
+And it'll help us understand a little bit more about Bayesian inference as well
+and how the generative model relates to the posterior distribution.
+So let's go back to the DAG at the beginning of the lecture.
+You can scroll all the way back if you want, and then come back to me here.
+What we have represented in this DAG is that the counts of water and land, W and
+L, are functions of P and N. That is, they're causally influenced by the
+proportion of water P and the number of times you toss the globe in.
+And the first thing I want to do here in setting up misclassification for you is
+to talk about some more devices that we can add intuitively to these DAGs to help
+us represent the causes of the sample.
+So let's simplify it a bit, and I'm going to add a circle.
+I simplified by removing L. We can do that because if we know N and we know W,
+L is just determined by arithmetic, right?
+It's N minus W is L. L equals N minus W.
+So we don't, this will just make the DAG simpler.
+Easier to see what I'm about to show you.
+And then I've drawn a circle around P, the proportion of water on the Earth.
+This is convention I'm going to use in the book.
+You'll also see this in some articles and books where a circle around the
+variable in a DAG means it's unobserved.
+That means in our particular sample, we don't have any observations of this
+variable.
+It's empty.
+Now, in our case, that makes sense because we're trying to estimate P, and so
+it's unobserved, and we use W and N to estimate it.
+And we did all of that in the hour previous.
+In other studies, though, other aspects of this problem can also be unobserved.
+So, for example, there are lots of problems in human sciences and in biology
+where the number of trials in the sample size itself is unobserved.
+And that's in the context of where there's some population of N entities,
+and they're producing observations W, which is detections.
+But we don't know the total population size.
+We just have detections W, and we also don't know P, the proportion of the
+time something is detected.
+But if you can get information about the detection probability P, and there are
+ways to do that, then you can also estimate N.
+And there's a whole branch, a particular population of ecology,
+mark recapture and distance sampling that is about this, about estimating
+population sizes from detections.
+We're not going to do that today.
+I want to talk about something else, which is a measurement error problem
+or misclassification problem, which is present in lots of data sets,
+but is usually ignored.
+And I don't think that's a good practice.
+So, I want you to imagine that the number of water samples, the true number,
+is unobserved.
+And what does that mean?
+Well, there are processes by which the true number of water samples would not be
+recorded correctly.
+For example, measurement error.
+Imagine that your assistant who's tossing the globe is sloppy and they let their
+fingers slip at times, or they just write down the wrong letter because they're
+not paying much attention.
+And so, what we observe is not the true W that was produced by the process,
+the W that is faithfully influenced only by P and N, but some contaminated W
+that I'm going to write as W star.
+And W star is influenced by W, right?
+It's derived from it.
+And this is W star as the misclassified sample.
+W star is also influenced by the measurement process, which I'm going to call M.
+And if we know the measurement process, or we know the measurement process within
+some range of precision, then we can use that knowledge to reconstruct as it were
+plausible true values W, and then we can still estimate P on the far left,
+which is our estimate.
+And this is called the misclassification problem, or has the same structure as
+measurement error in non-categorical data sets.
+And this is a very nice thing to be able to draw into DAGs, because remember that
+DAG should represent everything you believe about how the sample is caused.
+There'll be aspects of this, which are aspects of the natural process, the globe.
+And there'll be aspects of it, which are aspects of the research design, and how
+entities in your research respond to that design.
+So let's solve this problem. Let's develop a Bayesian estimator for P, the portion
+of water on the globe, assuming misclassification.
+That is, the sum proportion of time the true W is misrepresented, and you're only
+passed a contaminated count of W and L.
+So we're going to obey the workflow, and I'm not going to be very detailed with it
+because this is the bonus round, and I want to go quickly here.
+But the first thing we do in the workflow is write a generative model as a
+simulation. And so now we have SimGlobe 2.
+And in this, we define it as a function, and it's now a function not just of P
+and N as before. This is going to generate a sample, but it's also a function of
+this new variable X I've introduced, and X is the misclassification rate.
+So if it's 0.1, that means that 10% of the time your research assistant writes
+down the wrong letter. So if the true toss was water, they write down
+land, and if the true toss was land, they write down water, but that happens only
+10% of the time. 90% of the time they get it right.
+But 10% of the time is bad. That's a very high error rate.
+And so can we fix the inference given the simulation? Let's write the simulation
+first, then develop an estimator, verify it works. You know the workflow.
+Draw the L. Okay. In the simulation, it's often easier to write the generative
+simulation because you just think forward about how the sample is produced and
+use the knowledge from the data to do this. First, we generate the true sample,
+and this is just like the code in the previous hour. We sample from the
+possible outcomes W and L in proportion to their theoretical prevalence,
+that is P and 1 minus P. Then there's a secondary stage in this new generative
+process where we observe the sample that we actually observe.
+And this is the misclassified sample, the one that's contaminated by your
+research assistants and attention. There are lots of ways in code to produce
+something like this. I've tried to come up with something that's transparent.
+What this, if else, does is it generates a bunch of random numbers between 0 and
+1 and compares them each to X. So for every observation in the true sample,
+we generate a random number. If that number is less than X, then there's a
+misclassification event. And then the second line there, if else true sample
+equals W, that just flips W to L or L to W. That's all that line does.
+And then at the end, there's the no error. The observed sample contains the true
+sample. But all this function returns is the observed sample. So that's all we've
+got. Now we develop our Bayesian estimator and we do it exactly the way we did
+with the original globe tossing problem in the previous hour. We're going to draw
+the garden of forking data. And we draw the garden of forking data given our
+generative knowledge of the process of how the sample works, assuming there's
+misclassification. There are going to be two stages, though. This gets a little bit
+tricky. This is the value of this bonus round is to stimulate your imagination
+about how this works. There are two stages to the garden now and they're different.
+The first stage are the true samples, which remember we don't see. But they need to be
+in the garden because we're imagining counterfactual events that could have
+happened in the generation of the sample. And so we're going to draw all the possible
+true samples in the proportions they could happen. That's how we plant our garden.
+And then the second stage, we're going to do the misclassification pass that branch
+from the true samples. I'll take this one step at a time. So let's focus on the garden.
+This is what our new garden is going to look like. And in the inner ring here, I draw
+the true samples. Imagining again, just for the sake of simplicity, a four-sided
+globe. And it's covered 75% in water. So three out of four of the past produced
+water as the true sample on any particular toss. And one out of four produces land on
+any particular toss. And these are true. Now, we don't observe these when we see the
+sample, but we need to draw them in the garden. Imagining counterfactually what
+could have happened to produce our actual sample. And then the outer ring are what
+we actually observe. And these are the misclassification paths. So I want you to
+look at any particular one of these, and you'll see that one in three, this is just
+for the sake of the example, one in three, one-third of the time, there's a
+misclassification error. So one in three paths is the flipped color of the true
+state. So if you look on the far left path, water is the true state. The three
+classification paths coming out of it, two are water and one is land. That land one
+there is a misclassification event. Yeah, so there are two ways to see the actual
+true value of the sample for every one way that you see the opposite. And this is
+true for all the other three paths. The two water, the two remaining water paths
+are the same. There are two ways to see water. So I could say this as if what
+really happened was water, then there are two ways to see water and one way to see
+land. And then on the far right, if the true sample was really land, there are two
+ways to see land and one way to see water. Now, we do what we did before. We count
+paths given observations. So imagine we observe water. How many ways can this
+happen? Given the assumption that the globe is covered 75% in water and that the
+misclassification rate is one out of three. Because that's what this particular
+garden on the screen represents. We could draw other gardens with different
+proportions. They would have the same structure, but the numbers of blue and
+white balls would be different. So all we do is count blue globes on the edge now.
+Right? And let's break this down and think about it carefully. First of all,
+assuming that the true state is actually water, there are six ways to observe
+water. I just marked checks on them. So we're just focusing only on the inner
+ring where it was actually water. And then there are going to be six blue events
+on the edge there. So if the true sample is water, there are six ways to
+observe water. But that's not the only way to observe water. If the true sample
+is land, there's one way to observe land. And so there are seven ways total to
+observe water on this. And you can count it. You see that there are seven blue
+orbs on the edge of this garden. And this just comes again from our multiplication.
+But now we're imagining different alternative counterfactuals, things that
+can't happen together. And those are what the true state was. And then we have to
+add those alternatives that can't happen together. So the rule is, things that
+happen together in probability theory are multiplied. So that's like the three
+times two, three ways to have a blue sample. And then for each of those, there
+are two ways for it to avoid a misclassification error for six ways to
+observe blue if the true state is blue. Or if the true state had been land, now
+we have to set all those paths aside because they can't happen in that alternative
+state. And when you say or, you add, as I am at the top of this slide, one times
+one because there's one way to observe land out of four tosses. And then there's
+only one way if land had been sampled for us to observe water. So it's one times
+one. This is a total of seven ways to observe water, which you can just count up
+on the edge. You can, I spent a little bit more time on this in the chapter, in
+chapter two of the third edition draft. And you can write this down as functions
+using the same logic that we did for the original globe tossing posterior. Now the
+probability of water conditional on some proportion P and some misclassification
+rate X is equal to P times one minus X plus one minus P to the X. And the structure
+of that is exactly the same as the structure of the count on the previous slide.
+The P times one minus X, P is the number of ways in the inner ring, the number of
+ways for the true state water to arise. That's the three looking at the diagram in
+the, in the upper right here. And the one minus X is the two out of three. That is
+the correct classification rate. Yeah. And then or, that's where the plus is, one
+minus P. That means land happens. That's the number of ways for land to happen times
+X, which is, it's a misclassification. So the two terms are the first term P one
+minus X is water happened and it was reported correctly or land happened and it was
+misreported. And then analogously for land, the probability of land conditional on P
+and X is one minus P, the probability of land times one minus X, the probability it
+was classified correctly. Or plus probability of water times X probability it was
+misreported. And these probabilities can be used in our previous posterior
+distribution. They just substitute for P and one minus P because they're the
+probabilities of observing water and the probability of observing land. Remember,
+we don't know what really happened. We only, and the point of the garden and the
+point of the posterior distribution is to give us the probability of the
+observations given assumptions of the generative model. And so we end up with this
+ugly looking expression at the bottom, but the structure of it is actually quite
+simple. So let me spend a little bit of time on it. And this is our posterior
+distribution for the misclassification problem. It has the same structure as a
+beta distribution. The stuff in brackets is just the probability of each water.
+This used to be P in the beta distribution, but now it's this more complicated
+function involving P and X. But it's the probability of observing water. Yeah?
+There's a probability of each water observation. It's not the probability of
+water. And then, and the other one is the probability of each land observation.
+Yeah, and it's more complicated. But otherwise, the structure of this is exactly
+like the beta distribution. For each of these, we just count them, count of how
+many waters they are. And so the probability of each water, extenuated by W,
+times the probability of each land, extenuated by L. And then the Z thing on the
+bottom is our normalizing constant. And it's just an ugly integral. It can be
+solved and there's a box in the chapter where I show you its exact value. If you're
+interested, then I use it to draw a plot. Oh yeah, some unpleasant normalizing
+constant. And this is what we get. So the, these are posterior distributions. The
+horizontal axis is the proportion of water. And the vertical is the posterior
+probability. And the black curve is the beta distribution curve we had in the
+main part of the lecture. This is the thing that ignores misclassification. You
+can give it a misclassified sample. It doesn't know that. And it just treats
+every observation as if it were true because it believes it. Because those are
+the assumptions that were built into the golem. This is the naive golem that does
+not believe in misclassification. And it gives you the black curve. But this is
+overconfident if in reality there was misclassification. And so in red we have
+our misclass, our, our golem that is aware of misclassification. And this is the
+misclassification posterior, the function that was on the previous slide. And you
+notice it's more spread out. It's more spread out because it's honest. It honestly
+communicates. The uncertainty is induced by misclassification. But it also moves
+the center. You notice it's not just more spread out, but the point of highest
+posterior probability has moved to the right. And because this is what the
+misclassification does is it tends to push the sample towards the middle. Yeah,
+the higher the misclassification rate is. So you can take those functions, the
+simulation for misclassification and the program estimator. I'll show you these
+in the chapter and you can play with them and you can develop intuitions about this
+as well. You should test it and you should confirm, for example, as the sample size
+increases, the misclassification posterior gets the estimate right. That is, it can
+actually infer the true proportion of water on the globe, even though there's
+most classification. The structure of this problem is very broad and common to
+lots of things. Many classification tasks are testing situations, whether it's
+disease detection or paternity testing, trying to figure out what particular
+nucleotide lies in a particular position on a DNA strand. All those things are
+classification problems. And this basic math applies in those cases as well. Okay.
+More broadly, this is an example of measurement error. Measurement error is
+common in all scientific fields and we should model it. We should not ignore it.
+It's better to model it than to ignore it. And there are other things that are
+related to measurement error that we can also put in the DAGs and we can add them
+to our generative models and we can build better estimators. So missing data, almost
+every project I've been part of has had missing values. We want to model those as
+well. We'll do that later in the course. Compliance. We have people in our studies
+and the human sciences and the people don't always take their medicine, for
+example. And so you can ignore that problem or you can try to model it. Inclusion.
+People do survey research. I do survey research myself sometimes. Who's included
+in the sample? We want to model the processes that lead to inclusion. And
+modeling these things leads to good news as well. It's not that it just honestly
+reports the uncertainty. It does do that and that's very important. But there's also
+good news is it turns out samples do not need to be representative of a population
+in order to provide good estimates of the population. Now, sometimes they're
+unrepresentative in ways that you can't recover from. But sometimes they're
+unrepresentative in ways that you can recover from. And the way you figure out
+which situation you're in is by modeling the source of the nonrepresentativeness.
+But sometimes you'll hear that in order to estimate something from a population
+you must have a random representative sample that is false. It is simply false.
+What you must do is model the sampling process and how the sample arises, how
+it causally differs from the population. And then you can develop an estimator
+that can possibly reweight the sample to get a good estimate of the population.
+And that's actually how almost all modern survey work works because you can't get
+representative samples from human populations these days by telephone.
+Okay. That's my sermon on misclassification. I hope you enjoyed the bonus round.
+And you've done a lot of work here. When you return next week for the third
+lecture, we're going to talk about Gaussian distributions.

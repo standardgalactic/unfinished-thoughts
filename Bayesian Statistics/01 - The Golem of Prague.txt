@@ -1,0 +1,603 @@
+This is a statistics course or sometimes I joke it's an anti-statistics course.
+It's a statistics course for people like all of you who'd rather just not take a
+statistics course. What you'd rather do is some science or some research. You're
+interested in natural things like birds or plants or people or the physical
+forces that moves them and that leads you into research. And then when you get
+into research your goal is to connect data you might collect about these
+entities to scientific models that explain regularities in their lives and
+these scientific models often but not always are expressed mathematically. How
+do we make this connection and that connection is made through a branch of
+applied mathematics called statistics. The interest in this course is in the
+science and how the science motivates the statistical reasoning and how it
+connects to the data. There's a book that I wrote a few years ago it's in its
+second edition and in this series of lectures I'm revising this book quite
+actively to eventually become a third edition. So if you've taken this course
+before welcome back. There will be some new things and I hope it'll be worth
+your time. What am I doing that's different? There's not a complete overhaul
+it's basically the same course with the same major components. There's a Bayesian
+core to it and that will stay. What's different? I think there have become too
+many examples over the years and I want to trim them back to a few core
+examples that I can develop in complexity over a series of lectures
+and do each in more depth. I want to focus much more on the workflow of doing
+scientific research and testing the code we develop as we go. More examples of
+computing the things that were really after a scientist that is hypothetical
+interventions and one version of that is this post stratification that those of
+us who also do descriptive research often need. And I felt guilty over the
+years that very important topics like measurement error and missing data appear
+at the end of the course making them seem like they're optional and a lot of
+people let's face it never make it that far. So I want to foreground these
+issues because they're present in most research projects and they deserve to be
+taken seriously and become a core piece of our kit. Finally I'd like to do a
+few examples of sensitivity analysis which is something lots of people have
+asked for and something that I've found very useful in my own research. So if
+you're enrolled in the course you'll have access to the draft as I develop it
+and you'll know you're working on the third edition drafts because there'll be
+these peach boxes rather than blue boxes. This revised version of the course is
+going to focus on three components in all of the examples. The first is DAGs.
+I'll explain what that is in a moment. And the second is Golems. If you're
+returning to the course you know what Golems are and they're still here. And
+then the third is Owls. Let me explain each of these in turn for the remainder of
+this lecture, our introductory lecture. So often in statistics especially in
+Bayesian statistics courses there's lots of discussion of the differences
+between Bayesian inference and frequentism which is the other major paradigm
+by which statistics is done. We're not going to talk about that at all in this
+course. The statistics wars are over for the most part. They're just the thing
+that boomer statisticians talk about. We're much more interested in how we
+justify our statistical procedures whether they're Bayesian or not. And that
+leads us to focus more on a field called causal inference which is a very
+diverse field with lots of tools. It's a field that puts science before
+statistics or rather works really hard to make statistics serve scientific goals
+explicit scientific goals. Often statistics is taught in the absence of
+scientific models but we're not going to do that here. So first and we're not
+going to do that because in order for statistical models which are devices that
+process data to produce estimates for them to produce scientific insight they
+require some firm logical connection to a scientific model and so we're going to
+draw scientific models sometimes called causal models. In causal models
+scientific models changing a variable will change only some other variables
+and those are what we call causes. The truth is that for any given sample a
+statistical analysis can find any cause it wants in the absence of the causal
+model. That is people sometimes say the reasons for statistical analysis are not
+found in the data themselves. We cannot troll through the numbers and come up
+with the theory or at least we really shouldn't. Rather we have to put causes
+in in order to design the right statistical model that will give us an
+estimate that we're after. So the causes of the data cannot be extracted from the
+data alone. We need an additional external model a causal model of some
+kind. There's a philosopher of science Nancy Cartwright who has this great
+slogan no causes in no causes out. So what is causal inference? There'll be lots
+of examples as we go through the course and there are whole books on this topic
+just want to give you an intuition to start here. So often the first thing you
+hear about causal inference is that correlation does not imply causation and
+it doesn't of course but causation doesn't even imply correlation it turns
+out. I'll have an example later on. This is a deep and interesting topic to
+explore over many weeks. The associations between variables run in both directions
+is the basic problem and this is what we mean when someone says correlation does
+not imply causation. We should swap the word correlation for association. This
+correlation is a very limited measure of association. Variables can be
+associated but have no correlation so we're going to think more about
+associations between variables rather than correlations. But associations are
+bidirectional. There's no causation in them they're just statistical measures.
+Causal inference is about what happens when we take some action there's some
+intervention that's done and then there's directionality. Let me give you some
+examples in under two basic categories. The first is that causal inference can be
+thought of as the prediction of the consequences of an intervention. It's
+not just the prediction of what happens in the absence of your intervention. It's
+not just prediction of associations in the future. It's prediction of the
+consequences of changing one variable on other variables. Or it can be thought of
+as the imputation of missing observations. I'll explain both of these in turn. So if
+you look outside and there's any wind and there are any trees then the trees
+will be swaying in the wind. Now you know that the wind is causing the trees to
+sway but those variables the movement of the trees and the presence of the wind
+are merely statistically associated. And there's nothing about that statistical
+association which tells you the causal information. It's something else you know
+as a person. And this has implications for hypothetical interventions.
+When you know the cause of say the swaying of the trees that means you're
+able to predict the consequences of a particular intervention. That is adding
+wind to make them sway. Climbing up in the tree and swaying the branches does
+not create wind. Well it doesn't create very much wind to create a very small
+amount of local wind. And so the causal inference is the what if I do this kind
+of question. This is the consequences of an intervention. This is very different
+than pure or raw prediction because if all you know is the statistical association
+between wind and the swaying of branches you can predict the presence of wind
+when you see the trees sway. And that's a purely statistical prediction and that
+can be very useful. There's nothing wrong with that. But causal prediction is
+distinct. It's the consequences of an intervention of a particular kind.
+The other type that I mentioned was causal imputation. And this would mean
+you know the cause. When you know a cause you're able to construct or
+reconstruct unobserved counterfactual outcomes. What if something else has
+happened? And if you understand the scientific system and you understand the
+causes that drive it you'll be able to do this as well. So what if another
+country had been the first to land on the moon? What would have been different in
+history? Now no one can answer that question. That's the kind of causal
+imputation that we cannot do. But there are more simple systems in which we
+understand and we can do this kind of imputation. Causal inference is one kind
+of research goal but it's intimately related to at least two others. The
+description and the description of populations and the design of research
+projects. And the thing that binds these three together is that they all depend
+upon some scientific model to be conducted effectively. So causal inference
+can only be done if we have a causal model at some level of abstraction.
+Description as well, descriptive studies also depend upon causal knowledge
+because as I'll explain there are causes of the sample that we use to conduct
+the description. And research design, I hope it's obvious, depends upon some
+causal knowledge of the system we're designing to study. So I want to pause for
+a moment on this particular issue about description because I've found with
+various audiences it's not always intuitive. Sometimes causal inference and
+description are presented as opposite kinds of scientific goals and people
+will talk about descriptive studies and they're not going to make any causal
+claims. That's fine. I do a lot of descriptive work. I'm an anthropologist
+and I think probably most anthropological research is descriptive.
+Nevertheless, this is no way out of causal modeling and the causal inference
+literature. You still have to study it. And the reason is because the sample is
+caused by things and those things need to be drawn with a causal logic to help
+you understand whether you can design around them or calculate around them.
+That is that the sample differs from the population and if your goal is to
+describe that population, that requires modeling the causes of the sample and why
+it differs from the population.
+So there are going to be lots of causal diagrams in this course. These causal
+diagrams are called DAGs. DAGs stands for directed acyclic graph. There's a
+picture of one in the upper right of this slide and we'll talk a lot about these
+in more detail in later lectures. What I want you to understand now is that these
+are highly abstract causal models. I use the word heuristic here but you can think
+of them as being abstract in that the only information in a DAG is the names of
+variables which are the letters and their causal relationships which are the
+arrows. And an arrow indicates that if you change a variable at the start of the
+arrow it will also induce a change in variable at the end of the arrow but not
+in the reverse. So for example on this slide if you look at x and y there's an
+arrow going from x to y so if you change x y would change according to this
+diagram but if you change y x would not change and those are interventions. So
+what a DAG tells you is the consequences of a hypothetical intervention and we
+can use DAGs, we can analyze them to figure out which statistical models we
+need to answer particular specified questions about the variables in the
+graph and about particular hypothetical interventions. In a sense and that's all
+the DAGs have in them, DAGs don't make any specific assumptions about the
+relationships between these variables. They just name influences so they don't
+assume that things are linear and by default they assume that all variables
+interact. Everything is moderation in the language of psychologists. So they're
+useful for lots of reasons. I'll try to demonstrate to you but one of the things
+that I like about them is that they answer very general questions about what
+we can decide without making additional assumptions. Eventually we will make
+additional assumptions. We will make assumptions about the functional
+relationships between these variables and that will give us more scientific
+power but the DAG has usefulness even after we do that. So let's talk a little
+bit more about this first DAG and this maybe looks a little bit complicated. I
+want to break it down into the kinds of relationships that you have to
+specify in these things and why we need to do it. So the first let's gray out most
+of the DAG and just talk about the relationship between X and Y. So in most
+research or in the simplest research we're interested in the causal effect of
+one variable here X on another here Y and we call this the treatment X and the
+outcome Y and this relationship goes in one direction at least at one moment in
+time. In a time series you can have reciprocal relationships but I'm not
+showing that here. There are other variables in the world and these other
+variables influence X and Y and how they influence X and Y and how they
+influence one another is something it turns out we need to draw it as well in
+order to study the relationship between X and Y. So there are variables like B
+on the right hand side here which are competing causes of Y. They're like X
+but we're not interested in them and nevertheless it can be useful to measure
+them these competing causes and then there are variables like A which are
+influences of the treatment and these are also things that we might be concerned
+about at times and then there are variables like C which are common causes
+of X and Y together. Now C to foreground things a little bit is a confound. It's the
+kind of variable that we would want to control for in a statistical analysis so
+that we could correctly estimate the relationship between X and Y. However
+variables like C and A and B have relationships among themselves and those
+relationships among the other variables can confuse our regression strategies
+and we're going to return to this particular example a little bit later
+and I'll highlight how for you. So let me try to summarize a little bit. So the
+thing about a causal model like the DAG on the screen is you can ask
+multiple questions of it. You don't only have to ask what's the influence of X
+on Y. You can also ask about the influence of A on Y and so on and the key
+insight is that you will need multiple statistical models to do that. That each
+causal query will imply a different statistical procedure, a different
+estimate and in many cases you will not be able to use one statistical model to
+answer all of those causal queries for reasons I'll teach you. It comes down to
+the issue of choosing what some fields call control variables and it turns out
+that there are good controls. Absolutely there are variables you want to add
+because adding them controls for some confounding influence and lets you
+correctly measure a causal influence but it's not safe to just add everything and
+see what happens to the coefficients because there are also bad controls.
+There are variables that create confusion when you add them to the model. They
+create bias and mess up your estimates. So one of the things that the DAG let you
+do is avoid those hazards assuming that the DAG is correct and another thing that
+the DAG does is it provides a clear route for testing and refining the
+causal model because it's logically specified and you can deduce its
+implications. One of the things the DAGs do even independent of doing a data
+analysis is that they're intuition pumps. They get the researchers head out of
+the data out of the numbers and into the science and then we can go back into the
+data and make more sense of it. Okay so you have a DAG, you have a strategy for
+which control variables you want to use. You still need a statistical model and
+in this course we call statistical models Golems which is the metaphor
+from the book. Let me try to explain where this comes from. It comes from
+Prague. So Prague in the 16th century was part of a continental empire, the
+Holy Roman Empire and there were many learned scholars and artists and other
+sorts of people there. It was quite a happy place and it was also a
+multicultural community. It had a large urban Jewish community led by this
+fellow here Rabbi Love and there was, as the legend goes, a certain amount of
+discrimination and blood libel against the Jews of Prague at the time and
+according to legend Rabbi Love used magic, kabbalah, to construct a clay robot, a
+golem, probably one of the world's first robots and again according to legend
+this clay robot was used to defend the Jews against attacks against libel but
+mistakes were made and innocent people were accidentally hurt by it and so
+Rabbi Love decommissioned at the end of the legend the clay robot and swears
+never again to toy with the power of creation. I really like the golem legend.
+If you go to Prague you'll see it's a big tourist attraction. You can buy
+golem cookies and trinkets and earrings and all sorts of things but it's a
+wonderful story especially in the contemporary world because we're
+surrounded by robots of all kinds and they're not always physical they're
+just software or something else but also physical robots and these robots like
+the golem are built for particular tasks but they're blind to our intent when we
+make them. There's nothing about their their programming which understands the
+intent it can interpret it and reprogram themselves in that light and so if
+they're not used wisely and in only the right context they can do severe damage
+and there's a lot of ethical responsibility which comes from
+deploying machine learning, artificial intelligence and statistical models
+because they're all basically the same kind of thing. They're golems and we're
+going to make golems and hopefully we're not going to wreck Prague. These are our
+golems, our computer programs but computer programs also run on clay they
+run on silicon like the golem they're powerful but they have no wisdom or
+foresight they merely execute the instructions we've given them and so they
+can be quite dangerous when used inappropriately and I want to spend a
+little bit of time talking about one particular tradition and statistics
+which is very golem-like in that there's nothing essentially bad about the
+golem. The golem didn't mean to hurt anyone and statistical models are the
+same. They're not bad, they're good for particular things, they're designed
+with really interesting logic and they're quite powerful but they're applied in
+the wrong context and they're applied too broadly and they can do damage and the
+traditions just I want to focus on is this tradition that many people learn
+in their first introductory stats course probably when they were getting their
+first degree in the sciences and it's this idea that you use slow charts, answer
+a few simple questions and select some sort of statistical test for testing on
+the hypothesis. Now I have nothing against the individual test in this when
+used in the right place but this is not the kind of curriculum to train
+research scientists. This is the kind of curriculum for basic quality control and
+experimental science. Each of the little devices in here like a spearman's
+rank correlation or a t-test is extremely useful but it's also extremely
+narrow. This is a very limiting picture of statistics to give people and I say
+by the way this has nothing to do with old boomer arguments about Bayes versus
+frequentism. There are Bayesian versions of every one of these procedures. It has
+nothing to do with that. It's about the tradition of teaching students and
+researchers these little isolated tests and letting them test and teaching them
+that the sole goal of statistics is to reject null hypotheses. Now there is
+certainly context in rejecting null hypotheses is very useful I think.
+Lots of experimental work for example industrial quality control. There are
+lots of reasons to do that but in most of research science it is not a useful
+goal and I want to spend some time arguing that position for you. Oh I
+want to say something about industrial framework at the bottom. Yeah so a
+number of these tests are invented for industrial work and they're very
+important like quality control. So the t-test some of you may know was
+developed by William Ceeley Gossett who was a statistician who was working for
+Guinness Brewery in Dublin seen here and Guinness Brewery was one of the first
+really ambitious breweries to do science with their beer. They wanted
+customers when they ordered a Guinness anywhere in the world to get the same
+experience. Every bad if Guinness should taste the same. They're like the McDonald's
+of beer. I hope no one's offended by that because it's a compliment right. You can
+go to a McDonald's anywhere in the world and the cheeseburger tastes the same for
+better or worse. And the same for Guinness. Not everybody likes Guinness but if you
+do everywhere in the world you go it will taste the same and that's because of
+science. They science it and the t-test was designed to do small batch testing
+on Guinness and it's extremely useful that way. So kind of industrial control
+settings that in introductory statistics curriculum is extremely useful. But many
+of us to study much more complicated systems even if they're experimental and
+most of us study systems in which the the ability to do experimental
+interventions is incredibly limited. Either it's not practical, practically
+impossible or it's wholly unethical. And so we study observational systems and in
+such systems no models are not unique. That is it's typically not possible to
+define a clear and sensible null hypothesis that can be rejected. What we
+have to do instead is design multiple process models and study their
+implications. And so for example I may ask you what's a null population dynamic?
+Population dynamics is the study of how entities in a population change over time
+as they influence one another. What does it mean for a population dynamic to be
+null or neutral? Null phylogenies, null ecological communities, a null social
+network. People do reject null hypotheses about all of these things, but I don't
+think this is sensible. Let me spend a little bit of time talking about some of
+these examples. So in population genetics, and this is an example that that I was
+taught in graduate school, there was this historical fight between neutral
+theory and well everybody else. The book on the left and just as an exemplar of
+the so-called selectionists Gillespie, the book on the right. And the scientific
+issue here is a really interesting one. It's about population dynamics. How does
+DNA evolve over time? And DNA molecules are complex and the question and they
+vary. The question is why does that variation come from? Which forces of
+evolution strongly contribute to it? And under the neutral theory of molecular
+evolution, the idea isn't that there's no selection. It's just that most of the
+molecular structure of DNA is neutral variation, non-coding variation that's
+not important to phenotype. Most in the population. And so let's break this down
+a little bit. So we can have some vague hypothesis. Evolution is neutral, which is
+to say that selection doesn't influence the molecule that much, even though
+obviously adaptation happens. No one's denying that. And that hypothesis is too
+vague to compare to any data. So you need some mathematical model and
+population geneticists make mathematical models of population dynamics and those
+models have particular assumptions. So if you make a process model of molecular
+molecular evolution where there's no selection at all, we call this a neutral
+model, you also have to make other assumptions like how does the population
+size fluctuate and what's the life cycle of the organism like. You can't get away
+from making assumptions about those things. And so one particular process model
+that people studied who were interested in neutral evolution was the neutral
+equilibrium model. The equilibrium model, population size stays the same. And this
+implies a particular statistical test to test whether some population meets that
+distribution. You can think about the statistical model on the right as being
+some distributional implication of the process model. There are other process
+models, which you might also call neutral. For example, there could be a non
+equilibrium model in which population size fluctuates. And it turns out you get
+different distributions of DNA molecules under that model. And then the really
+frustrating thing in the history of this topic, and under the vague hypothesis
+on the left selection matters, you can also make multiple process models. And so
+for example, a constant selection model, directional selection model, kind of first
+cartoon version of natural selection that the biology students are taught, very
+unrealistic, but it's a model, has some particular statistical implications
+labeled here in three on the far right. But there's another kind of process model
+selection that Gillespie and others made, in which selection fluctuates. And it
+turns out the fluctuating selection models can make the same distributional
+predictions as the neutral equilibrium model. The null model is not unique. And
+so now you can test whether evolution is neutral and it's not. But the point here
+is not who was right. It's that do our data processing correctly. We're going to
+need process models and we're going to have to look away from the goal of
+rejecting them though. This same kind of drama has played out in multiple fields.
+So in ecology, the study of biodiversity, there was this theory of the unified
+neutral theory of biodiversity, which is essentially the neutral model applied to
+ecological communities, the idea that there are no species differences
+structuring communities. Unfortunately, this has the same problems. It's not
+really a causal model. And the quote I have here on the screen is one of my
+favorites. This is from James Clark. Equal probability is not a theory, but a
+lack of one. It does not include or exclude any process relevant to
+coexistence of competitors. Models lacking explicit species can make useful
+predictions, but this does not support neutral theory. So the predictions of a
+particular model lacking forces does not show that that's the model that's
+producing it. We need other causal models and we need to look at where they're
+different. Even a little bit older, in the late 70s and early 80s in ecology,
+there was this fight between some giants in ecology, a symbol often and diamonds
+were the most aggressive in this, as I understand the history. And the idea here
+was they were interested again in community ecology, which species
+co-occur the study of coexistence and a competitive exclusion. And Conor and
+Simberloff had a method of permuting matrices like the ones you see on the
+right here of the presence of species in particular locations to test and
+reject no models of whether species co-occurred or not. And the basic problem
+here is, well, these messages don't work. There's no argument about that now.
+And Diamond and Gilpin wrote a quite aggressive takedown of it here. You
+could quote the null hypothesis analysis by Conor and Simberloff is
+characterized by hidden structure, inefficiency, lack of common sense,
+imprudence, and statistical weakness, and ultimately by a scandalous disregard for
+their own procedure. Wow. Okay. So I don't think we should write criticism in
+this tone, but it is true that the Conor and Simberloff procedure just doesn't
+work. It has very low power and a very high false positive rate. And the basic
+problem is there is no unique way to permute a matrix to meet any particular
+null model. There's a lot of information built into a data matrix like the one
+you see on the screen that cannot be permuted away. And this is a huge problem.
+Now, we can study species co-occurrence, but we can't do it by creating some
+artificial null matrix with the species present in it. The same problem arises
+in the study of social networks. Another case where there are permutation methods.
+People used to use these permutation methods because that's all they knew how
+to do. But again, they just don't work. They don't do what they claim to be able
+to do. So here's a paper from Hart et al. recently in 2021, which summarizes this,
+which has been known for decades actually. These methods like quadratic assignment
+procedures simply do not statistically do what we think they do. And the reason
+is because there is no clear, unique null network.
+More recently, another example, just a primary imagination. So you may have
+heard that Neanderthals, which were, well, some people say the same species.
+Some people say different species. Let's just say they were very, very similar
+to humans. And they lived mainly in Europe and also in the Near East and are
+now extinct. And you may have heard that all humans outside of Africa have DNA
+from Neanderthals, which seems to suggest that Neanderthals and modern humans
+interpret. So all living humans evolved in Africa after Neanderthals evolved in
+Europe. And so one model of the interbreeding is that you see this on the
+map. When modern humans arise, shown in red, and leave Africa, they interact
+with Neanderthals and they interbreed and they have some families together.
+Eventually Neanderthals go extinct, but the surviving humans carry that Neanderthal
+DNA with them. There's no Neanderthal DNA in Africa because modern Africans,
+they're just as modern as the rest of us, never had that population history of
+interacting with Neanderthals. So it's something like 2 or 3% in people like
+me of European ancestry. And we study this at my institute here in Leipzig,
+for example. Well, I don't. My colleagues do. But there are other hypotheses here.
+It's not sufficient here to simply test the null hypothesis of no Neanderthal
+DNA in modern humans outside of Africa, which you can reject. You can reject the
+null hypothesis that people like me don't have any Neanderthal DNA. Okay. And the
+early papers on this topic, that's what they did. They rejected the null hypothesis
+of no Neanderthal DNA. There's not a lot, but it's there. It's not zero. But there
+are other process models consistent with the same fact. So for example, there
+could be Neanderthal DNA, what looks like Neanderthal DNA in people like me,
+because of ancient population substructure in the human population.
+There are lots of humans and they're geographically really dispersed and local
+populations have different neutral molecular variation that we can use to
+identify people from those places. This is neutral variation. It doesn't
+offend, so it's phenotype at all. But it lets us track who's related to who. And so
+Neanderthals also left Africa, or rather the ancestors of Neanderthals also left
+Africa long ago. And then the ancestors of modern humans after that. And in that
+process, they would have both passed through Northeast Africa, where it
+connects to Asia. And so any substructure in the African population could be
+transmitted to both groups, any group leaving Africa. And so we could share
+what looks like Neanderthal DNA with Neanderthals, because we and Neanderthals
+both got it from northeastern African populations, which are now extinct. And
+this is called the ancient substructure hypothesis. And both of those are
+consistent with rejecting the null hypothesis of known Neanderthal DNA. So
+it's just not enough to study these processes that way. Now you can test
+these two hypotheses against one another, but you have to consider them as
+process models and see what implications they have, and then look at the data
+differently. You can't just reject the null hypothesis. Okay, let me try to
+summarize some of that. I know it's a lot. And those examples were just meant
+to show you in realistic research context that this null hypothesis framework
+is very limiting, and we want to think instead of scientific models and how to
+introduce those scientific models to data by analyzing them to design
+golems. And those golems, at least in this class, will not be designed to test
+null hypotheses. They'll be designed to do much more. What we're going to need to
+make those golems are generative causal models, not just DAGs. DAGs are
+not going to have enough details to them to be generative. Generative means you
+can simulate data from the model. So we're going to start with DAGs, but then
+we're going to turn them into generative models that can produce synthetic
+data. And then we're going to write statistical models that can analyze the
+synthetic data to begin with to produce certain goals called F-demands to answer
+particular questions. And then once we're sure that the model works in
+principle on the synthetic data, designed in light of the specific
+transparent generative model, then we'll introduce the real data to it. So let's
+come back to the DAG and walk through this in a heuristic fashion and think
+about this issue of justified controls. So one of the things about statistical
+modeling is that we're interested in the relationship between two particular
+variables, say X and Y. And we know we have other variables. Should we use any
+of them in the analysis? And this is the kind of question I'm going to assert
+and teach you cannot be answered in the absence of a generative model, or at
+least some kind of causal model. What's the basic problem? Well, there are lots
+of particular, say, regression models, those of you who have already had a
+course in regression, models that model Y using its association with multiple
+other variables. So on the left here I've listed some of the possibilities here. We
+could have a model where we only look at the association between Y and X, which is
+the relationship of interest. We could have one where we also add the variable
+A, the second model on the screen. We could look at A and B together with X. We
+could do X plus C. We could do X plus A and C, X plus B and C. And I've left off
+the one that has them all. Which of these should we use? And this is one of the most
+common questions that we have in applied statistics is which covariates or
+controls to add. And you cannot decide this without at least a dag, and hopefully
+even more than that, some more generative model that specifies the shape of the
+relationships among these variables. And the reason is because the relationships
+among the variables cause problems for us when we add control variables. What we
+want to do, and I'll teach you in later lectures, is analyze the graph like this
+so that we can deduce, given the assumptions in this graph, which control
+variables are good and which control variables are bad. In this particular
+example, I won't explain this today, but I'll show you in a future lecture, the
+correct adjustment set is what it's called, is to include the variables B and C in
+the model. To stratify by B and C when examining the relationship between X and
+Y. And again, I'm not going to explain today why. I just want to wet your appetite
+for it. In a future lecture, I'll explain why only these two. Okay, so we've used a
+dag, we've analyzed it, we have our adjustment set, this is not enough. I
+mentioned before, we want a generative version of the causal model so we can
+design and debug our code, and we're going to do that in even the first
+example in the next lecture. And then we need some strategy to create an
+estimate, and there are different ways to do it. That is, we need, what's our
+strategy for coping with finite data to study something about a population that
+could, in potential, produce infinite data? And how do we properly characterize the
+uncertainty in the estimate that we produce? And the easiest approach, at least
+I feel, is Bayesian data analysis. I don't use it out of some sort of
+social commitment. I use it because I'm a scientist, and Bayesian data analysis
+lets me take the generative assumptions in my scientific models and confront them
+with data with the least fuss. So I have to admit that sometimes Bayes is
+overkill, and often I think a problem in courses that teach Bayesian statistics is
+they teach very simple examples where it's, there don't seem to be any real
+advantages of the Bayesian approach. So Bayesian linear regression, extremely
+similar to non-Bayesian linear regression, but there's additional fuss. So this is
+a bit like cutting a birthday cake with a chainsaw. It works. It's stylish. It
+produces a lot of additional mess. You might as well just use a cake knife. But
+the interest in Bayes here really is practical, because outside the birthday
+cake scenario, in a realistic analysis, like you need to cut a tree down, Bayes
+can do it. So what do I mean to carry this metaphor forward? In realistic
+analysis, we routinely have to deal with measurement error, missing data, latent
+variables, and goals like regularization. I'll explain what these things mean as we
+go forward, but these are not exotic problems. They're routine problems in
+scientific research, especially at the cutting edge where we're just figuring
+out measurement. And Bayes has very natural and comfortable ways to deal with
+these problems. You can do it in other frameworks, but it's harder. And so Bayes
+has gotten a lot more popular in research in recent decades. I think exactly
+for this reason is that the interest is practical, not philosophical. Whatever
+philosophical commitments people had one way or the other, we don't discuss those
+things so much anymore. In particular, one of the nice things about Bayesian
+statistical modeling is that Bayesian statistical models are generative. They
+can simulate data like a causal model. And this allows us to express our Bayesian
+statistical models to a very close identity with the causal models of
+interest. So I hinted at this just now. I think the statistics wars are over. They
+feel like they're over, at least. There was a time when Bayesian statistics was
+controversial early 20th century. But that's no longer true. It's extremely
+mainstream now. I mean, there are some fields like social psychology where it's
+still considered a bit taboo, people tell me. But in biology, people, if they use a
+Bayesian technique, they'll often put it right in the title even, or at least in
+the abstract, because it's a bit prestigious to do it. I don't think it
+should be necessarily just probability theory, as I'll teach you in the next
+lecture. But the point is, the wars are over. And we shouldn't talk about Bayes
+frequentist combat any longer. I do think there's a problem with university
+curriculum still catching up. In most places, there aren't dedicated teaching
+slots for people to teach applied Bayesian data analysis. But we're getting
+there. It's becoming much more common, because people are using Bayes more in
+their research than there are classes to teach it. And this creates problems in
+use. And we use people feeling that they don't have a floor beneath them. So it's
+just going to take some time for the curriculum to catch up. But we're getting
+there. I also think that a lot of the research innovation, the action is in
+machine learning circles now. And they have their own battles to fight. So we
+can let the remaining boomer combatants fight about Bayesian frequentism, let
+them fight. We have our own battles. Okay, last topic in this introductory
+lecture, I'll talk about owls. So some of you have seen this internet joke about
+how to draw an owl. The joke begins by saying, well, step one, you draw some
+circles, one rather ellipses, one for the head and one for the body. And then step
+two is you draw the rest of the owl. Okay, haha. I think the joke is funny. At
+least it was the first 100 times I saw it. I want to use this as a metaphor for
+how we teach, well, computational tasks in research, not just statistics, but all
+kinds of programming and technical things are often taught like this. There's
+some guide to how to do it. And they tell you how to do the initial steps. And
+there are a bunch of steps between one and two here that seem to go by really
+fast. So we want to move more slowly. We want to draw out all the intermediate
+steps in drawing the owl so that the student has some hope of finding out which
+part, which step they're having trouble with and learning effectively. And this
+naturally means it takes more time. It takes more time both from the teacher and
+from the students. But it's much more successful when you want to draw the owl
+to get all the steps. And we're interested in documenting our steps of
+drawing the owl, so to speak. And what this means is we're going to have an
+explicit workflow where we set up our code so that we have our generative
+simulation in step one. And we write an estimator in step two. And then we
+validate that estimator in step three using the simulated data. And then in
+step four, we analyze real data. And we have all this documentation in the flow.
+And then I'll show you some other step fives and things. We can reuse the
+step one code to do things like compute hypothetical interventions and other
+very useful tasks. Drawing the Bayesian owl, it's necessary because scientific
+data analysis is a very bizarre kind of software engineering. It's like software
+engineering done by amateurs who've not been taught anything about software
+engineering, right? This is an unfortunate state of affairs. But most data
+analysis in the sciences now is done with scripting. There are some people to do
+point and click and that's terrible for reasons I'll get to. But scripting is a
+kind of programming, a simple kind of programming. And you should approach it
+like that and test that the software works and document it and comment it
+appropriately. We want quality control and quality assurance. So there's kind of
+three modes to drawing the Bayesian owl that we'll do in this course. The first
+mode is you want to understand what you're doing and breaking it down into
+steps and having a recipe and a workflow that you hold yourself to is extremely
+useful for that. Otherwise, you'll just have a salad of code and you'll get lost
+in which version of the code you need. Lots of people have done that. Hopefully
+they only do it once and they learn from the experience. Documenting your work
+reduces error. This isn't just about understanding. It's about reducing
+scientific error as well and giving your colleagues some faith that your code
+actually works. And so this is the most important part of this is we're
+professionals and we should behave professionally. We want a respectable
+scientific workflow that we're not afraid to describe to our colleagues, right?
+What we don't want to do is be asked to see the research code and say, well, I'm
+not sure I can find it and then you find it and you can't find out which script
+it is and you're not sure how this works and you can't get it to run. There's too
+much of that going on in the sciences and we must stop. This is the profession,
+right? The public isn't paying us to goof off. We want to work responsibly so we
+can get things right or so when errors arise and they always do, we can find
+them and correct them. So the steps of the basic drawing, the Bayesian
+owl, are first we have to define some theoretical estimate. What are we even
+trying to do in this study? Then we're going to use that to design some
+scientific model, a causal model. This can start out as a DAG, but it eventually
+needs to be generative. We use steps one and two to build some series of
+statistical models which address the specific estimates and can be justified
+in light of the causal models in step two. Then in step four, we do testing. We
+simulate from the generative model to validate that the estimator works. Then
+in step five, we analyze the real data and there may be additional steps. After
+this, we might decide to loop back and revise the causal models, but as long as
+we document all that, this is the workflow that we want to draw the owl.
+Okay, that's really all the material I wanted to get through in this first
+lecture, talking about DAGs, golems, and owls. Just to review, the point of DAGs,
+this is a stand in for all kinds of causal modeling, not just directed
+acyclic graphs. DAGs and other causal models provide transparent scientific
+assumptions to communicate those assumptions to our colleagues. They
+allow us to inspect them ourselves, and this justifies our effort. It exposes
+our assumptions to critique, and it lets us logically build golems, statistical
+models that can credibly get at the S-demand we declare. These golems, this
+is my metaphor for models, statistical models in this course, they're
+brainless, powerful, statistical devices. We need them, but we have to use them
+responsibly and ethically. And then finally owls, this is our workflow. We're
+going to hold ourselves to a clear workflow that integrates DAGs with
+golems and documents it. So we provide some quality assurance so that our
+colleagues and the public can take our work seriously. So I think there's a
+strong argument for reciprocity between all the stages of this, and I tried to
+illustrate that jokingly on this screen with rock, paper, scissor. Think about
+the relationships between theories, and scientific theories allow us to design
+statistical models, statistical procedures that can test their assumptions. So
+theories in a sense dominate models. Models are needed to process evidence, and
+then evidence critiques theories. So no single part of this workflow and scientific
+theorizing in general is more important than all the others. Every little bit of
+code you write in statistical procedures is just as important as the grand
+theorizing that the greatest scientists have ever done, because it can, well,
+kill theories. And so we're going to go forward in this course, and I'm going to
+teach you how to kill some theories. We're going to have 10 weeks of instruction.
+I might revise the particular topics in each week a little bit as we go, because
+remember, I'm rapidly revising for the third edition as I go. But I think
+it'll mostly be this organization. Up through the first five weeks, it's
+basically a course in regression, in Bayesian regression, in light of causal
+inference. So I'll teach you how to use DAGs and teach you about confounders and
+colliders and fun things like that. And the second half of the course, we get into
+more specialized topics and talk about multilevel models and latent variable
+models and social network models and phylogenetic models and other sorts of
+things. But the tools all the way through, it's the same basic goal of
+engine that I will teach you in the next lecture.

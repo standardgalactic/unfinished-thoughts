@@ -1,0 +1,753 @@
+Welcome to the fifth lecture of statistical rethinking 2023. Last week I
+introduced how to use basic linear models and this week we're going to stick
+with all that same machinery, no new machinery this week, but we're going to
+add a bunch of conceptual material to deal with threats to inference. This is
+Helsinki, it's the capital of Finland and it's pretty cold place, but the Finnish
+people are the happiest in the world because there are lots of great things
+about Finland. Among those things is metal. Finland has more heavy metal bands
+per person than any other country in the world and if you put both of these
+variables happiness and the logarithm of the number of metal bands per million
+people on this hand graph as I've done here Finland is number one in both. It's
+the happiest nation and it has the most metal and there's a strong correlation
+worldwide between these two variables as you see there's 117 different
+countries and territories represented here. Is it possible that heavy metal is
+the secret to happiness? Probably not.
+Spurious correlations like that are commonplace. There's another which I
+talked about in the book. Waffle House is a famous always open place to get
+breakfast food and other meals in the southern United States and because it's
+confined to a particular region of the United States that is the south it's
+associated with lots of cultural features of the south and one of those is
+divorce. Southern United States has higher divorce rates than the rest of the
+United States and so there is a strong statistical association between the
+number of waffle houses per million people and the divorce rate but it's not
+plausible that waffle house causes divorce any more than it's possible that
+heavy metal makes nations happy. Correlations can be arbitrarily strong
+even if they're not causal especially in a time series so here's an example where
+we look at the divorce rate in Maine from 2000 to 2009 correlated with the per
+capita consumption of margarine in the same years and this is a correlation of
+point nine nine. Correlation is common in nature. Causation is sparse so we have to
+be sophisticated about how we think about threats to validity so we can
+distinguish associations that reflect cause from those that don't. To remind
+you where we're going in this course in every sample the idea is we start with
+some kind of scientific question and estimate and that's a goal so here in a
+cooking metaphor say we want to make this hedgehog cake that's our estimate.
+What we need to produce it is a recipe and that's our estimator and our
+estimator is a set of instructions about how to assemble ingredients like the
+data and the code to produce a result that resembles the estimate and that's
+our estimate and often lots of things can go wrong in either the design of the
+estimator or in how we use it so the estimate may not always be what we hoped
+for and that's what we're going to talk about today is those kinds of threats
+things that happen during the recipe that are mismatched to the estimator and
+the process we're studying that can lead us astray. This is the topic that's
+sometimes called confounding so the word confound means lots of things and
+statistics unfortunately but it's just a plain English word and when I use it I'm
+going to use it in that plain English sense. I don't think statisticians should
+go around redefining common English words to have technical meanings like
+significant for example. So when I say confound, a confound is just some
+feature of the sample and how we use it that misleads us. When you're confounded
+you're confused and the causal sources of confounds are quite diverse and I want
+to introduce you to that topic today and in this lecture and then in the lecture
+to follow the second lecture this week I'll show you a framework we can use to
+analyze those causes. So the goal today in this lecture is to introduce you to
+what I call the four elemental confounds. So even though the causes of
+confounding are diverse and DAGs can be large and the generative models that are
+extended from them even larger at their core and abstract sense they're all
+built up of these four fundamental relationships between triplets of
+variables. The fork, the pipe, the collider, and the descendant, the
+descendants fork but I'll get to that. So I'm going to introduce you to each of
+these in turn and give you an example and then in the next lecture we'll
+assemble them into bigger shapes that produce even more exotic confounds but
+you'll be able to understand the more exotic confounds because you understand
+these little triplet relationships. Let's start with the fork. The fork is the
+most fundamental because it's the first one that students are usually introduced
+to. In the fork there are three variables x, y, and z. In most cases and just for
+the sake of the narrative we're going to be interested in the association
+between x and y and what we're going to analyze is the role of z in influencing
+that relationship. So in this case in the fork z is a common cause of x and y
+there are other causes of x and y but they're not common they're not shared by
+x and y. z is a shared cause it's a common cause. So if you observe x and y in a
+sample x and y will be associated because they share z the common cause
+they will have some correlation or some more exotic association remember
+correlation is a quite simple and restricted measure of association we
+usually don't want to use it. In typical notation we write this weird symbol that
+I show you on the right of the slide there y and then that strange inverted t
+with a line through it and that means not independent. I'll say that again that
+weird inverted t with a line through it means not independent so y is not
+independent of x. If you know either y or x you know something about the other
+one that's what that means by association they have joint information. They have
+that joint information because they share a common cause z. If we stratify the
+sample by z however there's no association between x and y at each
+level of z for each level of z and the way we write that in the bottom
+right of this slide y and then the inverted t means independent of y is
+independent of x conditional that's what the vertical bar means of z. Let me
+show you that graphically I think that'll help. First let's think about this in
+terms of the DAG and animate it and then I'm going to show you a data set
+generated from this kind of process. So on this slide I'm showing you the fork
+represented as a DAG, z is the common cause and x and y at the top and little
+particles of influence fly off of z into y. Those particles can have
+different values that's what the filled and empty circles are meant to
+represent. If z was the only influence on x and y, x and y would be clones of
+one another but obviously there are other influences on x and y always in
+these DAGs and usually we don't draw them these so-called error terms and so x
+and y end up being associated. They share information each knows something about
+the other through their common cause but they also have their own unique
+features because their independent process is influencing them as well and so
+when we write a generative simulation of this sort of DAG these are the things we
+have to simulate these these extra influences. So let's do that. Here's a
+very simple simulation of the fork. I'm going to do a thousand simulations of
+this and generate a case where there's a common cause z so I simulate z first and
+then I simulate x and y from it but there's x and y are not only z they have
+some other random variation because they were generated by their own random
+Bernoulli trials that's what r burn means on this. r burn is a function that's in
+my rethinking package. So if we simulate data like this you can think of it as a
+contingency table the simplest example x and y can take two values 0 and 1 and
+you'll see that 0 0 and 1 1 are the most common and that's the influence of z the
+common cause on them so that x and y tend to take the same values in this
+example. y is not independent of x in the total sample and their correlation is
+0.63. However if we look within each level of z so we just pull out the cases
+where z equals 0 the pairs of values x and y where z equals 0 now you'll see
+that they're independent of one another. Yes there are more 0 0s and when z
+equals 0 but there's no correlation there and you can see that because I
+compute the correlations at the bottom of the right column. The same is true when
+z equals 1. Yes there are more 1 1's but the total counts are just randomly
+distributed after observing the marginal totals so again there's no
+correlation between x and y within each level of z and this is because after we
+have z we've sort of cancelled out z's influence by looking within each level of
+z and all we're picking up are the independent influences on x and y
+within each level of z. This is how the fork works. A continuous example lots of
+people find it easier to think about these things not in discrete data but in
+continuous data because you can make a nice plot so I do that now here this is
+the same basic idea we're simulating a fork. 300 examples now I generate z is
+binary this is the common cause and then I simulate random normal x's and y's that
+are associated with the z so that x and y are both larger when z equals 1 and
+they're smaller when z equals 0 and then I plot the simulated data points on the
+right red point x is on the horizontal y is on the vertical red points are those
+points where z equals 1 and blue points are those where z equals 0 and then I
+fit three regression lines on here and just to show you the trends in each
+cluster of points the black is the total sample if we ignore the values of z you
+see that there's an association knowing x helps you predict y and it really does
+that's what the black line shows you however within each level knowing x
+doesn't tell you anything about why those lines are horizontal the red line and
+the blue line and this is the fork. The fork induces an association between
+two variables because they share a common cause after you stratify by that common
+cause or condition on that common cause the variables are unrelated. Let's do a
+data analysis example and this will help bring home why we care about this we
+care about this because just looking at the scatter plot we can't tell what's
+going on we have a causal model that implicates the fork in generating the
+scatter plot this leads us to design estimators of certain times so that we
+can try to figure out what's happening so I mentioned waffle house and divorce in
+the introduction let's look at something a little bit more seriously related to
+divorce rates like marriage rate for example it turns out that marriage rate
+is statistically associated with divorce rate across the states of the United
+States and different regions of the USA with higher rates of marriage also have
+higher rates of divorce this could be a causal relationship yeah there could be
+cultural factors to drive both of these things yeah or in the bluntest sense
+people can only get divorced if they get married first but maybe there's
+something else going on here this is our estimate though we're going to be
+interested in the causal effect of marriage rate on divorce rate across
+regions of the United States and we're going to develop a scientific model and
+that turn that into a statistical estimator and analyze the data and I'm
+not going to focus as much in this example on the testing part of this
+although I'm not omitting that because it's not needed just because we're using
+basic linear models I showed you how to test those last week I encourage you to
+keep doing that but I'm going to reserve more time in this lecture for the
+causal shenanigans okay there's another variable that is also strongly related
+to divorce rate and that's the age of which people get married the median age
+of marriage in different regions in the United States is also strongly related
+to divorce rate but in the opposite direction so higher marriage rates
+associated with higher divorce rates lower median ages of marriage are
+associated with higher divorce rates so if we put all three of these variables
+together in a DAG we can try to think through what's going on so the age of
+marriage is a common cause it's a fork it's the common cause at the basis of
+fork of both marriage rate and divorce there are more young people so people
+get married when they're young than the marriage rate is higher so age of
+marriage drives marriage rate and we have a question about its influence on
+divorce and remember our estimate is whether marriage rate influences divorce
+so another way to express this is is the association between marriage rate and
+divorce solely a result of the fork their common cause age of marriage and
+we're going to develop an estimator to deal with this I have the three scatter
+plots implied by this DAG up on the slide to show you that it describes this point
+home you can't figure out the causal structure from these scatter plots the
+causes aren't in the data you have to know something about the variables and
+think about the directions of the arrows because many many different if these
+variables are just anonymous x y and z's many different DAGs would be
+compatible with these scatter plots okay so let's move on now to the we've got a
+basic scientific model at this point you'd want to generate a synthetic
+simulation and then when we get to the estimator we test it again in this
+example I'm going to skip that testing stage but that's not because it's not
+needed it's because I need the time to talk about more elaborate things okay so
+what do we need to do the idea here is that because of the presence of the fork
+if we want to estimate the causal effect of M we need to somehow break the fork
+and you know how to do that because we studied in abstraction the fork at the
+beginning of this section you break the fork as it were by stratifying by the
+common cause by stratifying by a and that's because within each level of a the
+association between M and D is gone or at least the part of the association
+between M and D that is caused by a will be removed with any level of a and so
+that's what we do we stratify our estimate by a and then we average the
+total cause across levels of a and that's the way to see what influence direct
+influence marriage rate has on divorce rate in the sample assuming this model I
+know it's a lot but we'll on the slides to come we come back to this point over
+and over again this is basically all we're doing for the remainder of this
+section okay what does it mean to stratify by continuous variables so in
+these samples before where I had x y and z z was discrete and that makes it easy
+to think about stratifying because there's only two values of z you can pull
+out the part of the sample where z equals zero measure a correlation pull out
+the part of the sample where z equals one measure a correlation yeah that's what
+I did but here the common cause a age of marriage is continuous now so what does it
+mean to stratify by continuous variable well it means the same thing for every
+value of a and we look at the association between M and D but there's an
+infinite number of values of a so what this means typically is we need some
+function that tells us how these relationships are associated and that
+lets us generate finds similar values of it of a implied another way to think
+about this is that if we say we demand the relationship between a and the
+others is linear then this lets us do the stratification quite simply and
+that's what linear regression does let me try to explain that a little a little
+better because this confused me for years and years when I was starting on
+statistics so if we have a regression model like this where the mean the
+expected average divorce rate is some intercept alpha plus a slope beta sub
+M and the marriage rate of that state I plus a slope beta sub a times the age
+of marriage to that state I every value of a produces a different relationship
+between D and M is a different expected level and then the slope beta sub M is
+going to measure that deviation as it's associated with him so by so in effect
+you're making alpha plus the age of marriage term into an intercept so you
+get a different expectation for every a right so imagine you're you're you're
+focused on marriage rate and that's perspective you're looking on that you
+want to measure it's it's association of the outcome work we're stratifying by
+age of marriage by making it part of the intercept in essence here so we get a
+different expected relationship counting for age of marriage that we then
+measure beta sub M against okay so we can develop a linear model here and I
+hope after last week there's no surprises here except that now that there's
+perhaps more symbols than there were in most of the examples last week but we
+have to develop priors here and the natural scales of these variables the
+rate of divorce the rate of marriage median age of marriage they're all
+quite weird and unless you're an expert demographer you're not going to have
+strong intuitions about what the priors are on these things scientifically and
+what their slopes should be and what they could be however there's this nice
+thing about linear regression models is that since they're little estimator
+machines you think past the generative model for a moment the scales on the
+variables are arbitrary so humans invent measurement scales so we can
+transform measurement scales for the sake of measurement as we like as long as
+we remember the transformations we did and we're sure that we can convert back
+to the original data so it's nearly always most convenient when working with
+linear regressions to standardize the variables you don't always need to do
+this in fact it's never necessary but it helps you develop priors and it helps
+the computer work more efficiently so we need we're going to standardize all
+these variables and then we're going to develop priors through prior predictive
+simulation what is standardized means standardized means to make the mean zero
+by subtracting the mean from the data and then divide by the same deviation and
+then you get a variable with a mean of zero and a standard deviation of one I
+say that here on this slide this is going to be something that's a feature of
+many but not all of the linear regression examples in the remainder of the
+course so we need some priors and for the sake of the lesson I want to show you
+what happens when you put in some pretty conventional linear regression priors
+for Bayesian models many Bayesian courses and textbooks will represent quite
+we'll propose quite flat priors like these normal zero ten priors this is an
+extremely flat prior normal zero ten has a variance of a hundred yeah so if you
+sample intercepts from normal zero ten well I'll show you what you'll get in a
+moment but within the region of the data this is essentially a flat
+distribution and the same for the slopes and what we're going to do this is
+already a fairly complicated model because the lines depend upon three
+different parameters alpha and two slopes and so if you're like me you don't
+have any intuition about what lines you're going to get if you simulate from
+this model is a generative process so let's just go ahead and do it let's
+simulate so the code on the screen here does the prior predictive simulation
+we're going to simulate 20 lines I just draw from these priors the zero ten
+normal distributions and then plot the implied lines in the space of the data
+and since we've standardized the divorce rate and and the median age of marriage
+and the marriage rate their standardized variables so if we plot them
+between minus two and two that's two standard deviations and that's more more
+than 95 percent of all the expected values so the data here's about the
+lines look like these are terrible right so he's the slopes are just too
+extreme going up and going down and that's because they're these normal zero
+ten priors it's not plausible that the x variable here explains all of the
+variation in divorce rate and that's what these folks are doing we want priors
+that are a bit more skeptical that are well possible so here's here's the
+example that'll work for standardized variables in many contexts but again you
+should always simulate with prior predictor simulation and check we have
+with standardized variables alpha is going to have the meaning of the average
+divorce rate which is zero because we set it at zero and so it makes sense to
+put a prior on alpha at zero and have it quite tight yeah and then let the
+slopes be looser because these are focused on our inferential questions
+yeah we've set alpha to zero by measurement we have not set the betas to
+anything by measurement but we know that they can't be well they can't be
+greater than one or less than one in any realistic sample once we standardize
+the variables because otherwise the X would explain all the variation
+essentially all the variation in the Y and that almost never happens at least
+in biology or social sciences so we simulate from these priors and you'll
+see these priors allow strong relationships going from the bottom
+left to the upper right and the upper left to the bottom right now both
+positive and negative but they also allow quite flat relationships where
+there's almost no association between the two so this these priors don't bake in
+any particular answer but they do put lower probability on ridiculous and
+impossible answers okay so we've got a scientific model we've got an estimator
+we've got some priors we like let's actually carry on with this and try to
+measure the causal effect of marriage rate on divorce rate here's how we do it
+so all this code is also in the book if there's some details that are missing
+here but this is the way I would do it I would make a short data list containing
+only the variables I want in the analysis there are many many other
+variables in the full data set and I standardize each of them and then I
+pass them to the estimator this case written with clap and this this code
+reflects the mathematical notation on the right quite closely you can look at
+the summary table and already get a sense of what's going on here we've got
+an intercept and two slopes and what I'm showing you in this plot this is the
+my pricy plot this is a sometimes called a forest plot or caterpillar plot these
+are the posterior means in the open circles for each unknown in the
+posterior distribution and the bars are 89 percent percentile intervals or
+compatibility intervals I sometimes call them and you can get a sense what's
+going on unsurprisingly the intercept alpha is centered on zero right it has
+to be by measurement we induce that through the transformation and the two
+slopes are the focus of our interest you can see that beta sub m bm there is
+close to zero and it spans both sides of it so any causal effect of marriage
+rate is this doesn't say the causal effect of marriage is zero just because
+the interval includes zero I'll say again this does not mean that the causal
+effect of marriage rate is zero just because this interval includes zero it's
+just as true that it could be negative right because the bar extends pretty far
+negative as well zero is not a special point that annihilates all other values
+okay however you'll see that compatibility interval is always closer to
+zero then beta sub a is a b a which is quite negative and nowhere close to zero
+there there's about the same level of uncertainty in both of these slopes
+the question we asked our estimate is what's the causal effect of m and often
+people will simply report the slope as the causal effect of m and that's not
+that's not terrible but it's not actually right or say it's not terrible
+because in a perfectly linear model after you do the right thing often you get
+an estimate that looks basically like the posterior distribution of the slope
+but that's only a feature of these really simple linear regressions and even
+slightly more complicated models and especially a nonlinear models it is
+never true that the causal effect for after the s-demand is a function of
+only one parameter of only one unknown in the posterior distribution so I want
+to show you how to do it the principled way so when you get to a more
+complicated model you'll already know how to do it right what we need to do
+surprise is a simulation we're going to simulate an intervention a causal effect
+is the manipulation of the generative model and what that means is we just
+lead an arrow so this notation I want to introduce you to P of D conditional on
+do m this means the distribution that's what the little p means in statistics
+distribution of the divorce rate when we intervene on m and this is different
+than just the statistical distribution of the conditional on m because it means
+we're mutilating the graph as it were we're deleting all arrows into m because
+when we intervene on m we're playing God we set its values and so all the arrows
+entering him disappear and so I show you on the right of this slide what this
+means in the absence of intervention the generative system is represented by
+that dad with the fork but when we do him we intervene on him the arrow
+entering him goes away if there were other arrows entering him they would go away
+too and so that's what we simulate when we simulate the causal effect of him on
+D we set the values of them and we hold the values of a constant we set values
+of them at different values and then we measure the differences it makes in D
+the divorce rate show you how that works so first I'm going to extract samples
+from the posterior distribution of the model we fit a couple slides back and
+then I'm going to run a thousand simulated states I know there aren't a
+thousand states but this is for the sake of measurement and what I'm going to
+do is I'm going to sample the empirically observed median age of marriage
+values I'm going to sample them with replacements so I can throw there are
+only 50 in the original samples is only 50 states what we want is a set of
+virtual states for the sake of measurement that have that same empirical
+distribution and then we're going to intervene on M on the marriage rate
+now first I'm going to do it for marriage rate equals zero what zero mean
+remember we standardize these variables so that's the sample mean now it just
+means the average marriage rate in sample and then with a post to remember
+that the with statement in R just means you don't you put all of the entries in
+post into scope so you don't have to use that posted dollar sign all the times
+the name be unknown so this just makes your code easier to read and easier to
+debug and then I simulate random normals random normal divorce rates yeah a
+thousand of them using the linear model formula for me for the mean the expected
+divorce rate conditional on M and A and I put the vector of simulated A's in
+there and I fixed M at zero you'll see the zero in the line then we do the same
+for M equals one which means one standard deviation above the mean that
+would be a really powerful intervention but you can do any intervention you want
+with this code just by changing these values code looks very similar but now
+there's a one next to BM and then we compute the contrast and I can plot the
+distribution of this contrast and this is the posterior distribution of the
+causal effect of intervening on M to increase it by one standard deviation on
+divorce rate and you'll see yeah it's centered on zero there's not much going
+on there but it could be bigger it could be small yeah there's a low
+probability that it could be bigger small so you can't say that there's no
+effect yeah because there's lots of variability in the population here and
+it's a limited sample but the guess is it's certainly smaller than the causal
+effect of A on D and you can calculate that as well using very similar code but
+you need to run another model and the reason is because if we were thinking
+about the distribution of D conditional on doing A as the causal effect of A on
+divorce rate of age emergent divorce rate there are no arrows to delete because
+there are no arrows in this tag entering A but we want to ignore M right we as you
+saw in the examples last week there was a there was a tag that was very similar
+to this if we want the total causal effect of age of marriage on D we don't
+want to use a model that includes M and why right maybe it was intuitive to you
+back then but I didn't really explain it I sort of asserted it and it works and
+you could test the code improve to yourself that it works but why does it
+work well it works because the path from A through M to D is called a pipe and
+that's the next elemental confound we're going to talk about we're going to talk
+about that after a break this is a conceptual sprint right here in this
+lecture so I think you can review what we've done so far in this lecture take a
+break walk around have some coffee socialize and when you come back I will
+be here
+welcome back before the break we had toured the fork and at the conclusion of
+the fork section I mentioned that there's also a pipe in the same example so
+now we need to understand the pipe as well because these different elemental
+compounds often appear in the same causal models the pipe looks very similar to
+the fork however now the arrows only go in one direction we still have X and Y
+we're interested in their association and there's this other variable Z that's
+in the middle of them but now Z is not a common cause Z doesn't influence X at all
+rather X is the cause of Z and Z is the cause of Y and X has no direct effect on
+Y Z is sometimes called a mediator it mediates or transmits the causal
+influence of X to Y so X and Y are associated because Z does that
+transmission and so again Y is not independent of X just like in the fork
+and once we stratify by Z just like with the fork there is no association Y is
+independent of X conditional on Z so statistically the pipe and the fork look
+the same but causally they're really different and we have to deal with them
+differently when we design estimators again a little animation just to help
+bring this home this helps some students we have little particles of causal
+influence leaving X in red and hitting Z and then those wrap the blue causal
+influence of Z and so Y is influenced both by X and Z but approximately only
+by Z and the consequence of that is when we stratify by values of Z there's
+no association left between X because any variation in X that will also be
+found in Y must pass through Z so again I'm going to do the same kind of little
+generative simulations for all of these compounds to help you understand them
+let's simulate discrete X Y's and Z's with random Bernoulli's just like before
+again we get an excess of pairs of X's and Y's that share the same value so Y is
+not independent of X if you learn X you learn a lot about Y and vice versa and
+there's a correlation of 0.64 in this particular simulation but if we stratify
+by Z we look within each look at the X's and Y's where Z equals zero or Z equals
+one again the correlations vanish very close to zero so Y is independent of X
+conditional on Z and Y well because everything that Y knows about X is
+already known by Z I'll say that again everything that Y knows about X or
+everything that X knows about Y is known by Z so once you learn Z there's
+nothing more to learn about the association between X and Y because all
+the association that is shared between X and Y passes through Z so Z knows
+everything about both so here's the continuous simulation to give you the
+same idea again discrete Z blue for for Z equals zero red for Z equals one and
+simulate Gaussian distributed X's and Y's that are conditional on Z so that
+both X and Y are larger when Z equals one and you'll see again in the black
+line is the linear regression for the whole sample ignoring Z there's a
+strong positive association here if you learn X you can predict Y but that's
+not because or rather that's because of the of the influence mediated by Z
+transmitted through Z and so after you've conditioned on Z there's no
+relationship yeah everything you could predict about Y using X is already
+accounted for in Z yeah so once you know Z learning X doesn't help you at all
+that's what this graph tells you let's we care about this because sometimes you
+want to include the mediator in the model and sometimes you don't and if
+you're not careful you can really radically mislead yourself by including
+it at the wrong time and I want to show you an example this is a wholly
+simulated example that pertains to an experiment because sometimes people
+think that if they're doing controlled experiments they don't need to bother
+with all this causal difference stuff but that's not the case you can mess up
+your experiment in analysis by including the wrong covariates so let me show you
+an example of this this is a plant growth experiment at least ideationally
+we're gonna imagine there are a hundred plants we've got a little greenhouse
+setup we're interested in fighting a kind of fungus like this white fungus you
+see on the leaf this sort of stuff is quite common in nature and also in
+greenhouses we're gonna treat half of the plants randomly assigned treatment
+with antifungal treatments and what then we're gonna measure the growth and the
+amount of fungus on each individual plant the estimate here is the causal
+effect of the treatment the antifungal treatment on plant growth here is the
+scientific model in abstract form we have the idea that the plants grow and
+there's a time zero when we before we apply the treatment that's how tall the
+plant is there that's h sub zero the start of time as it were the start of
+the experiment and then the height of time one is the end of the experiment when
+we measure the outcome and that there's an arrow from h zero to one because the
+taller the plant is a time zero the taller will be a time one yeah there's a
+causal influence and then there's the fungus the fungus also affects growth at
+time one the idea is that there was no fungus at least it was visible at time
+zero but it could develop during the course of the experiment and the fungus
+will influence the height of time one it will reduce the height of the plant
+to time one and then there's our treatment we apply the antifungal
+treatment to some of the replicant plants and the treatment has a direct
+effect on the fungus this is what we look this is supposedly how it works it
+reduces the growth rate of fungus and it could also have a direct effect on the
+height of the plant because it could it could be either beneficial the plant
+could benefit directly from the antifungal treatment or more likely it
+could be slightly toxic yeah to the plant and reduce its growth as well the
+experiment presumably works because of the direct effective treatment on fungus
+but we can't exclude the possibility that it also affects height directly
+okay we want to know the total causal effect of the treatment right that's
+our goal because that will answer the question or help answer the question is
+it worth using this treatment to increase the height of the plant now I
+want you to see is that the path from the treatment through the fungus to the
+height of the plant at the end of the experiment height h sub 1 is a pipe yeah
+and now the question is should we stratify by the amount of fungus because
+this is something we record at the end of the experiment we don't just measure
+the height of the plant we've also recorded the fungus it seems like good
+information to have right you'd like to know that but the answer is if our
+estimate is the total causal effect of the fungal treatment we should not
+stratify by fungus we should not put it in the estimator we should ignore it and
+the reason is because it would remove any association between the treatment and
+the final height of the plant that was influenced by the fungus yeah which is
+the whole point of the experiment is that the treatment reduces fungal growth
+but once you stratify by the fungus you you statistically removed any effect of
+the treatment through that path now there's still the direct effect but in
+residual effect what you didn't have estimating if you stratified by the
+presence of the absence of the fungus you'd only estimate the direct effect of
+the treatment on the height of the plant and that is not what you're after you
+want the total causal effect I in the book I give you synthetic data
+simulation for this experiment and the complete model so you can work through it
+I encourage you to do that there's no surprises there there's just a simple
+linear regression that does it and I show you both the model with the fungus
+and without it and it's the the one without it that gets the causal effect
+correct so sometimes you want to stratify by the mediator though and
+that's when you want to measure the direct effect yeah but if you want the
+total causal effect you should leave it out of the model this is a particular
+example of a perhaps the simplest example of what a phenomenon called post
+treatment bias and it's one of the more routine ways that experimenters ruin
+their experiments they ruin their experiments not during the conduct of
+the experiment but during the analysis phase if you stratify by a consequence
+of the treatment this is what post treatment means it's a post treatment
+variable it can sometimes not always but can sometimes and do something called
+post treatment bias as it would in the fungus case it gives you a misleading
+estimate of what you're after in this case and the fungus example it misleads
+us as a treatment doesn't work but it also misleads you in the other direction
+it can misleads you to think it does work and so usually it's a rule of thumb
+I don't like rules of thumb but everybody needs a place to start
+consequences of the treatment itself should not usually be included in an
+estimator I'll say that again consequences of the treatment itself
+should not usually be included in the estimator but then you're going to say
+but isn't the height of the plant also consequences of treatment yes but
+that's your outcome variable so obviously that's included in the
+estimator I'm talking about other consequences of the treatment other than
+the focus the measurement of focus there are exceptions to this sometimes things
+you measure during the experiment do need to be included and daggs will tell
+you that you still need to draw your causal assumptions you can't rest on
+rules of thumb but if you were going to use a rule of thumb this is the one I'd
+encourage so on the right I show you a table from a really nice paper about
+post treatment bias I encourage you to read this and this is a paper that
+surveys experimental studies and political science but you could do the
+same sort of survey for biology and they find that about half of published
+experiments condition on post treatment variables which is potentially
+inducing bias and bad imprints so just to drive this home post treatment bias
+isn't only result from blocking mediators when you don't want to there are a
+bunch of different tags that that can make it dangerous to stratify by post
+treatment variables that is consequences of your treatment and here's just an
+example on the right the dag on the right there's some treatment it
+influences something you can measure x this potential covariate that we're
+thinking about adding to our estimator and now I want you to imagine there's
+some unobserved confound if you haven't measured or haven't even imagined that is
+the common cause of the covariate and the outcome so now in this tag the
+treatment has no effect on the outcome at all that's what the experiments about
+there's nothing transmitted from x to y yeah if you condition on x in this
+example you will think the treatment works and to explain why I need to
+explain the next elemental compound the collider the collider is the third and
+for many students who are just getting into this material is the most upsetting
+elemental compound I think it's really exciting which is why I've given it the
+element of fire the collider behaves quite differently than the fork or the
+pipe but we still have x and y and z it's like an inverted fork now the arrows
+come from x and y into z and z is a collider it is jointly caused by x and
+y you can think about it as the arrows are colliding at z so in the collider
+structure x and y are not associated because they don't share causes yeah
+there's no common cause of x and y in this graph and so if you just take the
+sample and you look at the correlation between x and y they don't have joint
+information y is independent of x but x and y both influence z so now here's the
+weird thing if you stratify by z you look at each level of z and then you look
+at the values of x and y at each level of z they can have an arbitrarily strong
+association that is y is not independent of x conditional on z they have joint
+information within each level of z they have no joint information in the total
+sample this is weird I know we're going to have the same examples as before here's
+your cartoon version of the collider and red x and blue y coming in and z is
+influenced by both x and y are unassociated in this sort of graph because
+they have their own influences which I haven't pictured let's do the the
+discrete simulation just like in the previous examples a thousand triplets of
+Bernoulli variables now we simulate x and y first and they're completely
+independent of the other variables there would be random Bernoulli's and then z is
+a product of both and in this particular sample I make z z will be 1 90% of
+time when x plus y is greater than 0 if x plus y is less than 0 then only be 1
+20% of the time yeah so one way to think about this is this is kind of a
+thresholding process if either x or y is big enough then z can be equal to 1 so
+now we generate a contingency table there and you'll see you can probably
+just eyeball it and see there's no correlation between x and y in that
+contingency table y is independent of x and measure the correlation it's about
+0 but within each level of z there's a strong correlation so when z equals 0
+x and y are positively correlated when z equals 1 they're negatively correlated
+with one another yeah so the risk here or reason this is so important to
+understand is that these strong correlations could be read as causal and
+you might think that you're in another situation like a fork yeah and z is a
+common cause of x and y so again the sample the causes aren't in the data the
+sample correlations are not sufficient to know which causal structure you're
+dealing with each of these causal structures each of the elemental
+compounds can produce very similar samples the continuous illustration again
+if this helps now we get the flip of what happens before remember in the fork in
+the pipe the black line for the total sample shows a correlation when we don't
+condition on z now the black line shows no association unconditional on z but
+then when we when we stratify by z we get negative correlations between x and y
+that is that x tells you something about y and y is that it's the
+thresholding effect if either x or y is big enough then z can equal 1 and so
+that means that it's very plausible that large values of x are associated with
+smaller values of y as long as they're above the threshold required for z to
+equal 1 and vice versa as long as y is big enough x does x can be small and so
+you tend to get small values of either x or y associated with large values of the
+other and that's why you get a negative correlation in this case
+colliders appear for a variety of reasons sometimes our samples come already
+stratified by the collider and this is a kind of sampling bias or selection bias
+so let me give you an example that academics will appreciate but I think
+everybody who's done a PhD will understand what's going on here suppose
+there are 200 research grant applications and each is scored on its
+newsworthiness let's say it's potential for impact and its trustworthiness that
+is the rigor of its design these are the kinds of things that grant review
+panels talk about right because they're supposed to explicitly consider both
+impact or newsworthiness and the rigor of the design and I'm just for the sake of
+the experiment this is not a claim that this is what's really true of grant
+proposals let's say that they're completely unrelated and I simulated 200 on
+the plot on the right there no association between the two at all
+again this is not a claim about the truth it's just it would be sufficient to
+illustrate the point if these two things were associated the example would
+still hold you'd still have collider bias so now we imagine the ones that are
+funded and those are above a certain threshold that is if there's
+sufficiently newsworthy or sufficiently trustworthy that is the the sum of these
+two in a sense is sufficiently high then the grant can get funded you just need
+some compensatory selection mechanisms such that if a particular grant is
+somewhat boring it's not particularly newsworthy but it's incredibly rigorous
+it can still get funded and the other way around if a particular study is not
+particularly rigorous but it would be big if true that is it would have
+potentially high impact if it was good then it can still get funded and these
+are the points that I have not grayed out here and I just drawn a black
+regression line through them to show that there's a negative correlation in
+the funded grants between newsworthiness and trustworthiness and in fact the most
+newsworthy grants in this particular simulation have below average
+trustworthiness in the applicant pool I'll say that again the most newsworthy
+grants in this particular numerical example have below average trustworthiness
+in the applicant pool yeah but this isn't the feature of how grants are written
+because remember I made newsworthiness and trustworthiness independent of one
+another in the simulation it's a feature of selection this is a collider it's the
+same thing once you stratified by whether it was funded or not there's a
+correlation between these two variables even though there's no correlation
+before the decision of which is funded and that's collider bias so to draw this as a
+dag let a represent the awarding of a grant and his newsworthiness at T is
+trustworthiness there are few grants that are high in both because of the way I
+simulated them and so conditional on award there's a negative association so
+typically when we're looking at the features of awarded grants or people
+who've gotten jobs or published research articles we're not seeing the
+applicant pool or the submission pool so we're only seeing the post sample the
+post-selection sample and those samples have typically been invisibly and
+pathologically conditioned on colliders and so associations among the things you
+can measure about about a population post-election it's very hazardous to
+read as associations as causal lots of examples of collider bias in our daily
+one of my favorite examples there's a tendency it's not always true but there's
+a tendency in many metropolitan areas for the really best restaurants to be in
+terrible locations in bad neighborhoods or out in the margins and you have to
+take a train for 30 minutes to get to them and then frustratingly some of the
+worst restaurants are in the city center the tourist traps right the the
+Vapiano's sorry Vapiano I don't think he gets you but the Vapiano's of Europe
+and and I think what's going on here is that restaurants can survive two
+different ways either you have a you have good food or you have a good location
+of course you could have both if you're one of those rare restaurants it's so
+lucky but either would be sufficient and so this means that places with bad
+food can survive in good locations and places with good food can survive in
+bad locations yeah but restaurant with bad food in a bad location goes out of
+business and this will induce like conditioning on a collider because we
+only see the restaurants that have not gone out of business and this induces a
+correlation between these two things even though they're not causally
+associated there's nothing about being in a bad neighborhood that makes your food
+good okay and then famously people think this is true in in acting actors can
+succeed either by being attractive or being skilled so when you look at
+successful actors the best ones tend to be less attractive and the more
+attractive ones tend to be less skilled but again that's not necessarily because
+there's some causal relationship between them being an attractive person makes
+you a worse actor or vice versa it's just post-election
+okay those are colliders that arise during data collection so we have to be careful
+about that but there are also colliders that arise through how you design the
+estimator if you include a collider in your estimator you can produce a spurious
+association between an X and a Y of interest this is what I call endogenous
+colliders because they happen within your analysis and it's kind of a phantom
+statistical phantom that haunts your analysis so I want to work through again a
+generative simulation and I'm going to do this without a lot of code details but
+all the code details are in the book there's a simulation function and so on I'm
+going to show it to you graphically and explain the concepts the question is
+going to be does age influence happiness there's a big research literature on this
+actually so the estimate is the influence of age on a person's self-reported
+life satisfaction or happiness or some measure thereof and when you're designing
+influence like this a study like this lots of things you can measure about people
+and many of them you want to measure and potentially include in your analysis
+because they might be confound said that is they might be a common cause as part
+of a fork kind of very typical basic kind of con count one of them might be
+example marital status or anything else that makes people more or less happy
+so the idea here is that married people are more happy because they're married
+and so you want to include it in your analysis but suppose again just as a
+generative example let's suppose age has no influence at all on happiness I'm not
+arguing that's true it's just for the sake of the example but that both age and
+happiness influence marital status and the dag on the right of this slide
+represents this generative situation where age is happiness age is your age
+and both of those things influence being married why because happier people are
+more likely to get married who wants to marry someone who said and age influence
+this marriage that sounds weird to say it but remember age in in a causal model
+was just passage of time so the older you are the more chances you had to be
+married I'll say that again the older you are the more chances you've had to be
+married it's like a measure of the exposure to the risk of getting married
+yeah that makes sense and happy individuals per year of exposure are more likely
+to experience the event which is marriage so we write a simulation that contains
+these assumptions and again the code is in the book and you can run it from my
+rethinking package I want to show it to you as an animated example what we're
+looking at here are the assumptions on from the previous slide as a graph so we
+have age on the horizontal and each point is a simulated individual each row is
+just an individual moving through time and each vertical line is a cohort of babies
+and all of these points are moving from left to right and the gray ones are
+unmarried individuals starting at age 18 they're capable to get married so there's
+no under 18 in this simulation who gets married and then some individuals end up
+turning red and then marching across until 65 when they all move to the southern coast
+of Spain in retirement and the vertical axis here is happiness and I just arranged the
+individuals by their birth happiness from from lowest on the bottom row to highest on the top
+row and no one moves rows during their life all right the red dots you follow a red dot with
+your eyes you'll see it just moves across until 65 so as said on the previous slide age has no
+effect on happiness but age does influence the probability you get married quite obviously
+here right and happiness also influences probably get married there are more red points at the top
+where people are happier okay so we can take this sample you can run the simulations as long as you
+like harvest a bunch of synthetic individuals in their life histories and analyze the relationship
+between age and happiness and what happens well if you don't stratify by marital status there's
+no association between age and happiness right because it doesn't change with age
+but if we do stratify there's a negative association and the reason is you see this
+if you just stare at these points these static points look at just the red points the married
+individuals imagine fitting a line between age and happiness for only the red part of this sample
+there's a negative association right you see that it took the line would tilt down because there's
+more red points on the far right yeah I'll say that again imagine taking only the red points as a
+sample and then looking at the association between age and happiness and it's negative
+also for the gray points imagine taking only the unmarried individuals and looking at these
+associations between age and happiness that's also negative you'll see that it there's fewer
+gray points on the far right in the total sample there's no relationship between age and happiness
+but in each sub-sample stratified by marriage the relationship is negative and so if you
+included marital status in your estimator as a control you thought it would be something that
+would be necessary to avoid being confounded it would in fact induce the confound and you'd be
+misled to think that people get sadder as they age but in this example we know for a fact because
+we wrote the simulation it's just not true okay that's the fork the pipe and the collider there's
+one more and then I promise we'll be done with this lecture the descendant and the descendant
+easy because really it's just like a parasite on the other three but it's important to talk about it
+I think because it rises in lots of important processes so descendant is some variable we can
+measure that is influenced by something else so I say it's a parasite and it can be attached to any
+of the others here I draw it attached to a pipe but its effects depend upon what it's attached to
+and the way to think about this is that when you when you stratify by or condition on a descendant
+it's like conditioning on its parent so in this graph here in the upper right z is the parent of a
+yeah a is the descendant or sometimes called child of z and since a contains information about z
+when you include a in a model it's like including z yeah but just more weekly right because it's not
+a is not a carbon copy of the clone of z but it contains information about it
+so what happens in this particular example so imagine we have a pipe x and y are causally
+associated through z because z is a meteor right so y is not independent of x the descendant a
+also has information about z so if we stratify by a forget z for a moment say we stratify by a
+this will block or reduce the measured association between x and y
+here's a simulated example to show you that's true as before we simulate these random Bernoulli's
+the only thing that's new here is I want you to see that a is generated from z just like y is
+yeah but it's not it's not a carbon copy of because it's it's got its own error right it's got its own
+stochastic processes so now we look at in the total sample the associated between x and y and
+they're associated that's because x influences z and then z influences y all right a doesn't influence
+anything and that's just a descendant we get a correlation of 0.6 this is exactly what we saw
+before with the pipe now we stratify by a we're ignoring z right so say you're sophisticated
+and you said yeah I know z is a mediator and I've measured it but I'm not going to include it
+because Michael already told me I shouldn't do that if I'm interested in the causal effect of x
+so about this other thing a maybe I should include that and when you include a which is influenced
+partly by z you end up messing up your experiment because it isn't that the correlation goes away
+completely you see to look at the measured correlations on the bottom right but it's
+halved right you get the wrong estimate and that's that's just as bad
+descendants are everywhere in fact probably most of the variables we analyze in observational work
+and even much experimental work is actually just a proxy the thing we wish we could measure
+yeah the thing that's actually involved in causation so there's a whole family of statistical
+procedures which talk about this and use latent model late variables that to model the causes of
+interest and the measurements we have are just descendants of those of those processes or
+proxy so things like factory analysis measurement error models social network models right you
+can't see a social network it's just some phantom social construction that's supposed to predict
+relationships or behavior in relationships so lots of processes like this so on the
+dag on the right just as an example a and b are descendants of you which is some unobserved cause
+of x and y but b and a contain information about this unobserved confound and so actually you can
+de confound the dag on the right and build a useful estimator if a and b contain enough information
+about the unobserved compound to you so descendants aren't only dangerous they're
+measurements they're proxies for something and that also makes them useful
+okay that's everything i wanted to get through in this lecture i know it's a lot
+please look through the slides again reviews of foreign little confounds and and make sure
+that you understand how they're different and the examples that i embedded them in
+in the next lecture we're going to continue with the foreign little confounds we're going to
+combine them into larger tags and i want to show you some interesting and exotic things that can
+happen as a result and the first example will be what happens when they're unobserved confounds
+interacting with things like colliders all right and that's all for this lecture thank you for your
+attention in the next lecture we'll continue with this theme and then in the weeks to come
+we're going to focus on prediction and markup chain
+you

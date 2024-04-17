@@ -1,0 +1,1045 @@
+Welcome to lecture 8 of statistical rethinking 2023. In this lecture, we're going to return to the basic issue of how we compute a posterior distribution.
+The fine folks at the Bristol Science Center are here, seen throwing sausages on the floor. This is an odd British folk tradition going back hundreds of years, but it is also a mathematically legitimate way to approximate the digits of pi, 3.1415 and so on.
+Because the sausages are tossed at random and they randomly spin, they randomly intersect the lines only some of the time. And because they spin in a circle, the number of times they intersect the lines is related to pi.
+So in this case, 200 sausages were thrown, as is according to the Bristol tradition. 130 cross the line, 200 divided by 130 is approximately pi over 2.
+Starting in the 20th century, the early 20th century, randomness began to be exploited by scientists to do calculations. And there are now a large number of ways that we do advanced mathematics with random numbers.
+And we have books that are essentially full of pages like what you see on your screen. This must look like madness to somebody from hundreds of years ago, but it's not madness.
+There are legitimate algorithms that let us do difficult mathematics, difficult calculations that are hard to do any other way, and we accomplish them by generating random numbers.
+And that's what we're going to need to start doing going forward in the course is update posterior distributions using random number generators.
+And we're going to need to do that because the serious scientific modeling problems that we're going to address going forward require the calculation of more complicated and involved posterior distributions.
+And the most practical way to do those calculations to do the calculus is with random numbers.
+So let's revisit, for example, this marriage divorce agent marriage problem that I used to introduce the elemental confounds.
+What I disguised from you in this example is we haven't actually measured any of the three variables in the example.
+We've only observed their descendants, some error-prone estimate of it, any particular region of the United States.
+There's age of marriage. There's a distribution of the ages of marriages that people tend to get married in that region.
+There's the marriage rate and there's the divorce rate.
+But the data that we have available that I've made available to you as part of the course are only finite samples of data that are used to estimate those things.
+And so these are actually estimates.
+And the true things we have not observed but only the estimates marked here with the asterisks.
+How do we take into account the inaccuracy that is part of these estimates and do the statistics honestly?
+This gets even more complicated when we realize that, of course, there are other variables that are influencing the inaccuracy in different regions,
+like populations, smaller states have more inaccurate estimates of these three variables than larger states.
+Why? Because there's just less data.
+And therefore, there's different amounts of reliability for the different amounts of data in each row in the example I gave you.
+We can solve this problem statistically.
+Well, solve is a strong word. We can address it honestly and transparently, statistically.
+But in order to do that, we're going to need some new machinery.
+Another example, and one we'll deal with more today.
+There are a large number of important measurement problems, inferential problems in science that have the same basic structure,
+and it goes something like this.
+Suppose you're teaching a class, and there are a bunch of students in the class.
+And what you want to do as an instructor is, well, instruct them first of all,
+but then you want to assess their knowledge.
+Is the course working? Should you quit your job?
+So imagine there's some variable k here that represents the knowledge of a student.
+And what we'd like to do is assess their knowledge, but we can't do it directly because we can't read their minds.
+There's no way to peer into their brains and know what they've learned.
+Instead, we can only ask them questions or give them tests or homework assignments.
+And we can score those homework assignments, but this is obviously just a proxy for their knowledge.
+It's not 100% correlated with it.
+It's a pale reflection of what they know.
+It's also true that the test or instrument you use to assess their knowledge has its own hidden properties,
+which we may not be aware of.
+Like, for example, how hard it is when you or I design a test or homework assignment.
+We have some sense about how difficult it is, but we're often wrong about that.
+And then there are features of the person taking the exam that may influence their knowledge, how much they've learned.
+And so, for example, how hard-working they are, how much they study.
+But there are also maybe features of them that directly influence the score because of the biases of the test or instrument.
+Things that aren't actually a reflection of their knowledge, but nevertheless lead to biases in scoring.
+Lots of important measurement problems, both in science and outside of science, have this same causal structure,
+where there are unobserved or latent variables like knowledge and the features of the test or instrument or assessor or judge
+that influence the scoring.
+And so, scores are hard to interpret, but we must interpret them.
+For example, many people end up being judged for promotions or jobs or grants or their papers get refereed for journals.
+And this sort of setting has the same basic structure.
+There's the quality of some item, whether it's a job candidate or a paper or a grant proposal.
+And those items have features, and they're assigned evaluations by some referees.
+Those referees have hidden properties, like how harsh they are or their biases.
+And those things interact with the features and the quality of the item itself to produce an observed evaluation.
+We want to infer quality. How do we do that statistically?
+One more example, and then we'll get to the meat of the work of this lecture.
+I'm just trying to prime you for the things that we're going to be doing going forward using the tools that I'll introduce to you today.
+Social networks, very important part of behavioral research because people have relationships.
+And when you study those relationships, there are lots of awkward statistical things that arise.
+For example, suppose we have observed some behavior here, why?
+Sub-AB means it's a behavior from individual A directed at individual B.
+This could be a gift or a Christmas card or taking A takes B to the airport.
+And we think that people do nice things for specific other people and not third individuals, say C or D,
+because of the relationship in the dyads, this relationship of A and B.
+But we can't observe this relationship directly.
+This is the network or these directed ties that are the invisible relationships that explain social behavior.
+And we want to infer the network.
+What we mean is we're inferring some complicated structured latent variable.
+And it's not just the relationship of A towards B, but also the relationship of B towards A because it doesn't have to be symmetric, right?
+You might think that someone is your friend, but they may disagree.
+And then there are a bunch of other features of these individuals, which could also explain these are behavior Y,
+and also lead to the formation or prevent the formation of the relationships that we're interested in estimating.
+And these things are confounds in the narrow statistical sense.
+There are variables that we'd like to stratify by when we try to estimate the influence of or merely estimate the social network.
+And the thing about these features, which I've marked here as X on both sides, except A features of individual A and except B features of individual B,
+is they're also often unobservable.
+They can be things like personality.
+We don't even know what to measure.
+How do you make progress in a case like this where the only thing that's been observed is behavior,
+but we're imagining a bunch of latent variables that are actually causally driving all of that behavior?
+Well, you can make progress.
+All of these area statistics are very well developed.
+They depend upon models that have a number of inconvenient features.
+First, they have many, many unknowns or many parameters, sometimes more parameters than observations.
+And some of you will have been told that it is impossible to estimate more unknowns than you have observations, but it's not impossible.
+It's very possible, and we will do it.
+In fact, we have to do it to solve important scientific problems.
+Second, there are nested relationships among these unknowns.
+All the models we've seen so far in this course, the unknowns interact in a purely additive way.
+But there can be multiplicative or nested relationships among unknowns,
+and that makes the calculation of positive distributions more challenging.
+There are often bounded outcomes as well in realistic science problems.
+So far, I've tried to be nice by avoiding thinking about boundaries on observed variables.
+Everything's been nice, smooth, Gaussian outcomes.
+But soon we're going to start dealing with count variables, and those are bounded.
+The count can't go below zero.
+All of this mounts up to make the calculations quite difficult,
+and so we're going to need a more general framework for computing posterior distributions,
+and luckily it already exists and is likely already on your computer.
+Yeah, so when we reach the stage in my Drawing the Owl workflow, there's this Analyze the Data stage,
+and that's always left a bit vague.
+I'm telling you we're going to draw every step in the owl, but then I've black boxed what really goes on
+in computing the posterior distribution.
+So in this lecture, I want to give you an introduction to what is going on inside the box
+when the posterior distribution is calculated for the more advanced models we're going to be using going forward,
+which means I'm going to introduce you to Mark O'Chain Monte Carlo.
+So at the very beginning of the course, in the first week, when I computed the posterior distribution,
+did the Bayesian updating, we did it analytically.
+We could just count paths through the garden of working data, and in those cases, the simple cases from week one,
+we could actually do everything analytically because the integrals are easy to do,
+and you can get a closed form little function for the posterior, say for the posterior distribution.
+I also showed you in week one this trick called grid approximation,
+which is easier to understand for a lot of people where you divide up a continuous space of unknowns
+into a grid of any density that you like, and then just count paths through the garden,
+and you can always compute posterior distributions this way as well.
+It's just that it's very intensive.
+So the first approach, the analytical approach, is only possible in the simplest sorts of problems,
+and usually you have to structure them in awkward ways to even make it possible in that case.
+The grid approximation process is, in principle, always useful, always possible,
+but it's, in practice, hardly ever useful because it just takes too much calculation time.
+As the number of unknowns grows, the dimensionality of the grid grows,
+and it's just not practical in terms of computing time.
+The approach we've been using up until this week is called quadratic approximation,
+or Laplace approximation you may have heard called.
+This is an extremely useful technique.
+I don't have anything against it.
+There's a very similar algorithm that's used in non-Basian statistics,
+maximum likelihood, which is basically the same thing, although people won't like me saying that,
+but it's the same algorithm, and I even use the same engine.
+This is a great technique, but it's limited in the kinds of problems it can do well,
+and there are lots of important posterior distributions that are not approximately multivariate Gaussian,
+and so we want something more general that doesn't make strong assumptions
+about the approximate shape of the posterior distribution.
+And so we come to this technique, which is the workhorse of modern desktop statistics, Markov chain Monte Carlo.
+It's also intensive, but if you can use it on a wide range of arbitrarily,
+scientifically complex and realistic problems, and increasingly it scales really well too.
+For example, in my own work, I've used this technique on models that have tens of thousands of parameters with no problem at all.
+To introduce Markov chain Monte Carlo to you, I want to tell you a parable.
+It leaves the mathematics aside for a moment, so the parable goes like this.
+Suppose there's some Polynesian kingdom, and it has a benign monarch named King Markov seen here,
+showing his smoldering intensity, and King Markov is benign.
+He loves his people, and his contract with them is that he will visit them
+so that they can meet their monarch from time to time and feel watched over.
+There are a number of islands in King Markov's kingdom, which is called the Metropolis Archipelago.
+I'll show you one, two, three, four, five, six, seven islands here.
+His agreement is that he will tour these islands and spend time on them in proportion to their population sizes.
+The larger islands have more people, and he will visit those islands more often,
+wave at more people, kiss more babies, and so on.
+In the smaller islands, he will visit much less often, but always in proportion to the number of people there.
+This is his contract, and this is what he has agreed to do, and he's an honest man, and he wants to do it,
+but he's also not interested in careful record keeping or having a calendar.
+He likes to live in the moment, and so his demand he makes to his advisors
+is that he doesn't want to have some calendar about which island he's going to be in at any time.
+He wants to have some simple rule of thumb he can use on any given day
+to decide whether he stays on the same island or moves to another.
+There is an algorithm, it turns out, that will let him do that and still keep his promise.
+It has a series of steps.
+First, he needs to flip a coin or some other randomization device to choose an island left or right.
+Remember, this is an archipelago, so the islands are in an order.
+This gives him a proposal island, an island that the coin has proposed that he moved to.
+And since it's a fair coin, there's a half chance that he will go left and a half chance that he will go right.
+That's step one.
+So let's say he chose to go to the right.
+Now we have a proposal island.
+He says he's on island four.
+The proposal is to move to island five to decide whether he accepts the proposal.
+He needs to find the population of the proposal island,
+and he can ask someone or he can send an advisor across to island five to do that.
+Let's call that number P sub five, the population of the proposal island, island five in this case.
+He's on island four, so he needs the same information for island four, and that's easy to get as well.
+Let's call that P sub four, the population of island four, the island he's currently on.
+And then the rule is he moves to the proposal island with probability P five divided by P four.
+That is the population of the proposal island divided by the population of the current island he's on.
+And he needs something like a spinner or a bag with rocks in it or something like that in order to move with this probability.
+But there are lots of natural randomization devices like dice that can do this.
+This seems wild, I know, but it worked.
+And step five is, of course, to just repeat it every day.
+And in the long run, if he follows this algorithm faithfully, he will visit all the islands and he will visit them in proportion to their population sizes.
+But only in the long run.
+Let me show you what this looks like in animation.
+So what you're seeing on your screen here on the left is the metropolis archipelago, but I've made it into a ring.
+So it's easier to think about looping around so that the biggest island, which we're going to start the simulation on there, is Tin.
+It's got the red dot on it.
+It has got an island in each side of it as well.
+And you'll see that some of the islands are bigger than others and from one being the smallest and Tin being the largest.
+On the right, we're going to just count up a histogram of the number of visits that King Markov visits and shares his smoldering intensity with the citizens.
+So I'm going to start the animation and you can see what happens.
+It jumps around, goes back and forth between islands, sometimes makes long tours.
+We're starting to build up the counts.
+It doesn't look very proportional yet, but remember, island promised in the long run.
+There's a mathematical proof that this works, but in any particular simulation, it can take you a while to reach that expectation.
+But you see, it's already starting to take shape.
+And what happens is, it tends to stay on bigger islands and tends to move from smaller islands to larger islands and in the long run then ends up visiting in proportion.
+So what I can do, here's what it looks like in the very long run.
+You can see, after running it for thousands of days, we get an almost perfect proportional representation and the citizens feel cared for.
+Okay, obviously the metropolis archipelago doesn't exist and King Markov doesn't exist.
+Outside the realm of fiction, what you're seeing is the oldest and simplest Markov chain Monte Carlo algorithm that's called the metropolis algorithm.
+And this algorithm is used a lot.
+It has been used a lot for decades now.
+It's usually used to draw samples from posterior distribution, but it can be used for lots of other things too.
+It's used to take integrals.
+It's used to do calculus without having to actually do the calculus.
+You're sort of like tricking your computer into doing difficult calculus for you.
+The islands metaphorically are unknowns or parameter values.
+They are the candidate explanations of the observations that define the dimensions of the posterior distribution, the parameters in your models.
+The population size in this example is posterior probability.
+What we want the metropolis algorithm to do is to visit parameter values more often when they have higher posterior probability and that means we'll get more samples from them.
+The samples mean days visited.
+And this actually works and it can work for very large numbers of dimensions of parameters as well if you have enough computer time.
+So this is the way we usually view these things called Markov chains.
+It'll give you an idea why we call them chains.
+Chains just mean the sequence of draws from some distribution.
+And what I'm doing here on the screen is animating it where the vertical axis is the island visited of the position or the parameter value of King Markov.
+And the horizontal is the day.
+And you see he wanders around from island to island, but he collects a bunch of island samples in this.
+And this is the Markov chain.
+It's the chain of these random samples, his position on any given day.
+Markov chains have a particular property.
+There are lots of sequences of draws you could call a chain.
+And Markov chain has an interesting property in that the history doesn't matter.
+All that matters for the probability of what happens next is where you are right now.
+It doesn't matter what happened 10 days ago.
+And Monte Carlo is just a cute name that some mathematician decided that means random simulation has to do with a particular city where people gamble a lot.
+Okay, so if we scrunch up this Markov chain, you can see it a little better how it makes a sample over time.
+And if you take all the values that make up that red zigzaggy line and stack them up as a histogram, you'll have a posterior distribution.
+And if you let it run long enough, you'll have an excellent arbitrarily good estimate of the shape of the posterior distribution.
+And this is the so-called metropolis algorithm named after Nick Metropolis, who headed a group that was the first to use this in a scientific application.
+It's very easy to write, but it's often very inefficient and it's not used so much these days.
+We're not going to use the metropolis algorithm, but it inspired all the other methods.
+And it's the easiest to understand, so it's worth knowing a little bit about.
+I want to say not so much about exactly how the metropolis algorithm is programmed, but more about who programmed it first.
+Because I think the history of this is really interesting.
+The metropolis algorithm is now something you can teach to undergraduates and you can do it in a few lines of code, actually.
+It's so simple.
+But when it was first used, computers were much more primitive back then, and of course no one knew how to do this.
+And so as we're saying a little bit about the development of that.
+So this is the paper that's usually recognized as launching the Markov Chain Monte Carlo Computing Revolution.
+This paper with this very awful title equation of state calculations by fast computing machines.
+Fast computing machines for the time.
+This was 1953 when computers took up whole rooms.
+And this is the paper Metropolis Rosenbluth Teller and Teller that gives the metropolis algorithm its name.
+This paper has been cited last time I checked, over 47,000 times.
+It's kind of one of those papers that starts the whole field.
+The person who really did almost all the programming is this person in the upper right here, Ariana Rosenbluth.
+There's also the fencer on the left, when she still had the last name right.
+And Rosenbluth's contribution was to take the mathematical derivations and make a machine do them.
+And anybody who's ever tried to do mathematics with a computer knows that there's a whole bunch of other stuff that comes into play.
+So there's a great achievement when nobody knew if this was going to work at all to actually take the mathematical theory and make it work in the machine,
+in silicon.
+This is the machine that she did it on.
+This machine is called Maniac.
+Maniac took up a whole room.
+This thing had vacuum tubes and a whole fleet of people constantly replacing them.
+One of those kind of computers, yeah, from the 50s.
+And Maniac, which was one of the fastest computers in the world at the time,
+stands for Mathematical Analyzer, Numerical Integrator and Computer.
+You can guess they worked really hard on that acronym.
+And Maniac weighed 1,000 pounds.
+It only had 5 kilobytes of memory and it could do 70,000 multiplications per second.
+That is a lot.
+I don't think I can do 70,000 multiplications per second, at least not consciously.
+But if you compare that to a bargain laptop that you might own, which is 4 to 7 pounds,
+it'll have more than 8 million kilobytes of memory and could do billions of multiplications per second, no problem.
+But they made it work on this vacuum tube monster.
+These days, Markov Chain Monte Carlo is a diverse range of algorithms.
+It's not just a metropolis algorithm.
+People have worked really hard.
+And the last couple of decades, especially, things have gotten a lot better.
+There are many more people working on it and also computers are faster.
+The best methods these days are ones that use something called gradient.
+I'll explain them what that is as we get into the lecture.
+In particular, we're going to use a gradient-based method called Hamiltonian Monte Carlo.
+To understand what Hamiltonian Monte Carlo does, it'll help to understand the metropolis algorithm a little bit more.
+Let's take an animated view of it.
+What I'm going to show you is the basic Rosenbluth algorithm.
+Better known as the metropolis algorithm, but this is the fetch I'm trying to make happen right now.
+Let's see if we can get people to start calling it the Rosenbluth algorithm instead,
+because Nick Petropoulos didn't write any code.
+And the way the Rosenbluth algorithm works is, well, as I explained it with King Markov, you make proposals.
+You have a position in parameter space.
+So in two dimensions, like on the slide here, we've got a mean mu and then some sigma value.
+And here I'm drawing it on log sigma, so there's no boundaries.
+It's a smooth space.
+And what we have a position, and then we make a proposal.
+And the blue line here is a jump from a starting position to a proposed position.
+And you'll see the blue lines indicate proposals, and when they're rejected, there's a red dot,
+and we go back to where we were, and we make a new proposal.
+But when they're accepted, the individual crawls along the proposal line and moves.
+And these circles that are left behind is a trail of samples through the posterior distribution.
+And in the long run, these samples are combinations of parameter values,
+which are drawn from the actual posterior distribution that we want to sample from.
+What's great about an algorithm like this is that we don't know mathematically the distribution.
+We've defined its constraints, and we have some data that logically decides what it must be,
+but we can't do the integral calculus.
+Nobody can that can tell us what the distribution is mathematically,
+but we can still sample from it using an algorithm like this.
+This is a huge accomplishment, and it's incredibly non-obvious
+that we would use random numbers to do something like this.
+Okay.
+The Rosenblum's algorithm has a bunch of tunable properties that can make it more or less efficient,
+and when you try to use it in practice, usually you have to worry about these things.
+So I'm going to show you one particular thing about it.
+It's a trade-off, this thing called the step size.
+And you can think of this as the distribution of proposal lengths,
+how far away from your current position you're willing to move.
+And when it's large, like on the left, you explore the posterior distribution faster
+because the possible jumps are bigger, but many, many more of your proposals are rejected
+because you will make bad proposals into low probability spaces on the edge of the posterior distribution.
+And that's what you see on the left.
+It tends to get stuck in an area and make repeated rejections,
+those little red dots over and over again before it moves.
+And then, again, this wastes a lot of computer time.
+But you can traverse a big posterior distribution more quickly with larger steps.
+In contrast on the right, we have the same distribution, the same algorithm,
+but now the step size is smaller, so the maximum size of the posterior distribution
+of the proposal distance is much, much smaller.
+And in this case, proposals are much more likely to be accepted
+because proposals aren't into some wacky neighborhood with very low probability,
+but it takes you a very long time to explore anything
+because you're taking a bunch of samples that are right next to one another
+and contain essentially the same information about the distribution.
+And so the total, to see the total shape of the distribution takes much longer this way.
+This fundamental trade-off cannot be avoided in the Metropolis algorithm.
+It's just built into how its logic works.
+It doesn't make it wrong, it just makes it very inefficient,
+sometimes so inefficient that it's not practical to use.
+Okay, now we're going to talk about gradients and where they come in.
+So what I'm showing you on the screen here is a Gaussian distribution,
+the familiar bell curve.
+If we take the logarithm of a Gaussian distribution and multiply it by minus one,
+we get this, which I'm going to call a bucket, or a skate park.
+It's a parabola actually because Gaussian distributions are quadratic,
+which is why we call it the quadratic approximation.
+This is a perfect parabola.
+And the width of the parabola is proportional to sigma,
+and its location on the horizontal axis is mu, its mean.
+So when we view probability distributions in this log probability space,
+they're like buckets.
+And these buckets have a gradient in the sense that if you rolled a ball inside them,
+it would roll downhill towards the bottom of the Gaussian bucket.
+And this analogy works also in two dimensions.
+So on the left of this slide, I'm showing you a two-dimensional Gaussian distribution.
+It's now a hill, a Gaussian hill, in an x and a y dimension, and the z is the probability.
+If we take the logarithm and multiply it by minus one,
+now we get a two-dimensional Gaussian skate park as seen on the right of this slide.
+And again, if we rolled a marble into that thing, it would roll downhill towards the high probability space.
+And so this is a hint of a strategy we'd like to use,
+and we will of basically, well, rolling marbles inside the log probability distributions.
+So let's bring this metaphor home a bit.
+This is an actual skate bowl.
+I would call this a big bowl.
+I don't know what people in Europe call these things.
+And the very talented fellow who's skating through it is, of course, just exploiting physics.
+His skateboard doesn't know anything in a sense about the global shape of this bowl,
+but he doesn't have to.
+It just has to know which direction is up and which direction is down at the point it's at now,
+and gravity takes care of the rest.
+Now, there's some planning involved, of course, but you know what I mean.
+So with our analogy, you can think about this as this was a log probability distribution.
+The bottom of the bowl is the high probability space.
+That's where the marble is going to roll if it's left to its own devices,
+and the edge is low probability space.
+So how can we fling a marble or a skateboarder around this thing
+and collect information on their positions over time,
+such that those positions will be valid samples from the posterior distribution that the bowl represents?
+And that's the algorithm we're going to use as weird as that sounds.
+So here's the actual algorithm, not a virtual skate park, but for a posterior distribution that I've made.
+So the book has all the computational details for this.
+If you're interested, and there's many papers written on this method,
+I want to give you some animated intuition about how it works.
+This technique is called Hamiltonian Monte Carlo.
+The word Hamiltonian merely comes from a certain way of representing a physics simulation,
+a classic Newtonian simulation with velocity and so on.
+So same distribution as we had before with mu and log sigma.
+And now what I'm going to do, though, is I'm going to release the marble into this bowl.
+And the way we're looking at this top down, the center of this distribution is downhill,
+and the edges where the contours are closer together are the edge that is higher elevation with higher potential energy.
+So if we fling a marble from a random initial starting location and just let it roll according to the physics,
+and then stop it at a certain point and record its location,
+and then do it again from that location where we stopped it,
+we flick it again in another random direction at a random velocity,
+let it run, and then stop it.
+You'll see these simulations are going.
+Each of the black circles, which are the recorded in positions of the trajectories,
+these little simulated rolls through the skate park,
+each of those is a sample from the posterior distribution that gives it shape to this physics simulation.
+And in the long run, or the not so long run,
+you get a pretty good description of the shape of the bowl that our virtual marble is rolling around in.
+This is in two dimensions, but the algorithm works in any arbitrary number of dimensions.
+You just can't visualize it, right?
+So in three dimensions, it's pretty hard to visualize.
+In four, it's impossible.
+But we can do this for tens of thousands of dimensions.
+The computer doesn't mind because it doesn't need to visualize it.
+That's the same basic principle.
+There's this indimensional surface, and it's got some curvature,
+and we're going to run it like a physics simulation and let things roll around on it and record their positions.
+It's amazing.
+Again, this actually works.
+It's exploiting randomness, but it's also exploiting the physics metaphor
+and the fact that we can do analysis on that thing to prove that this works.
+So just to show you, there are things to tune about this as well, like step size.
+So the little segments in the blue trajectories are individual linear approximate steps in the physics simulation,
+and they define sort of the coarseness and speed of the virtual particles that we're using to take samples from this bowl.
+And if you make those steps and the trajectories, the steps big and the trajectories long, having many steps,
+then the skateboarder tends to loop around a bunch of time and do a bunch of tricks before reporting his position, finally.
+One of the side effects of this is if you tune it badly is you tend to return to where you started,
+and that's what you're seeing on the left.
+This is a so-called u-turn phenomenon where the trajectory turns around and comes back to near where it started,
+and this is inefficient.
+We don't want to do that.
+We want to stop in a different place.
+And so to use these algorithms in practice, you don't have to tune them,
+but if you do, you get much better performance because they won't return to where they start.
+On the right, we have a simulation that doesn't tend to do the u-turn,
+but it also takes a much longer time to explore the whole space because we're taking really small fine steps
+and we're not moving very far in any particular simulation,
+which means it takes much longer to get a good overall picture of the shape of the bowl.
+But one of the great virtues of this algorithm, the Hamiltonian Monte Carlo,
+is that it finds a path through the curvature of the shape.
+So here's a posterior distribution in two parameters that are highly correlated with one another,
+which is fine.
+Parameters can be highly correlated with one another.
+That doesn't break any law of probability theory.
+But a metropolis algorithm often has a problem sampling from such distributions
+because it doesn't know anything about the global shape.
+It's just making completely random proposals,
+and so it keeps making proposals out into the low probability space outside the,
+what you call that surfboard shape or pickle shape in the middle of the slide here.
+Hamiltonian Monte Carlo, in contrast, as you can see,
+moves around according to the curvature of the space in the middle
+and takes samples from the high probability region where it wants to be.
+So if you're interested in all the details of this algorithm and how I made those animations,
+it's all in the book.
+You want to look on pages starting at 276,
+and there's a long overthinking box that has a complete code example.
+It's not even that much code and relates it to the mathematics behind it.
+But by no means is it necessary to understand exactly how it's programmed
+to use this algorithm.
+That's not your job.
+That's the engineering job that's been done for you,
+and we're going to use a math library that does all this for us.
+And what the math library does is it gives us the most important ingredient,
+the gradients.
+So the gradients tell us which direction from any given point is uphill and downhill
+in every direction, in every dimension, in every parameter dimension.
+That's the gradient.
+So we need some way for any combination of parameter values
+to know which direction is uphill or downhill.
+Yeah.
+And so how do we get those things?
+Well, you can write them yourself by doing calculus.
+You can take the probability, the definition of the posterior distribution
+for your particular model, and you can use calculus
+like the chain rule to take the derivative of it in each direction
+with respect to each parameter, and you can get your gradients that way.
+That's a lot of work, and it means you have to rewrite your code
+every time you change your model.
+We'd rather have something that's just kind of like plug-and-go, right,
+that works.
+There are lots of algorithms that try to use approximate gradients
+numerically by something called finite differences.
+And in fact, that's what we've been doing so far with CLAP,
+which uses finite differences to estimate gradients.
+For big models, and especially for Markov chain Monte Carlo,
+that's not going to work because it's not accurate enough.
+And it descends into numerical nightmares.
+So what we're going to do instead is use this really slick technique
+called autodiff, which stands for automatic differentiation.
+What automatic differentiation does is it's a set of methods
+that actually takes derivatives of code.
+So you can program your model as code, as you've been doing,
+and then the autodiff library will find the derivative of your code.
+I know it sounds wild, but the reason it's possible is because
+every component function in your code has a known derivative.
+And it's a wonderful thing about derivatives is that there's this thing
+called the chain rule that lets us break them down into a set of smaller derivatives.
+And that's how an autodiff library works.
+It gives you symbolic derivatives of your model code so that they're accurate.
+This is used in not just in Bayesian statistics these days.
+So it's a workhorse in Bayesian statistics.
+It's used all over in machine learning.
+You may have heard the term back propagation, which is used a lot in neural networks.
+Back propagation is the same thing.
+It's just a particular application of it.
+The library we're going to use is called STAN.
+Well, STAN is kind of the whole ecosystem of software.
+The STAN math library does the autodiff.
+And STAN is a set of tools and interfaces for using that library.
+And this is what we're going to use.
+It's already on your computer probably, and you can use it.
+There are also really good libraries like Turing in the Julia environment
+that also use the same kinds of algorithms, but use a different math library.
+Those are excellent as well.
+STAN is not an acronym.
+Usually things in computing are like this or an acronym, but STAN is not an acronym.
+It's a name.
+It's named after this fellow, Stanislaw Ulam, who lived until 1984
+and made many, many important contributions in computing and mathematics and biology.
+And he actually worked on the Maniac project at Los Alamos.
+Here is an old photo that I quite like of him in one of the Maniac control rooms
+with his daughter Claire, who was fairly young at the time.
+And I'm not sure what he's gesturing at, but that terrible control panel
+I would not like to operate a computer with.
+Okay, that has been your introduction to, conceptually, to Markov Chain,
+why we need it and the cartoon version of how it works.
+Let's take a break now and purge some of that from our minds.
+After you've relaxed a bit and come back, we'll continue forward
+and I'll show you how to actually use it.
+Welcome back.
+Now, most people don't think of New Jersey on the eastern coast of the United States
+as a home of good wine, but it is.
+New Jersey grows and has grown for decades now some of the best wine in the world.
+That is according to international judges.
+It's a long history of how this happened.
+It hasn't always been true.
+There's not, as in some parts of Europe, hundreds of years of wine culture in New Jersey.
+But there's a very particular moment in this timeline of the development of New Jersey
+into a world center of wine growing.
+That is in 2012.
+In 2012, something happened in Princeton called the Judgment at Princeton.
+And the Judgment at Princeton is when an international panel of professional wine judges,
+both French and American, judged 20 different wines,
+10 French and 10 grown in and produced in New Jersey,
+and assigned 180 scores to these wines.
+And this is the judgment that put New Jersey on the international line map.
+We're going to look at this data set as an example of how to use Markov chain Monte Carlo,
+so I can introduce you to some of the due diligence involved in running Markov chains,
+but also a way for me to introduce a new kind of model to you,
+something called an item response model that is used to model scoring events like this,
+which are incredibly common.
+So let's make a dag, as always.
+We're interested in measuring the quality of individual wines,
+which I'm going to represent here with Q and Q's in a dashed circle because it's unobserved.
+We cannot directly determine the quality of the wine,
+because that is determined by the people, preferences of the judges.
+What we do get to observe is a score that is assigned,
+and each score is assigned by a particular judge.
+And judges also have unobservable characteristics,
+which influence the kinds of wines that they like.
+And so the score is a cause of both the quality of the wine and the disposition of the judge.
+And then there are aspects of the wine, which may also influence its score,
+either indirectly because, say, like wine origin, whether it's grown in New Jersey or in France,
+the wine origin will change the nature of the grapes and the kind of wine you get
+and how the wine is produced in different places as well.
+And so that may affect the quality, which influences the score indirectly,
+or there may be direct influences of the origin of the wine on score.
+How would that happen?
+Well, the most obvious way is through the bias of judges.
+If a French judge knows by reading the label that the wine was grown in New Jersey,
+that may actually reduce the judge's enjoyment and result in a lower scoring.
+And that's why in things like the judgment at Princeton,
+the origin of the judge is a likely cause of those preferences, of those biases.
+New Jersey judges are probably more likely to like New Jersey wines and French wines.
+And that's why in these sorts of judgments, they blind the judges to the origin.
+They remove all the labels. They don't have them in original containers or decenters.
+And that's to remove any direct effect of the origin of the wine on the scoring.
+So in the DAG I have on the screen here, there are no confounds, really.
+There are no backdoor paths to close.
+But our estimate is still going to require estimating wine quality and stratifying it by wine origin.
+And maybe we want to do that anyway, stratify by wine origin, because there might be a confound.
+If the blinding is not 100% accurate, as I've tried to indicate here with the dashed arrow,
+if judges can kind of taste some of the characteristics of a New Jersey wine and guess,
+or maybe the colors are a little different because the grapes are different,
+then that might activate their biases as well.
+And so stratifying by the wine origin could be useful for that reason, because it's a confound.
+Remember, we're trying to isolate the quality differences here.
+Our estimate in this analysis is going to be the association between the quality of the wine and its origin,
+as scored by the judges.
+And now, judge is not a confound, right?
+You learned the backdoor criterion in previous weeks,
+and there's no reason we have to stratify by judge in this analysis.
+But we're going to do so because judge is a competing cause of the score.
+Judges have their own biases, some of them are harsh, some of them are easy,
+some of them are discriminating, meaning that they give wines that are even a little bit different,
+wildly different scores.
+Some judges are non-discriminating, meaning they give almost all wines the same score.
+And those differences in the judges obscure our ability to measure the quality accurately.
+So if we can estimate those features of the judges, we can possibly do a better job.
+And there's a whole family of models, latent variable models, item response models,
+that are designed to deal with data structures of exactly this kind.
+So let's do an example of one.
+I'm going to build it up in components.
+I'm not going to do the end goal model all at once,
+and that's because that's not how I work, and it's not how you should work.
+You should build a small, simple model with one little splint or variable first,
+make sure it works, and then add in the next bit.
+And so on.
+These golems can get pretty complicated, and if you try to build them in one go,
+something will not work, and you won't know what it is.
+If you build them piece by piece and make sure after each little adjustment it still runs,
+you'll be in much better shape and you'll be much happier.
+Okay.
+So on this slide, first we just load the data, Wines 2012 as part of the resinking package,
+and I make a shortened data list with variable names to match the DAG in the upper right here.
+I've standardized the score.
+So in the original judgment, they could assign a wine between one and 20 points.
+I've just standardized that variable, which means I've made the mean zero and the standard deviation one.
+This is useful for defining the priors when we get down to the model below.
+After all, one to 20 is an arbitrary scale.
+Then we get to the model.
+This is still linear regression.
+We haven't really learned how to use anything else yet, but we will next week,
+empowered by Markov chains.
+We will do all kinds of stuff, and we make the mean of each.
+The way this data works is there's 180 scores, and each score has an associated judge and wine.
+And the variable W is the index of the wine, and the variable J is the index of the judge.
+That's their name, so to speak.
+And then X is an index for the origin.
+New Jersey is one, France is two, and Z is an index for the origin of the judge.
+Again, one for American, not just New Jersey, and two for France or Belgium.
+I think there's one Belgian judge.
+And then the model at the bottom, what I want you to notice is it looks just like a quat model,
+but the function is named Oolom after Stanislaw Oolom.
+And this will take the same kind of model formula that you used in the first part of the course,
+and it will build a Markov chain for it to sample the posterior distribution.
+And the Oolom model will return only samples, but you can interact with it,
+and in most of the same ways you can interact with a quat model fit.
+So the mean of each, the expected value of each score S is given by the quality parameter Q
+for that, the wine that received that score, whichever index W refers to.
+You remember categorical variables from weeks ago.
+And then I find that whole vector of Q variables, there are 20 of them because there are 20 wines,
+a normal zero one prior.
+Why normal zero one?
+Well, because the average score is zero.
+So the average wine must have a score, must have a quality of zero,
+and the standard deviation of the score is one.
+All right, so the quality dimension is latent and it's arbitrary,
+and so it scales arbitrary so we can do this effectively.
+So we pass the data, and then there's a couple of additional function arguments
+that you use when running Markov chains.
+The number of chains, chains equals four, and then of course,
+core is equal to four, and I'll explain these two things a little bit later as we move through.
+So just hang on while we get there.
+First, let's look at the Precy output just in the summary.
+So you run this model, again, it'll do some sampling,
+it'll build a Markov chain all by itself, you don't have to do anything,
+and do the automatic differentiation to find the gradients,
+and then it does the Hamiltonian simulation, you know, the virtual skate park,
+and then you can look at the parameter summary with Precy just like you could with the Quap model,
+and you see here the 20 wines, the 20 cube values, and one lone sigma at the bottom,
+and you'll see the wines do vary.
+That's the only thing I want you to get from this,
+and I also want you to notice that there are two new columns in the Precy output
+for an Oolong model that weren't present for Quap, and those are in F and are at four on the far right.
+We're going to explain those in a few slides, just hang on,
+but these are there because they're diagnostics to help you know if the Markov chain is efficient,
+and how good the approximation is of the posterior distribution.
+Okay, so when we draw the owl and we're using Markov chains,
+there's a certain amount of due diligence.
+After you run a new log model, you make some minimum checks to verify that the golem worked correctly,
+because the Hamiltonian simulation is complex, it works unreasonably well,
+but we still have to check it, and I want to introduce you to five different ways,
+five different things to think about and ways to check the efficiency of the chain
+and assess whether you need to adjust the model structure to make it run more effectively,
+and we'll deal with problems like this throughout the rest of the course,
+where I try to give you advice on how to make your code more efficient,
+to debug common problems and making these things run,
+because the truth is for scientifically realistic analytical problems,
+there are always coding problems and problems getting the thing to run,
+and there's no avoiding that.
+You can't fall back to some worse approximation without making even bigger problems for yourself.
+It's better to work a little bit harder and get an answer to the question you really want to ask.
+Okay, so I'm going to work through these one at a time,
+talk about trace plots and then something called trace rank plots,
+and then these, the same as measure R hat, you may have heard of already,
+and this thing called the number of effective samples,
+and then finally, I'll immediately mention divergent transitions,
+but I'll explain them in later lectures.
+Okay, so the first thing is trace plots,
+and these plots, maybe you've seen before,
+they're very commonly associated with markup chains,
+they're just the visualization of the markup chain.
+You just take the sequential samples to chain,
+and you plot them with the sample number in the sequence on the horizontal,
+and then the value of the parameter on the vertical,
+and here you see the trace plot for all 20 Q values from the model we just fit,
+and when you zoom into any one of these,
+you can see what you want to see for a good healthy markup chain
+is that it rapidly moves around the whole high probability region of the parameter space,
+zigzagging a lot.
+Sometimes people say like a fuzzy caterpillar is the idea.
+It looks like a noise pattern.
+I'll show you what a bad chain looks like in a moment.
+On these graphs, this is the default trace plot for the rethinking package for Oolong.
+The feed also shows an F at the top, the number of effective samples,
+bigger numbers are better.
+I'll talk about that a little bit later.
+Inside each of these plots, you notice there's a gray region and a white region.
+The gray region is the warm-up region.
+Those values are not samples from the posterior distribution.
+When Stan is trying to develop the markup chain,
+it spends a lot of time warming up,
+which means it's adapting the step length and the other things I showed you before the break
+that change the efficiency of Hamiltonian Monte Carlo.
+It's nice to visualize these because they give you an idea whether warm-up is effective or not,
+but it's the samples in the white region that you actually get to work with
+that are valid draws from the posterior distribution.
+What I just showed you is one chain, that blue hairy caterpillar,
+but we fit four chains and you usually want to fit more than one chain.
+You have to because it's the only way to assess something called convergence.
+Each markup chain is initiated from a different random starting location
+in the total space of possible parameter values.
+What you want to see is that from widely dispersed random starting location
+that all the chains converge to the same posterior distribution,
+and that's what's called convergence.
+Each chain explores the correct distribution and the same distribution.
+We're going to say chains equal four for four markup chains,
+and this is optional, but also cores equal four.
+Your computer almost certainly has between four and eight different sub-processors called cores,
+and you can run a parallel markup chain in each of them,
+so you usually want cores equal the same number of chains.
+Let's layer on the other chain.
+Here's the figure you saw before, and then here's the second chain,
+and what you want to see is that it overlays.
+It's exploring the same space as the first chain,
+and then the other two, and here's four chains all laying on top of one another,
+and now it really does look like some kind of colorful hairy caterpillar.
+This is what you're looking for with a good, efficient Hamiltonian Monte Carlo chain,
+is that it looks like this.
+I guarantee that it's the correct posterior distribution, but this is what you want to see.
+This is what a bad chain looks like, where it's wandering around.
+It doesn't look like a hairy caterpillar, or maybe it's a decaying hairy caterpillar.
+Zoom in on one, you get an idea.
+You see there's only two chains here, and they're not exploring the same space,
+and they wander around the space.
+They don't look like a fuzzy caterpillar at all.
+This kind of chain is usually, well, it's at least highly inefficient.
+This is a very inefficient exploration of the posterior distribution.
+It might also still be valid, often with chains that look this bad.
+If you ran them long enough, you would still get a valid approximation of the posterior distribution,
+but we don't want to wait that long, right?
+Often with Hamiltonian Monte Carlo, you only need a couple hundred samples to get a good picture
+of the posterior distribution because it explores the distribution so efficiently and quickly.
+I'll say that again.
+Often with Hamiltonian Monte Carlo, if it's configured correctly,
+you only need a couple hundred samples to get a good picture of the posterior distribution.
+But if your chain looks like this, you need thousands and thousands.
+That's why you'll sometimes see with Bayesian, particularly phylogenetic analyses,
+people taking millions of samples.
+That's because the Markov chain algorithms in that software is not so good.
+Also, nobody knows how to explore tree space.
+They take like five million samples and then pray.
+We don't pray.
+We think.
+Another diagnostic you can use to look at the quality of your Markov chains
+is this thing I'm very fond of called trace rank plots.
+I call them tranq plots.
+I know nobody else does, but I'm going to keep trying to make tranq happen.
+What a trace rank plot is, it's the same data that goes into making a trace plot.
+We just looked at, but now we take the rank orders of the samples and other values.
+What you do is you take, for any given parameter, you take all the values from all the chains
+and then you convert them to rank orders.
+Then you plot histograms of those rank orders for each chain.
+That's what you're looking at here.
+It makes this weird geometric shape.
+The point is that the peaks of those little bars are the peaks of the histogram.
+What you want to see is that all the chains are basically in the same place,
+that they're uniform.
+The rank orders, low ranks and high ranks, are not located within any particular chain.
+That's what you want to see.
+If it's all jumbled up, that's good.
+Here's what good is for the model we just ran.
+Here's the tranq plots for all of the 20 queue parameters, the wine quality chains.
+What you'll see is there's no particular color in any of these configurations,
+which is consistently above or below the others.
+This is what it looks like when it's bad.
+I messed up the algorithm and re-ran it.
+This is what you get instead.
+You get this case where it's a lot that's still jumbled,
+it's jumbled in a more sorted way.
+We can zoom in and you can see, for these in the middle,
+you'll see that, for example, the blue chain tends to be either above or below the others.
+This indicates poor exploration.
+Again, if you ran this chain long enough,
+maybe it would give you a perfectly valid approximation of the posterior distribution,
+but we'd rather have something that's efficient because that's much more reassuring.
+There are also numerical things, the things that appear in the pracy plot.
+The pracy table, like our hat, the most famous of them.
+Our hat is a chain convergence diagnostic.
+The way to think about it is it's like a variance ratio, like an F statistic.
+Those of you who know F statistics, here's the idea.
+If chains do converge, the beginning of the chain and the end of the chain
+are exploring the same place.
+The chain is not wandered into some new territory as time goes on.
+It keeps revisiting where it started.
+That means the chain is stationary and it's hopefully in the right place.
+You also want to see under convergence that the different independent chains
+are exploring the same place.
+They're returning to the same places.
+Our hat is a ratio of variances that assesses these things.
+As the total variance shrinks to average variance within chains,
+our hat approaches one.
+As the total variance, that is among all the chains,
+shrinks to be the average variance within chains, our hat approaches one.
+If this wasn't true, the chains are exploring different regions,
+then the total variance will be bigger than the variance within chains.
+The average variance within chains.
+You look inside one chain and you can see the variance within that chain.
+You do that for each chain and then take the average.
+That's the average variance within chains.
+It tells you how much chains vary internally.
+Then you look at the variance across chains.
+That's the total variance in all the chains.
+If that ratio approaches one, then that indicates convergence.
+It takes infinity to exactly get to one,
+but in practice this often happens very quickly for a good functioning chain.
+This is not a test.
+There's no magical value of our hat, which guarantees convergence.
+It just isn't.
+But if it's a big number over 1.1 or 1.2,
+you might need at least run the chain longer,
+but you might also want to do some fiddling to make things more effective,
+or maybe there's a real serious problem.
+The other thing you'll see in these tables is NF,
+the number of effective samples.
+People call this slightly different names all the time
+and have opinions about that effective sample size and so on.
+What you want to take away from this is the idea that this is an approximation
+of how long the chain would be if each sequential sample was completely independent of the one before it.
+Let me say that again.
+You ran a Markov chain and say it was 2,000 samples long.
+Let me do the real example.
+We ran four chains here and got 4,000 samples.
+The NF for Q1 is 2,962.
+What that's saying is approximately, this isn't the promise,
+it's a guide in approximation,
+is that there's as much information
+and any, sorry, I've done this all the wrong way.
+I've got to do that.
+The other numerical diagnostic you're going to see in the Preci table output is this thing NF.
+I call this the number of effective samples.
+Some people call it effective sample size.
+What you want to take away from this is that this is an approximation
+that says how long, how much information you've really got in your samples
+and it gives you that measure of how much information
+in terms of a counterfactual of how long the Markov chain would be
+if it were in some sense perfect, perfectly uncorrelated.
+That is, sequential samples were totally independent samples from the posterior distribution
+as if you had simply used a perfect random number generator.
+For example, if you wanted to simulate Gaussian draws in R,
+you would simply use R norm and every draw from R norm is independent of the one before it.
+In some sense, that's your ideal efficient Markov chain.
+Your chains won't be that good usually, but if we can assess how long the chain would be
+for the information you've got in your actual samples that you drew,
+which are correlated sequentially with one another,
+how long effectively is your chain from a shorter.
+Typically, NF is smaller than the number of samples you actually took
+because the perfect chain will need fewer samples.
+I'll say that again.
+Typically, NF is going to be smaller than the number of samples you actually took
+because the perfect chain will be shorter, wouldn't have had to have run as long
+to get the same amount of information as you've got in your more correlated chain.
+So when samples are auto-correlated, you end up with fewer effective samples
+because the sequential samples share information with one another.
+They're not independent draws.
+There's this thing called the ACF or auto-correlation function,
+and you can just dump Markov chain samples into this and get an assessment
+like I have here of the auto-correlation of sequential ones.
+So typically, there's always some local auto-correlation, like you see here,
+that's going from zero, which is any particular sample,
+and moving back in time, they're similar, but it fades very quickly.
+It is possible for some Markov chains for the effective number of samples
+to be bigger, actually, than the number of samples you took,
+and that's because sometimes a stand is so clever
+and Hamiltonian Monte Carlo is so efficient that it does better
+than completely random and independent.
+It finds dispersed parts of the posterior distribution,
+which are better than independent of one another, so it can explore even faster.
+That's an amazing thing.
+So when you do see that, if you do see it, it's not a bug.
+Okay.
+Let's come back to our model.
+We need to add, we need to stratify by the origin of the Y, this X variable,
+which is an index saying whether Y is from New Jersey or from France.
+And we're going to do the simplest form of stratification here.
+I'm going to add an offset O of X where O is a parameter.
+There's one for New Jersey and there's one for France.
+That is an offset, how much better on average wines from that origin are.
+And you can think of this as a mean, and then each of the Q's is an offset
+from each nation's mean.
+And I'll again assign this normal zero one prior.
+We can look at the plot, the crazy output this time,
+and make one of these caterpillar plots.
+We've got a lot of parameters.
+It might be more sense to see all those Q's.
+Those are the wine qualities.
+You can see the wines definitely do vary on average, particularly in wine number 18.
+Not so great.
+People didn't like that one.
+Some of the others get higher ratings.
+And then the two origin parameters down there at the bottom,
+their posterior distributions don't differ very much.
+There's not much evidence here that on average New Jersey wine is worse than French wine.
+Last step, now we're really going to make this into a fully grown-up item response
+kind of model or judge model.
+What I want to do now is introduce judge effects.
+So judges vary in how picky they are, both how hard they are on wines
+and how discriminating.
+So we're adding two parameters in here.
+And I know that I've modified the mu line,
+both in the mathematical version of this model and in the code.
+And I've added two new vectors of parameters, h and d.
+It takes a little bit of time to explain these by zooming in on the mathematical version of the model.
+We can talk about it.
+So the line for mu just defines the expected value of a score for any given combination of the predictor variables.
+As always, the Q parameters are wine quality, as we've seen before.
+And the O parameters are the origin offsets.
+And these are the two I've just added.
+The first is h.
+This is a judge's harshness.
+Each judge j, so h sub j of i is the judge on row i.
+It has an h parameter, and this h parameter indicates harshness, the harshness of a judge.
+What does harshness mean?
+You'll notice it's being subtracted from the quality of the wine and the origin offset.
+What that means is the harshness is how good a wine needs to be for this judge to rate it as average.
+I'll say that again.
+The harshness is how good the wine needs to be for this judge to rate it as average.
+So say a wine had quality two on this latent scale.
+If a judge has a harshness of two, that means it essentially subtracts two points from the wine.
+So a wine of quality two would be rated only as average, and a wine of quality three would be rated as quality one, and so on.
+Judges can also have negative harshness, and they can like everything and give everything the maximum score.
+And then in all of that stuff is in parentheses, and so that sum and the difference between the quality of the wine and the harshness of a judge is multiplied by this thing.
+D is the parameter, again, specific to each judge, that measures the judge's discrimination.
+What does that mean?
+Well, some judges make a big deal out of small differences in quality and give really dispersed scores to wines that are even a little bit different.
+Those are discriminating judges.
+Other judges are not very discriminating, and they tend to give even quite different wines similar scores.
+And that's what D does here, so it multiplies the difference.
+It either magnifies for big values of D, it magnifies the difference, and results in a bigger score, or a smaller score, as the case may be.
+And for small values of D, and the limit zero, which is the lowest D can get, a judge with a discrimination value of zero assigns all wines to be average.
+I'll say that again.
+A judge with discrimination value zero assigns all wines to be average, and we all know someone like that.
+But these are professional judges.
+They make discrimination.
+But still, they can vary in their discrimination.
+In this structure that you're seeing on the slide, this is a very common way to do a judge model, or an item response model.
+Okay.
+And the idea, we go through this extra machinery of the harshness and discrimination parameters, because these are the judge's biases are a competing cause of the score.
+And if we can model those things, we can get more precision on estimating quality.
+So we run this model.
+Again, I put some normal zero one priors on harshness and discrimination in a few weeks.
+I'll show you, we can do better than these priors, but I don't want to overload you today.
+And then I show you the pricey plot on the left hand part of this slide.
+Again, all the cues at the top, all the wine quality estimates.
+Again, you see wine 18 there, below zero, deep underwater.
+And I think that's a New Jersey red, actually.
+But most of the New Jersey wines are just all in the mix and indistinguishable from the French wines.
+And then you see the judge parameters on the bottom, the harshness parameters marked H.
+And you'll see that those vary quite a lot.
+The judges really are very different from one another.
+Judge four, for example, is very harsh.
+It's a positive harshness value.
+Judge four gave lower ratings than the other judges on average.
+Judge five and six are the flip side.
+They're easier judges.
+They tend to give higher scores to other things.
+And then judge eight again is quite harsh.
+And then the discrimination value is also very less than the harshness estimates as well.
+But some judges, particularly judge nine, are not nearly as discriminating as some of the others,
+particularly judge two is very discriminating.
+And their scores vary more.
+They scored the different wines much more differently from one another than the other judges did.
+Including those effects, again, we didn't go into this caring about the judges and their personalities,
+but since this is the competing cause of the score,
+the idea is we get better estimates of the underlying latent quality of the wine
+if we can deal with the features of the judges.
+Finally, here's the posterior distribution of the contrast between the average New Jersey wine
+and the average French wine, and there's a lot of probability both above and below.
+Knowing a wine is from New Jersey makes hardly any difference in your expectations of how good it is,
+at least for really good top shelf wine.
+When this judgment at Princeton was done and the results were released,
+many of the French judges were deeply embarrassed by the results that they did not know,
+and they rated New Jersey wines as equal to some of the best French wines.
+But that's how it is, it's a brave new world.
+Okay, I'm going to wrap up this lecture.
+I know there's been a lot here.
+When we start using more complicated models and Markov chains,
+it's routine to have problems getting the chain to work at first.
+But we work through it and you get better at it and you fix it.
+What I want you to understand is that often the chain is not working,
+not because of some technical issue or some problem with your computer or even with you.
+It's a problem with your model.
+That is, there's something about the scientific design of your model, which is bad.
+But we've missed it either because of the mistake or because we didn't think deeply enough
+about the relationships between the variables.
+And so it's good when you're having a malfunctioning software to loop back to your basic scientific questions as well,
+or assumptions because those are reflected in the model.
+And it may be that the posterior distribution is having trouble sampling
+because it doesn't make any sense.
+And one of the signs of that is this thing called a divergent transition.
+Divergent transitions are rejected proposals for Hamiltonian Monte Carlo.
+Now remember Metropolis, the Metropolis algorithm or the Rosenbruth algorithm we should call it,
+makes proposals and rejects a lot of them.
+In fact, in many cases, most proposals are rejected.
+But Hamiltonian Monte Carlo is efficient.
+It doesn't need to run nearly as long because typically nearly all of it's proposals are accepted
+because they're always within high probability space because they're rolling around the surface of the posterior distribution.
+But sometimes they get rejected and in this animation I'm showing you the red samples are rejected proposals
+and these are called divergent transitions.
+And they happen.
+And they don't mean necessarily that anything is broken.
+But if you're getting a lot of them, then the chain is exploring the space of the posterior distribution inefficiently.
+And it may be missing, completely missing, some regions of it.
+And that could result in biased estimates for some of your unknowns.
+And so you usually want to work to get rid of the divergences.
+Remember, they're just rejected samples.
+And when Metropolis runs, it rejects most of them.
+So there's nothing about rejecting a proposal that means the chain is bad.
+It's just for Hamiltonian since it can typically accept all of its proposals when it rejects any of them, it's a bit alarming.
+And it usually indicates there's something inefficient about it and we can address it.
+In the book, I show you some examples of bad models that generate a bunch of divergent transitions
+and how to address those, some of the more common causes of them.
+Often, it's unrealistically flat priors.
+But in a later lecture, when we start doing hierarchical models, multi-level models,
+we're going to talk much more about divergent transitions because they're much more common and they can do real damage.
+So just put a bookmark in that and we'll worry about it later.
+Okay, I want to sum up here.
+So really, the rise of Bayesian data analysis, applied Bayesian data analysis in the late 20th and now early 21st centuries
+has been because of an innovation in software and desktop computing.
+This kind of software, like Stan, was really pioneered by a project called the BUGS project.
+BUGS is an acronym for Bayesian analysis using Gibbs sampling.
+Gibbs sampling is like a variant of the metropolis algorithm or the Rosenblum algorithm, I should say.
+And a key member in this group is a fellow whose picture is on the right, Sir David Spiegelhalter.
+He was a well-known British statistician.
+And the BUGS project really catalyzed a tremendous amount of scientific computing and development algorithms
+and really sparked a revolution in allowing scientists to bypass a captive statistician
+and directly program and express their scientific models and draw samples from the posterior distributions of them.
+And this has been an amazing thing in the sciences, especially in biology but in all the sciences.
+And it also allows us to do things that we always knew we should be doing, like propagating measurement error,
+but had no effective way to do.
+And so as we go forward in this course, I'll show you how to do that as well
+because the Markov chains will make it much, much easier.
+Okay, that has been week four.
+In next week, we're going to start using Markov chains to visit new and exciting kinds of models we can do.
+But most of the coding technology is in place now for the rest of the course.
+There's no really new technical skills you're going to need to learn.
+The model formulas you're going to write are going to look very similar to the ones you've already been writing.
+They're just going to have some more ornaments to them.
+Those ornaments are going to be expressions of scientific assumptions, so we're not leaving that perspective behind.
+And so I'll see you next week.

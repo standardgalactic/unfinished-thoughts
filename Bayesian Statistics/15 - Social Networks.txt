@@ -1,0 +1,798 @@
+Welcome to lecture 15 of Statistical Rethinking, 2023.
+In this lecture and for the rest of the course, we're going to be looking at more specialized
+topics that are built on top of the tools you learned in the previous weeks.
+For this one, we're going to flow upstream to the community of Arundhak in Nicaragua.
+Arundhak is a community of Native Americans who, well, make a living for themselves and
+households assist one another extensively, like all human societies.
+And this involves lots of gift-giving and exchange and the like.
+And anthropologists work in these communities and collect data on these exchanges, and we're
+going to look at these exchanges because we're interested in human sociality and how human
+societies are successful because of their extensive cooperation and mutual aid.
+This is a big topic in all of the behavioral sciences, how human societies are cooperative
+and how they regulate cheating in cooperative institutions.
+Here's one of the most famous quotes in anthropology, at least, and also in sociology.
+This is from Peter Fleschen's 1961 book about the Inuit.
+Up in our country, we are human, and since we are human, we help each other.
+We don't like to hear anybody say thanks for that.
+So the implication here is that aid is given freely without any expectation of reciprocity.
+What I get today, you may get tomorrow.
+Up here, we say that by gifts, one makes slaves, and by whips, one makes dogs.
+The implication being that gift-giving often entails some obligation to give another gift
+later in return, and that would be reciprocity, another modification.
+So attempts to measure these different ways, different kinds of cooperative institutions,
+the generalized giving on one hand and reciprocity on the other are quite tricky.
+You can't really do it experimentally because we're interested in real communities, so we
+must deal with it observationally.
+The data that you get from these kinds of situations, where you look at who is given
+to what, are complicated to analyze.
+So we're going to look at that problem today, and we're going to use the multi-level modeling
+tools from last week to do it.
+The data set that we're going to work with is, as I said, from R&Doc, as collected by
+anthropologist Jeremy Koster, and this is one full year of food transfers among 25 different
+households.
+That's all the households in R&Doc.
+This is 300 dyads, and we'll be interested in dyadic exchanges among households.
+In total, there are 2,871 observed food transfers between households.
+Now I'm going to colloquially call these transfers gifts occasionally, but keep in mind that
+doesn't mean that they're cognized as gifts.
+That's one of the questions, are these transfers the result of reciprocal obligations or special
+relationships, on the one hand, or are they just generalized need-based transfers on the
+other?
+So how much sharing is explained by reciprocity within dyads, and how much just by generalized
+giving?
+There's a long history of really bad ways to analyze data like this.
+One of the worst would be to simply make a scatterplot like this, where we look at dyads
+each point of the dyad on the horizontal, we have A gives to B, or A and B are arbitrary
+labels, but within each dyad one of the houses gets called A, and one of the houses gets
+called B, and then we can make a plot like this, where on the horizontal we have A gives
+B, and then on the vertical we have the other direction, B gives A, and the naive expectation
+would be if there was a lot of reciprocity, then these points would be correlated.
+Somehow the more A gives B, the more B gives A.
+What I hope to show you today is that this simply does not work.
+You can simulate data, and I'll show you how, in which there's a lot of dyadic reciprocity,
+and yet there will not be much apparent correlation in the points.
+There's a mixture of things going on in these situations, and we have to think generatively
+to analyze observational data of this sort.
+So let's do that.
+Let's start to draw the owl.
+We have right now our couple circles, but we'll add some more circles and keep going.
+So the basic goal here is to understand how these gifts, remember I'm using the word gift
+a bit colloquially here, to transfer, are generated.
+The first thing to understand is there are features of the households in each dyad, household
+A and household B, on this very simple dag on this slide, which both influence whether
+A gives to B.
+That is, G sub AB is a direction where exchange A gives to B.
+That's something we've observed, but there may be lots of things about most households
+which influence that, like for example, under generalized giving if household A is wealthy
+and household B is poor, then that would predict an exchange.
+That is to say that the features of both households moderate giving in any particular direction.
+The other thing that could matter is that there's a special relationship between individuals
+in the households, and I'm going to call this a social tie, and this is where the social
+network as a concept enters into it.
+Social tie represents something other than the household features themselves, but some
+relationship that's a product of the history of the households or their common features
+that itself leads to giving.
+And this is the thing we can't observe.
+Social ties, they're latent concepts, it's like a relationship.
+It's not observable.
+Only behavior is observable, but the relationship can definitely cause behavior.
+And of course, this is symmetric.
+A and B are just labels.
+Everything here is exchangeable and should be symmetric.
+And so we make the other half of this dag for the other household.
+And there's a special relationship of B to A as well, and that could also motivate giving
+from A to B. And these ties are directional because they don't have to be symmetric, right?
+So you could think you're someone's friend, but they don't think that they're your friend.
+Or you can have client-patron relationships and all kinds of relationships that are asymmetric.
+So we allow for that as well.
+To fill this in a little bit conceptually, you want to think about features of households
+like where they are, households that are closer to one another, are more likely to make exchanges
+regardless of their social ties.
+Yes, the location of household A and location of household B will matter.
+I already mentioned wealth.
+And then there are a bunch of other things, like which kin group they're in.
+But bills may be regarded as networks, right?
+And things like friendship would be something we'd want to explain as a result of a social
+tie, some kind of relationship, which is not simply a product in the immediate term at
+least of things like wealth and location, where those features can cause social ties
+as well.
+So we have lines from household features to the social tie itself.
+This is the foundation of social network analysis.
+This kind of conceptual causal model.
+And these ties from A to B and B to A, this is a dyadic, a pair of dyadic directional
+relationships.
+If you have these for a full community, then you can plot them up in a network like I show
+on the right of this slide.
+And this is where the idea of the network comes from.
+But these things are not observable, the ties.
+And neither is the network.
+In fact, in some sense, the network doesn't even exist.
+It's just an abstraction that is supposed to help us make predictions about regularities
+in the social exchange among households, net some other factors like wealth and generalized
+giving and the like.
+So we can make predictions with this and we could also perhaps with causal inference make
+predictions about possible interventions like what would happen if everybody got wealthier
+or some particular king group got wealthier.
+There's a principled approach for analyzing social network data.
+I already mentioned one unprincipled approach, which is to make a scatter plot.
+There are lots of unprincipled approaches, unfortunately.
+And when I say unprincipled, what I mean is they've got no generative model underneath
+them that is about the process we're trying to understand.
+There's a large number of approaches to social network analysis which only imagine some null
+network and then try to say if the observed network deviates from the null, none of these
+methods really work.
+And I give you a citation at the bottom of this slide to a recent paper about the problems
+with these approaches.
+The problems with these approaches have been known for decades, actually, but like everything
+in behavioral sciences, they stick around until someone retires.
+These methods don't work because there is no unique way to permute a network.
+It is not a simple thing to think about a null model in a network situation.
+And even if you could, we're trying to do causal inference here, not testinal hypothesis.
+We need to know what did happen and make inferences about that.
+So this is not a good start and we should resist such ad hocary that is not premised
+upon some scientific model of interest.
+So we're going to draw the out, just as we've been doing for the whole course here.
+We're going to start with our estimate.
+We're interested in reciprocity and what explains it.
+That is the existence of the ties.
+And as you'll see, this is a pretty complicated but also very important kind of estimate in
+behavioral sciences.
+And we're going to build a generative model, then a statistical model, and then we'll finally
+get around to analyzing the sample.
+Okay, I showed you this tag before.
+We're going to focus on inferring ties for now and how ties influence transfers.
+This is a GAB in the middle of this tag.
+And you can see that there are a bunch of backdoor pass here through the household features,
+like the wealth of the households.
+These are confounds that can also influence gift giving.
+And so at some point, we're going to have to deal with those confounds in order to credibly
+estimate the influence of the social ties themselves.
+But we're going to start easy.
+This is a point where the generative model is complicated enough at this point that you
+don't want to tackle all pieces of it at once.
+You want to go in layers.
+We've got our big picture.
+We could complicate this tag even further.
+But when we start coding, we should probably simplify it first and do some basic testing
+and then layer in additional confounds and the like.
+So let's pretend for the moment that it's a bit simpler.
+And I'll show you what I mean as we get in there.
+And the idea is that we're going to be looping back and forth between numbers two and three
+in the owl drawing recipe here, scaffolding our way up, climbing the ladder, as it was.
+But only one bit of complexity at a time because otherwise it's just too hard.
+It just gets too confusing for anybody.
+I've been doing this for 20 years now.
+And I really have to go slow and scaffold my way up to complicated models.
+It's the only way I can be sure they work.
+So what I'm going to do is remove the back door pass.
+And I know they'll come back in later, but we begin simple.
+We understand this thing one piece at a time, what a sample would look like if household
+features didn't influence gift giving, but only influence ties.
+And then we'll come back and add in complexity afterwards.
+But this is plenty to start with.
+Okay, let's simulate a social network.
+I'm going to walk through this code very slowly.
+I haven't done much of walking through code in this course really especially for the simulations
+because they've been relatively simple, but this is a bit complicated and it's also really
+useful if you happen to study social networks to be able to do this.
+Okay.
+So we start.
+I'm just going to make an example with 25 households just like R&Doc.
+And then the first thing to do is just enumerate all the dyads and that's what the second line
+on the slide does.
+The R function, C-O-M-B-N combination gives you all the pairwise combinations of in things.
+So it tells me how many dyads there are.
+It's simple.
+Combinatoric.
+You learn this at some point in high school and then forgot it because you have a rich
+and entertaining life and it's not worth cluttering your brain with this, but you can
+look it up.
+There's a mathematical formula for this and R knows it so you can just have it do it.
+And it'll give you a list actually here.
+This is what we get from combinations.
+It gives you all the combinations.
+And so each row here is a dyad and then we have the numbers of the households, the indexes
+of the households in the columns one and two.
+There are actually 300 of these, but I'm only showing you the first 91 of them.
+And then I just count up how many there are.
+Now I'm going to simulate friendships, that is simulate social ties.
+But friendships are social ties that are shared.
+They go both ways.
+D and B to A. And I'm going to say 10% of dyads are friends and so I just simulate this
+list F for newly variable across all, for every dyad all 300 of them I randomly make
+10% of them friends.
+Now we simulate directed ties.
+Not all ties are because individuals are friends.
+Some people just are very well liked and everybody gives them things.
+And some people are particularly hated and nobody gives them things and that'll affect
+the rate of social ties as well.
+So I make a base right here alpha of social ties and this is almost certainly got to be
+less than a half because otherwise you've got a saturation of the network.
+And then I make this matrix called Y here and this is a matrix of ties.
+People who do social network analysis will recognize this as what's called an adjacency
+matrix but that's not important.
+It's just a matrix where households are on rows and columns and we can enter directed
+ties into it.
+Where the row is the sender of the tie and the column is the receiver and so each cell
+in the matrix tells us if there's a directed tie between two households in a particular
+direction.
+And then we can loop over all the rows and columns and simulate this.
+So that's all this code does.
+We loop over every row I and every column J and remember rows and columns are households
+but this is directional so we loop over it all and so we get both directions.
+We skip over the diagonal.
+Households don't give gifts to themselves in any meaningful sense of the word.
+And then we simulate directional tie just by identifying the dyad that is at that location
+and then pulling out whether they're friends you see the P underscore tie is going to be
+the probability of a tie for this dyad.
+I pull out whether they're friends that's F the dyad and then if they're not friends
+if they are friends they have a tie.
+If they're not friends they get the base rate chance alpha and that's all it is.
+And then we get into adjacency matrix.
+Run this code and play around with it and take a look at what it produces.
+I'm sorry I should have highlighted this.
+Let's always share ties in this but non-friends can also have direction ties they're just
+not necessarily shared.
+Now we have the invisible social network.
+We know it because this is our simulation but and now we use it to cause gifts and remember
+in this I removed the back doors there's no other source of gifts in this except the social
+ties.
+So we have a basic rate of gift giving there is lambda and then we just loop through all
+the dyads and we simulate gifts in both directions as a Poisson variable.
+Why Poisson?
+Because gifts are counts.
+There are numbers of transfers and they're strictly positive and there's no in principle
+maximum or at least the maximum is we never observe accounts anywhere close to the maximum.
+And then we can draw a network from this and this is the network drawn using the true
+adjacency matrix.
+It's true because we simulated it and you'll see that it is fairly sparse.
+There are households that just don't have relationships with other households and therefore
+are unlikely to send gifts to them.
+Alright that's the first generative model.
+Remember we're going to come back and do the generative model again because we're going
+to add in more causes but for now we're going to go ahead and develop a statistical model
+so that we can test the first layer of the statistical model with a simple generative
+model and then we'll keep looping back.
+I really recommend in your own research projects that you do this.
+You don't try to tackle everything at once.
+It's just too hard.
+Alright let's make the mathematical version of the statistical model and understand it
+conceptually and then we'll make the code.
+So when I think about each dyad there are two kinds of outcomes we've got to predict
+and the first is gifts from A to B and then we're going to take a look at gifts from B
+to A but of course the solution has to be symmetric because A and B are just labels
+and they're completely exchangeable.
+We're going to make this a Poisson variable because of the maximum entropy constraints.
+Remember it's a count and we don't observe any counts even close to any theoretical maximum.
+We model the Poisson variable with some rate lambda and lambda sub AB is the rate at which
+household A gives the household B. We put a log link on this and use our GLM strategy
+so alpha will be some average rate of gift giving in the community independent of social
+ties and then we just add the tie from A to B. This is just a parameter.
+There's no data in linear model well except the names of the households that let us know
+which tie to pull out of the social network matrix and we're going to let the ties be
+continuous here in this and so effectively they've got their coefficient built into them
+right.
+It's like a continuous measure of the tendency of household A to get the household B even
+though our simulation made ties discrete 0, 1.
+This is symmetric for gifts from B to A right we just flip all the A's for B's and all the
+B's for A and we're going to predict both of these things simultaneously.
+Now here's the cool part.
+We're interested in reciprocity and so we want to measure the extent to which these
+ties are shared between households that is like the friendships that I simulated and
+how much this then explains gift giving in the community and so what we do is we take
+these ties A, B and TBA within any dyad A, B and we give them a multivariate multilevel
+prior.
+This is just like varying effects from last week the previous lectures for any given dyad
+their tie variables are drawn from a bivariate normal with means of 0 because they're offsets
+from the mean alpha up there in the equations at the top and then we have a covariance matrix
+that specifies the extent to which there is reciprocity in social ties.
+How correlated these things are so in the lecture last week I talked about correlated
+varying effects and here's a case where that's really essential to the research question
+because it is the research question how correlated are social ties and so there's this parameter
+row that little kind of slanty P in the covariance matrix which measures the correlation between
+dyads.
+The thing about this matrix that you should see though is that there's only one standard
+deviation sigma because A and B are arbitrary labels and so it has to be perfectly symmetric
+in that case.
+It's just social ties vary and there's nothing special about B or A which gives them different
+standard deviations and so this is actually a simpler covariance matrix than the generalized
+ones we looked at last week.
+So we need a prior for the correlation and again I'm going to use the LKJ prior family
+for this and prior for the scale parameter sigma and that's it and then effectively what
+we've got here is partial pooling for network ties and this is extremely useful because
+there's much more behavior from some within some dyads than others and from some individuals
+than others and partial pooling can be very useful in these sorts of observational studies.
+Implementing this in code involves some annoying things but don't worry I'm here to help and
+the annoying bit is you've got to build this custom covariance matrix and so the code that
+does that is here in the middle of this formula list that will get passed into Oolong at the
+bottom.
+I don't want to spend a lot of time going into this, I discussed this in the book just
+to say that the trick, the real trick here is that you're going to repeat sigma sub t
+that is the standard deviation for social ties twice inside this thing and so there's
+this rep-vector command that I've smuggled into the code there to do it, otherwise it's
+the same kind of code you'd use for any kind of non-centered multivariate partial pooling
+prior.
+All right, run this model you're not going to have any trouble sampling from it, it samples
+smooth as butter, here are the trace rank plots for it, this is the kind of thing you
+want to see and then remember we're running this on synthetic data right now so we know
+the answer so we can look at how well the posterior captures the truth or is the finite
+sample so you don't expect to perfectly recapture the truth but you want to see that the posterior
+learns true things, yeah, that it can separate ties from no ties and that's what we get here
+on the left we're looking at posterior distribution, the mean social ties strength, when ties actually
+exist in blue and you'll see that's higher, it's usually positive and then in red when
+there's no tie and that's most of the probability mass is negative so the model can separate
+friends from non-friends in this case, can't do it perfectly remember because there's a
+base rate alpha of giving in the real in the synthetic data and so sometimes that will
+make it difficult to do, yeah.
+And then on the right we're trying to estimate that correlation within dyads that is the
+friendship rate and you'll see that the posterior distribution for that correlation is very
+high because a large fraction of the social ties in the community are those friendships,
+those 10% of the dyads are friends and so there is a high correlation within dyads and
+we can look at those, we know who the real friends are in the generative model and so
+we can plot those out, we can plot out the tie values for household A and household B
+and then highlight the friends and see that yes friends have higher tie values.
+So what you'd want to do if you were going to do a full check of this sort of stuff is
+try different sample sizes and show that as the sample size gets bigger the quality of
+the inference gets bigger and so on and you can go back to the synthetic code and run
+the model and play around with that yourself.
+You should also play around with the generative model a bit and typically there will be generative
+settings for any particular model which make it very hard to discover the truth so you
+should probably fish around for some of those, imagine if friends are very rare for example.
+At this point what we need to do is, well let's see what happens when we analyze the
+sample and then we'll loop back later to the generative model and remember we're going
+to analyze the sample with a model that ignores known confounds that is household features
+like wealth but I don't want to, let's take things easy because this is complicated,
+this is in this lecture we're the closest we've been yet to something that's like a real research
+problem. Okay let's load the real sample, these data are in the rethinking package
+and it's called Costa Lecky and one of the tables is Kale dyads and that's the one we're
+going to be focusing on now so I prepare a data list for the elements from Kale dyads that we
+need, the number of dyads, the number of households and we make an index variable
+for the dyads that's what the variable D is there and then I'm going to go ahead and put in the
+household IDs is HA and HB and then the actual observed variables GAB and GPA the gifts are made
+of B and the gifts from B to A and these are the real data now and then we can use that exact same
+formula from a few slides back and just pass it into Oolong but now we just change the input
+data to the real data and let's see what happens, well we're trying to estimate a correlation
+remember social ties within dyads and we find out here it's the posterior mean is 0.35 you can see
+the elements of the correlation matrix row there in the posterior distribution of the correlation
+in the lower right so what well these data are ignoring confounds at the household level
+consistent with a substantial amount of reciprocity at the household within dyads at the household level
+in gift giving and remember in the scatter plot there was no positive correlation at all
+yeah it's really paced to think generally about these sorts of problems and not just do some ad hoc
+thing like plot the data and tell a story because that doesn't work so let's deal with those confounds
+those factor or paths measured and unmeasured things about households can cause social ties but
+they can also directly cause gifts so let's put in an obvious one but I'd like to take a break first
+because I understand that was already a lot conceptually I'm going to encourage you to review
+it quickly and then actually take a break and take care of yourself and when you're ready I will be
+here waiting
+welcome back
+before the break we had built up a simple generative model but one that ignored confounding of a
+certain kind and then a statistical model analyzed it and done a basic test to show that it could
+work and then I analyzed the real sample provisionally but now we want to loop back and and follow due
+diligence and take care of these very plausible compounds which are the generalized household
+traits which could also cause giving independent of special social relationships these are the
+HA and HB things we know a lot about these households because these data were collected
+by an anthropologist an anthropologist in years literally living in these communities they know
+everybody all their family relationships and tons of things about their economic situations
+and their personal histories and so on so there's like an embarrassing amount known in these
+circumstances so we can use some of these variables to try to predict gift-giving
+independent of special relationships so we're going to modify the generative simulation now
+just remind you this is what we had before remember all we did was simulate some friendships
+and then simulate some dyads from that and friends or always have symmetric ties and
+non-friends sometimes sin ties to other individuals which may or may not be reciprocated
+right a popular person might be might receive gifts from lots of people because they're
+they're trying to flatter that person now we're going to simulate wealth as the kind
+of household feature which might matter under a generalized giving motivation remember this is
+one of the major hypotheses about giving communities that there's no expectation of return remember
+with gifts we make slaves with lips we make dogs there is giving that's just altruistic right or
+at least people report so so we're going to simulate a wealth variable standardized wealth
+variable for every household that's what i do at the top of this slide the variable w is just wealth
+on a standardized scale and and then i make some regression coefficients here point five is the
+effective wealth on giving richer households give more because they can afford it and then
+then the effective wealth on receiving b w r is negative and that's the effective wealth
+on receiving the rich get less and the poor get more now we simulate gifts
+just like before this code is very very similar to what we had before but in the linear models
+at the bottom we stick in the wealth variables and we use these regression coefficients to create
+offsets for the expected amount of gifts that the communities will receive you know i'm highlighting
+that here yeah so the wealth uh looking at gifts that may be on and then on the far right in the
+bottom right of this slide um we multiply w for household a the wealth of household a times the
+effect of wealth on giving because household a is in the giving role on this line and then the line
+right below it household b is in the giving role and so the b's and a's switch on these two
+okay now we have to amend the disco model uh to put these effects in and this is fairly
+straightforward you won't be surprised we can mirror the generative model in this case um and
+and plug these things uh into uh the generalized linear model portion the log lambda part of this
+model so let's compress this all together and then let's pull out the log lambda line and
+let's uh staple some new pieces onto it okay now we're going to create two new parameters
+one is a's generalized giving right so we have to do this first i know where's wealth right well
+one of the things we have to deal with is that household a may just be really nice independent
+of its wealth so we're going to deal with this issue first um uh as a kind of confound and we're
+going to let the parameter g sub a represent a's generalized tendency to give to any other household
+at all irrespective of what it is and we're going to let r sub b be b's generalized receiving
+yeah so you think about this is there may be households that just receive a lot because
+they're politically powerful and people want favors yeah but there may not be any reciprocity
+that would be like a generalized receiving effect um and there may be households that are
+particularly generous uh as well irrespective um of their wealth value yeah so these are
+like confounds latent confounds and we're going to model these first and then we're going to put
+wealth in so just hang on we're going to get it all in here we do this uh for both um households
+a and b you just see that the b's and the a switch right because in the first one a's in the giving
+role and b is in the receiving role and in the second one uh b is in the giving role and a is in
+the receiving role and then the rest of the model stays the same we still got our our multivariate
+normal prior for the social ties a and b that has the correlation row inside of it but we need um
+we need a prior for our new parameters g sub a and r sub a and that's also going to be multivariate
+normal because there's the cluster here is the household and not the dyad so for the multivariate
+normal for social ties we're clustering on dyad it's like a it's a varying effect clustered on
+dyads now we're clustering on each individual household a so every household a um and also the
+b but you know in this in this setting they're they're labeled a because it's arbitrary um gets a
+giving and receiving um feature right a latent tendency to give and a latent tendency to receive
+and we're going to have a full um uh covariance matrix for this so that the variation in giving
+and receiving can be independent of one another and there's a covariance between the two which is
+also something of interest to us research wise yeah our households that give the same that receive
+or is there some negative association between giving and receiving
+oh i should have highlighted this i'm sorry uh a is giving and receiving that's what g sub a and r
+sub a mean and uh then we have a full covariance matrix it's an ordinary one just like last week
+and we can parameterize it um just like last week is more convenient to use a separate correlation
+matrix and a vector of standard deviations just like in the lectures last week because then we
+can use uh the lkj correlation prior for the correlation matrix if you had more features
+of households you wanted to estimate and we could but i will resist the urge in this lecture
+we could just make this make this um most very normal have more dimensions and then
+we have more standard deviations and more correlations but the code really doesn't change very much
+okay let's sum up a bit and then we'll look at some code uh so we've got 25 households at top
+that's 300 dyads there's 600 observed counts for 2871 individual household transfers
+in terms of the parameter count here we've got 602 social network parameters
+in total and 53 household parameters so technically we have more parameters than observations
+i'll say that again we have more parameters than observations if you take 600 as the as the
+account of observations and uh in traditional statistics or in basic statistics uh this would
+be forbidden yeah it would not run at all but there's nothing wrong with this because it's a
+multi-level model and the relation isn't the number of parameters that matter it's their
+relationships yeah and the individual parameters aren't individually related uh tied to any
+particular outcome it's much more complicated than that and these sorts of models are just fine
+remember the minimum sample size for amazing analysis is one
+okay so we're going to make the model again um you can start with the uh list from before
+i want to walk through this a bit because i know it's it's a bit of a brick wall hitting you in the
+face here at the top we've got the observation model of the the Poisson distribution for giving
+from a to b and giving from b to a and then the two generalized linear models the lambdas
+and you'll see that i've added the giving and receiving there but what i've done for the giving
+and receiving is since they're going to be drawn from the same prior they're they're in a vector
+together g and r and the first element is the giving and the second element is the receiving
+and so you'll see for example log lambda ab we've got a which is the alpha the base rate of giving
+plus the social tie uh from a to b now that's the first element of t for the dyad d
+and then we add the giving for household a so we go to the g r matrix and we pull out the row for
+household a and we take column one because column one is the giving effect the generalized giving
+of household a and then we add the generalized receiving for household b so it's g r for household
+row is household b and the second column because that's where the receiving effect is
+i know this kind of index fiddling is annoying i don't like it either but it becomes very natural
+after a few a few uh projects that you work with it this is also why we do testing right
+as we make sure we get these things right and we discover little accidents where we type in the
+wrong index in the wrong place happens to everybody okay uh next we have the dyad effects just like
+before nothing has changed here this is exactly the same uh and then we have the dr matrix this is
+our new multivariate prior partial pooling prior uh the code's very similar this is that just the
+same standard non-centered stuff um that i introduced last week and i explained this kind of code in
+more detail in the book okay so remember this is synthetic data first um just for validation
+we run the the simulation code pass it into the model we get some we get a posterior distribution
+so um and in the simulation code remember the wealth is what's um creating generalized giving
+and receiving in the simulation and uh richer households give more and receive less and so
+there should be a negative correlation between giving and receiving in in the stat model and
+that's what we find we find generalized giving posterior distributions for generalized giving
+on the horizontal axis on the left on the plot on the left of this slide
+posterior distributions for generalized receiving on the vertical each point is a household and those
+ellipses are i think uh i forget what percent fifty percent um plausibility ellipses uh for
+for both parameters together and you'll see yeah the the wealthiest households um give more and
+receive the least like that one on the bottom of the plot that's a particularly wealthy household a
+real outlier and it gives a lot receives almost nothing and then in contrast the poorest households
+are receiving the most and that's just like the simulation assumed and then we've also
+got a posterior distribution for the correlations and giving and receiving and that is really dead
+negative exactly as we programmed it we can also again look at the stuff we looked at before the
+ties and um this model is still recovering social ties but is doing it even better now
+because we've taken care of this generalized uh compound effect yeah and so it's identifying
+friends a little bit better and it's identifying that reciprocity is really uh quite high
+note that that's reciprocity in social ties yeah not in giving that's the distinction
+it's reciprocity in in social ties
+now the real data same plot for the most part but now with the real data it's not exactly the same
+plot because we don't know the truth now for the real data but in the data from our doc we
+also find a negative relationship between giving and receiving you'll see in on the right on the
+left sorry of this slide the richest households give more and they receive the least and then on
+the right we see there's a negative correlation there the in blue the posterior distribution of
+the correlation between giving and receiving it's almost all negative and a strong correlation at the
+dyadic level between giving and receiving you'll see the posterior distribution of reciprocity
+is basically pushed up against the maximum in this case this is again this is reciprocity in
+social ties having netted out generalized giving and receiving yeah
+and this is the social network the posterior mean network we get from the inferred ties
+in this particular sample for our doc remember the social network doesn't exist it's an abstraction
+a kind of structured latent variable that is meant to predict regularities in the data to
+do some compression of the complex true sample and we could use it to make predictions or to
+make inferences about the consequences of interventions but we don't know it with certainty
+and so this is not the network in fact there is no the network there are a bunch of plausible
+networks there's a giant posterior cloud of them and we have a posterior distribution
+of social networks in the posterior that comes out of ulam here and i'm just animating through
+some random samples from it this is one way to get an idea of the uncertainty networks are highly
+structured things and so it's difficult to visualize their uncertainty but animation is is one way to
+do it there are lots of other techniques as well the point in this lecture is just to reinforce
+to you that you should not be summarizing it with a single picture and say that's the network
+and you should not do any subsequent analyses with only one network but always with all the
+networks in the posterior distribution this is extremely important anything you compute
+from a network like centrality or any of those other betweenness there are a bunch of social
+network measures that people like to report from networks we don't know any of those either
+so you need a posterior distribution of them yeah anything the network is uncertain so anything
+you compute about the network is also uncertain it should be done as a distribution
+okay this point i want to remind you social networks don't exist that's not an insult lots of
+really interesting and useful things in the sciences don't exist they're they're concepts
+they're statistically regularized latent entities that help us make predictions and inferences
+and that's their job and this is in a sense like all varying effects because social networks are
+structured varying effects they're placeholders for things we haven't measured directly or can't
+measure directly we can use in the model network ties using the features of dyads and that's what
+i've shown you so far we can use them to model giving and receiving generalized giving and receiving
+using household features we've done that often another very important thing to do in these
+kinds of analyses is sometimes we have information about the dyads about relationships that let us
+predict them these would be things like association and disease how often individuals from the
+households are seen together whether they socialize together whether they share kin and those are
+things we could also use to predict ties so if we're interested in understanding the causes
+of social ties other than they just existing is some varying effect we'd want to put variables
+like that in there to try to explain away the varying effects actually and so i want to show you
+an example of that and i'm not this lecture is pretty long so i'm going to skip over the code
+but the code is in the script in the script folder to produce all the slides that are about to come
+so we're going to modify this model now and we're going to add a model for the social network ties
+t but also for the generalized giving and receiving effects g and r because we're going to make those
+functions of wealth now they're going to make all of these three things functions things that used
+to be parameters so let's do this one at a time i've replaced t ab with fancy t ab and fancy t ab
+is a linear model it's not a parameter it's strictly a fun deterministic function of other
+parameters in this case there's t sub a b which is our varying effect from before and nothing
+has changed about that it's going to be estimated from the same multivariate prior and now we've
+added a little regression term here there's a coefficient of beta sub a to be estimated which
+is the effect of some empirical association index between a and b which is capital a sub a b
+and that's some data we might have about how often these households associate and you'll find this
+in the in the uh our index data um and then for giving same idea we replace ga with fancy ga in
+the top linear model and this is the deterministic function of our previous ga which is still the
+same varying effect as before and then a regression term beta sub w g that is the effect of wealth on
+giving and we multiply that by household a's wealth and this is exactly the same kind of term
+that existed in the generative model and then symmetrically for receiving the same idea replace
+r b with fancy r b uh the previous r b is in the linear model as an intercept and we add a regression
+term for the effect of wealth on receiving and we multiply that by household b's wealth
+make it symmetrical from b to a remember this model is always symmetrical and we can add
+all these new fancy linear models into the oolong code just like this having multiple linear models
+like this might look really annoying because in principle you could just substitute each of them
+into the it is a top line and that'll work just fine but i find this form is much easier to
+conceptualize and to debug and and also to teach the others it's just much more transparent what's
+going on and that means hopefully you'll make fewer errors or when you do make errors it'll be easier
+to discover them okay so if you run this uh i want you to see um on uh i think this is on the real
+data here uh you get what you expect if the new predictors we add are explaining um variation
+in in gifts between households then the standard deviation parameters for the varying effects should
+decline and that's what we see here the standard deviation among ties in the varying effects prior
+goes down when we add the association index that's shown in blue uh than the model that ignores the
+association index in red and that's because association index is really associated with
+social ties that is giving independent of generalized giving and wealth
+um and then we also estimate the giving and receiving effects wealthier households uh
+the posterior distribution on giving is uh well it's very wide uh but most of the mass is positive
+yeah and uh the posterior distribution for receiving in blue uh is is mostly negative
+so there really does seem to be that thing uh this effect that a lot of generalized giving and
+receiving and the negative correlation between generalized giving and receiving in the community
+has a lot to do with wealth differences and the wealthier households give a lot more
+and the um and the poorest households receive more
+okay there's a bunch of additional stuff uh you can do uh in these models and i just i've only
+scratched the surface of social network analysis um one of the things that another kind of confound
+that i haven't spoken about and i'm not going to actually run you through an analysis of this
+in the lecture but i feel like it's my duty to tell you about it is this thing called a triangle
+so social relationships at least in humans but also in other primates and many other animals
+tend to come in triangles this is a phenomenon called triangle closure and what that means is if
+there are three individuals or households in this case a b and c if a and b share ties then it's
+likely that a and c and b and c will also share ties and that's what we mean by the triangle being
+closed yeah all the edges are there and we see this a lot and there are different um generative
+hypotheses about why and they could all be true in different contexts that's a different extent
+one of them is this idea that is addressed by something called block models social network
+block models um the idea here is that you get triangle closure because ties are more common
+within certain groups like families or offices or the stompish uh in german speaking countries
+and uh that could be one reason that we tend to see dense regions of networks for there are a
+bunch of triangles there are other reasons too like for example relationships cause other
+relationships if a is friends with b um and friends would see then uh a will hang out with
+both b and c and they may meet one another and become friends yeah and that's another way that you
+can get triangle closure but it doesn't depend upon um shared locations or institutions like families
+or offices so we're going to think about that in terms of a dag just uh so you can exercise your
+dag drawing skills the idea is we have these blocks which i'm going to call k sub a and k sub b
+these is the block membership of households a and b these could be kin groups is what i was thinking
+and why i call it k and um that block membership can uh directly influence ties in combination with
+the other individuals block membership the idea is that um with for example the simplest block model
+would be if you're in the same block yeah you're much more likely to share a social tie yeah and
+so the social ties are joint functions of both blocks for for both in both households in the
+dyad and as you see again this is another kind of confound yeah another backdoor um
+okay one last thing to talk about in terms of the kind of networks you infer out of these things
+is that they're highly they're really sparse compared to the data themselves so if we just took
+the gift observed gift giving and we drew it as a network uh you would get what you get on the left
+here is called a raw data network and it's really dense because there's a lot of generalized giving
+in this community yeah rich rich households give quite a lot and so you get um uh basically almost
+every household gives to every other household a little bit uh in this in this community but the
+inferred uh relationship network um where there is high reciprocity is much sparser and that's what
+you see on the right and then this is just the posterior mean but you could run through the
+animation again and you get the same impression this is highly regularized relative to just the raw
+data so again uh social networks try to express regularities their varying effects uh and this
+is a good feature of using regularized inference for them um there are lots of analogous problems
+that where we've got the same basic uh issue there's a very dense amount of data some of it's
+regular some of it's irregular and there's a structured latent space that we project underneath
+this thing and to make inferences from and we want that space to be regularized so phylogenetic
+inference is very much like social network inference in spirit it's just the algorithms are a little
+different uh main problem being nobody really knows how to search tree space uh spatial um
+autoregressive problems also have this kind of issue to them as well um heritability inference
+models of knowledge uh for example the wine tasting example that I had when I introduced
+Markov chain Monte Carlo those kinds of models are meant to model latent knowledge of an individual
+and in that example it was the quality of the wine but if wines were students and they were being
+judged by tests it would be an issue of estimating their latent knowledge and that can be highly
+structured as well because it could have multiple dimensions that relate to one another in in a
+number of potential ways and then personality is a famous example in in psychological sciences
+none of these things really exist but they're often very very useful for describing regularities
+in observations that do exist okay um so in these cases the clusters are discreet and in all the
+examples I've done so far in the course when we've done varying effect models and we've wanted to
+do regularization the clusters have been unordered categories things like uh households in this
+example um but sometimes they're not uh we want to cluster on things and do regularization on
+continuous variables like age or distance uh or some kind of just similarity or similarity in time
+or distance um what do I mean do regularization in these cases well for age um ages that are
+similar to one another are more likely to share similar effects on the outcome I'll say that again
+age is more similar to one another or more likely to share similar functional effects on any given
+outcome and so we want to do partial pooling locally not globally with variables like age the
+same for distance entities that are near one another be they households or anything else
+more likely to share similar unobserved confounds and so if we were going to do partial pooling to
+estimate varying effects for households then we took into account distance we don't want to do
+partial pooling over the whole community irrespective of the distance but we want to pool households
+that are close to one another more yeah because imagine there's a household and there's uh where
+you have a lot of data and then right next to it is another household but you have no data from it
+you're going to make a prediction for this new household that you haven't sampled yet
+you wouldn't use the whole community well you would a little bit but the household right next to it
+is probably better information yeah I hope that's intuitive I'm telling you this story because
+that's what we're going to do in the next lecture I'm going to teach you how to do that with continuous
+categories and new partial pooling it's a topic called Gaussian processes we're going to apply it
+to spatial models we're into being near one another maybe more similar and to biogenetic
+and I hope to see you there
+are you still there here's a little bonus
+so one of the things you see a lot in scientific journals are variables that are perfectly
+deterministic functions of other variables this is most often used to construct an outcome
+variable that will be modeled using a regression or a generalized linear model
+and the reason this is usually done is that the authors seem to think that this is a way of doing
+statistical control that is if you divide some outcome by another variable you have controlled
+for the variable you divide by so you see things like all kinds of outcome variables which are
+ratios of measurements or differences of measurements or complex transformations of
+measurements the most common example that I know of is body mass index or bmi this is a very common
+health statistic which is a ratio of mass over the square of height and this is meant to control
+for height how it would scale with mass so that you can get deviations for mass as from
+mass expected for each height but it doesn't do that it just doesn't and it's a it's an ongoing
+shame of the medical literature that we continue to use this ratio at all
+if we're interested in mass we should model mass how it scales for height and in the second to last
+lecture of this course I will show you how to do that there are all kinds of rates and ratios
+similarly constructed anytime you see a per or something one of these ratios has been constructed
+and if it's used as an outcome variable well hold on to your seat so per capita anything per
+capita or per unit time and that is used as an outcome variable is bad news differences can
+similarly be very bad news things like change scores where you have some measurement at a later
+point in time and you subtract its value at an earlier point in time to look at the change
+after some treatment this is almost always a bad idea or differences from some reference
+values totally so it's not that these are always going to lead you astray but they're never justified
+approaches and we should really just use causal inference and causal modeling and model the
+functional relationships between things we actually measure so this bonus I want to give you some
+drawn out examples using some DAGs to support the scandalous things I just said
+so here's an example from the literature this is a preprint a preprint by some colleagues of mine
+and I'm not going to give you the citation because I'm not trying to shame or call anyone out this
+is such a really common thing people were taught to do this right there's if there's any guilt it's
+collective this is a sociological problem and we all share in in the blame and in this pollution
+in this paper it's a really interesting paper I think in this paper they're they're looking at
+relationships between economic growth and various things like kinship systems and what they do in
+the method section is they construct for their outcome variable the logarithm of GDP per capita
+this is quite common in particularly economic history papers and I don't really have any complaint
+about this variable actually it might be good it might not although since it's a ratio as well
+talked about in a bit the first thing it assumes is any effect of population on GDP if this is
+supposed to control for it must be linear right because you're just dividing by the population
+what they say in the paragraph is is the most transparent statement of the fallacy I have yet
+to see and that's why I've chosen to quote this paper they say they do not include population
+density in their regressions because their dependent variable their outcome variable is
+already in per capita terms but that does nothing dividing by population does not mean you have
+stratified by population let me try to draw that out for you using a DAG so we'll move we'll build
+up this DAG a little bit at a time it won't be that complicated so the thing to understand about a
+constructed variable a constructed dependent or outcome variable or even a constructed predictor
+is it's just a deterministic function of the things you've actually measured yeah so that's
+what we're going to do here we've got two variables that have actually been measured population
+and gross domestic product well gross domestic product is a weird one because you don't really
+measure it it's also a calculation but the sleep we have signed for the moment and GDP per capita
+is just a simple arithmetic function of the two it's one divided by the other it's not a measurement
+yeah that doesn't mean you can't use it as an outcome variable that's not what i'm arguing it's
+just that it it doesn't mean that anytime you run a regression on GDP per capita that you don't have
+to include population that will it it will have been automatically stratified by that is not true
+the simplest sense in which it's not true is the reason they're doing this is because they think
+that there's a line here the red one from P to GDP that is larger populations have larger economies
+yeah so if the population changes these expect the economic growth to change
+but this influence doesn't have to be linear in fact it's essentially impossible to think of a
+realistic economic model in which the causal influence of population on economic growth
+is going to be linear each additional person does not have the same effect on population growth
+i mean on on economic growth there would be diminishing returns yeah in most models that's
+the first reason you don't want to just do this adjustment in the back alleyway of dividing
+because when you do that you assume that every additional person has the same effect and that's
+why you're using per capita okay there are deeper problems though so in this particular paper they've
+got a cause of interest which is also plausibly influenced by population it's x on this graph
+and so the causal path of interest is this one from x through economic growth to GDP per capita
+i think that's fine GDP mediates the relationship between this cause and GDP per capita sure
+the problem is there's a backdoor path here you can see through population and the fact that
+GDP per capita has used population its calculation does nothing to close that backdoor absolutely
+nothing at all just by the logic of the deck yeah GDP is just a cause of that variable and you need
+to stratify by it to block the backdoor path okay another example many papers including social
+network papers the theme of this lecture have to deal with the fact that different individuals
+or households or dyads are observed for different amounts of time and this is awkward obviously
+because you have more sampling effort for some units and so you have way more data for them
+and you intuit because you're a clever person that what really matters are the rates of some
+behavior per unit time and so the the entities the households the people you've observed the most
+will have higher numbers of say gifts of transfers that's why on this graph it's like the gifts in
+the main lecture but that's partly because you observe them for more time so the observation
+time influences the number of observed transfers the longer you watch the more events you see
+and so we need to correct for observation time somehow the proper way to do that would be to
+put it on the right hand side of the equation as something called an exposure which i talked about
+in the book in the chapter on Poisson regression but there's this ad hoc procedure that you'll see
+in lots of papers even very recent ones where people will simply take the outcome variable and
+divide it by time and then run regressions linear regressions usually on those ratios and the reason
+is because they say this controls for the differences in observation time it does not
+it one of the big problems that arises from this of course is that we have yes we want to know the
+rates but you have to estimate those those are parameters they're not things you've observed
+yeah you can't just take this ratio and say that's the rate because it's not we don't know the rate
+the rate is a latent variable you need if you've observed a count of things you need a count model
+and then the parameters of that count model will give you rates yeah the big issue here in any finite
+sample is that when t is large you're going to have more precision about what the rate is
+and when t is small the observation time is small you'll have very little precision about what the
+rate is for that entity and if you just treat all these y over t variables as known with no
+measurement error all that is lost and everything could go wrong in your estimation essentially
+you're making the units with the smallest amount of sampling effort just as important in estimating
+your coefficients as the units with the most another example this is thing called change scores
+which is unfortunately popular and a number of literatures again it's one of these intuitive
+ad hoc procedures by which people think they're controlling for something so think back to
+the plant growth example when I introduced causal inference in the first half of the course and in
+this experiment there were a number of plants and we applied some treatment to them this is an
+experiment so you don't have to worry about confounding but the baseline height is obviously
+competing cause and it's a very powerful one and so we wanted to include it as well and back then
+in that lesson I included it on the right hand side I modeled it the relationship between baseline
+height and the post-treatment height as h0 and h1 but it's very common that people will want to
+analyze such experiments by computing something called the change score why not take h1 and
+subtract h0 now we've got the amount that the plant grew during the experiment and then we can
+just compare those across treatments okay yes that's intuitive but it's almost always a bad idea
+the first thing that's bad about it is just like in the case of the previous example
+the GDP example this explicitly assumes a linear relationship in growth right that
+the starting value of h0 has no effect on the growth rate in some non-linear way
+and that can't be true if there are any floor sealing effects on the measurement
+and height obviously has a floor yeah and it's going to have some possible sealing as well in
+the sense of how structurally tall can a plant get given what it's made out of yeah and so those
+the change score makes really strong but hidden assumptions about the functional relationships
+about how growth works in this if you've got an experiment that's not growth it's still it's going
+to make very strong and hidden assumptions and you can easily go wrong with this it's better than
+model how the growth works and and condition on baseline height as you win any other variable
+to get things right of course in a more complicated observational setting there could be more arrows
+here and then you're going to have to deal with back door pass as well okay i hope those examples
+help you get an intuition for why this is a bad idea and you shouldn't panic because it's very easy
+to avoid such mistakes just never do those things yeah arithmetic is not stratification i'm going to
+say that again arithmetic is not stratification arithmetic is great you should do a little bit
+every day it's good for you it's like eating your vegetables but it is not the same as stratifying
+by a proper adjustment set that you had deduced through some causal inference logic yeah that's
+what you need to do arithmetic solutions assume fixed relationships when you should really be
+estimating the functional relationships and in a way they can deal with imbalance and sampling
+across units that is all the methods i've been teaching in the class similarly i haven't mentioned
+it in this bonus but there's also a tradition of using model predictions like residuals as data in
+other models that this these are also constructed variables although they're not ratios or differences
+um these also don't necessarily perform statistical control in the way people think they do just because
+you used a variable in one regression you can't just take the predictions from that regression
+using in another model and say that the variables in the first regression have been controlled for
+you know from dag's it ain't that simple uh there's sorry there's no way out of of
+sketching your drawing your assumptions and justifying them logically so again don't panic
+there's an easy rule here what you need to do is just use causal logic to justify your analysis
+and then test it and demonstrate to your colleagues that given a certain set of assumptions this is
+a legitimate way to analyze the data one way to think about these sorts of traditions is
+they're part of this uh big malady in research that i call well statisticians have been using
+this word for two generations now although i guess nobody knows who invented it ad hocory
+and ad hocory is a joke from the latin phrase ad hoc which to speak casually in modern english
+just means something that's made up yeah for the sole purpose of the current case and what i mean
+by this in research is that ad hocory is making up some procedure for a given analysis and the
+only justification for it is intuition it seems plausible but no one's tested it no one's got a
+generative model you can't really say why and when it would work but you can push it forward if you
+can persuade the reviewers and the editor you see casual versions of this too which aren't
+elaborate things like computing ratios whenever someone says in a paper when they're justifying
+how they're going to look at the data with a phrase like we expect a correlation that's a very
+loaded phrase why do you expect a correlation what's the causal model you have here right it's not
+unreasonable to ask why they expect a correlation and to have them unpack it uh but way too often
+that's all you have we expect a correlation between these two things we looked for it we didn't find it
+therefore some argument's wrong that is not good research okay so um the larger attitude and maybe
+this is just me is that ad hoc procedures can sometimes work but they're not justified by
+probability theory and so they tend to go wrong at a very high rate yeah when they do work uh then
+we need to prove why using the same laws of probability theory yeah because if they do work
+it will be because of uh something we can understand through probability theory as logic
+in don't panic um i'm pointing out these these odd things to use so that uh you can spot them in
+other people's work and you can avoid doing them in your own but there's a very simple rule about
+how to do statistical modeling model what you measure yeah don't invent new measures as rates
+and think that those that that is a statistical procedure that somehow controls for confounding
+thanks
+you

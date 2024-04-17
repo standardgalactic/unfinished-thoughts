@@ -1,0 +1,846 @@
+Welcome to lecture 13 of Discovery Thinking 2023.
+When I was a kid, we were really into books.
+It was the early days of the internet, and I guess, you know, books were pretty cool.
+So at the library we used to exchange these two-year-old adventure books.
+They came in lots of exciting titles like Mystery of the Maya, Island of Time, Cup of Death.
+What was great about these books is that, well, they were distracting and entertaining,
+but they're a kind of book where you get to choose branching paths,
+like the Garden of Forking paths, the Garden of Forking data, from the first half of the course.
+You reach a particular page, and you're given a choice,
+and you choose which page to turn to next, and the story continues from there.
+And many, many stories are embedded in a single book through this branching path mechanism.
+So for this particular book, The Island of Time, this is its map, and there are 12 possible endings.
+And from a causal inference perspective, these books are relevant because you can explore counterfactuals.
+See what would have happened if you had done something else,
+the sort of thing we can never really do in real data analysis.
+Not all of these adventures are as simple as the previous one.
+The Mystery of the Maya, for example, has many, many more possible endings,
+39 in total, many other, many branching decisions that lead to those,
+and the possibility of returning to the start of various points for looping paths.
+A directed cyclic graph, if you will.
+Why am I talking about kids' books?
+Well, in this course, I encourage you to follow this idea of drawing the Bayesian owl.
+There's this five-step plan to success where we start with a clearly defined theoretical estimate,
+and then we use that to sketch out some causal models,
+make them into real generative models that can produce synthetic data,
+and then we use those two steps to build statistical models through the logic either of due calculus
+or by expressing the generative model directly as a statistical model.
+Then we need to test quality assurance is necessary.
+We use simulations from the generative model to validate the estimator,
+and then only then are we ready to analyze the real data.
+The disservice with this outline, of course, is that you know just from the course material
+and the homework assignments that it's much more complicated than this.
+There are branching paths.
+It's not a straight line from one to five.
+There are lots of little subjective decisions that have to be made in between.
+It's much more like this, the mystery of the model,
+and there are many, many possible endings, more than 39 for sure.
+But, reassuringly, when you reach a bad ending and your model doesn't work,
+you can return to the start and fix it.
+And those are the tools that is my responsibility to teach you.
+And part of that is when drawing a real owl, for example,
+there are many technical skills involved in technical details
+from the choice of pencil to how you hold it.
+And everybody knows that in every art form.
+And the analogy in statistical modeling are these little things about estimators
+and coding them and making them run, like the partial pooling thing
+that I showed you in the previous lecture last week.
+These are things that don't really appear in the generative model, typically.
+But if we leave them out, we leave information on the table.
+We could do better if we pick up that information and incorporate it correctly.
+So, I want to introduce you to your multi-level adventures,
+the sorts of branching paths that will lead you to good estimation.
+And from this point on in the course, I think the foundations are in place.
+Once you've got the basics of partial pooling,
+you've got a really strong foundation in advanced statistical modeling.
+And from there, you can choose to invest as little or as much as you want
+in any particular sub-area.
+There's no obligation to learn it all.
+That's why I think of it as the discourse up to the first multi-level modeling lecture
+is a foundational thing that most behavioral scientists and biological scientists need.
+And after that, you choose to specialize.
+And so, from here, I'd like to propose some choices, some branching paths for all of you
+who've been following along in the lectures or taking the course.
+And the first, of course, is to return to the start.
+Start again from the first lecture, come back through,
+take notes on what you didn't understand the first time,
+and really reinforce your foundation because that foundation is the most important thing.
+And after you've repeated that foundation, you'll feel much better
+because you'll understand it much better the second time through,
+give you a warm glow.
+And then you'll be in a much better position to decide what you want to do next.
+You could also, for the rest of this course, skim and index what remains.
+Don't put too much pressure on yourself.
+Just try to learn the details.
+Just sit back, be entertained, see the kinds of applications that are possible,
+index them in your mind so that if you come across a research problem
+and you need something like that, you can come back to this material
+and choose to go in as deeply as you need to.
+Third, you could pick and choose.
+You could skip over whole examples.
+I will not be offended and engage only with those topics that interest you
+but from here on out, it's going to get more specialized.
+This lecture and the next are not too specialized,
+but they will get increasingly specialized in the week after
+and we'll look at topics like social networks and phylogenies
+and it's perfectly fine not to be interested in those topics.
+But if you are interested in those topics, then wait for those and focus on those.
+You don't just, you have no obligation to focus on the other pieces.
+Fourth option is what I call the Bayesian flow,
+which is what I've been encouraging from the beginning.
+Try to learn enough in each part just to keep moving, just to hang on,
+and that's fine.
+I think it's actually a bit foolish to try to understand everything on the first go,
+but just enough to keep moving so that you're learning a little bit
+and then you can do it all again at some point.
+Or, better yet, stop and engage with your own research problems when you feel ready
+and if you reach a stopping point, a block, a wall in your own research problems,
+then you can come back here and find some help.
+So, the distinction that I need to prepare you for so that you can branch out
+and choose your path is this distinction between clusters and features in multi-level models.
+And basically every kind of advanced statistical model or machine learning model
+is some kind of multi-level model, so this distinction is very useful,
+no matter what you end up doing later.
+So, clusters are the groups, the subgroups in the data.
+Things like tanks in the tadpole example, stories in the Charlie example,
+individuals also in the Charlie example or in the tadpole example,
+or departments in the Berkeley admissions data example.
+These are subsets in which there are multiple observations.
+And then there are features and these are aspects of the model,
+things we'd like to estimate quite typically that may vary by cluster.
+And the way we program these different things into the models is the thing you want to get clear.
+And so, I'm going to do another lecture today which basically repeats
+and gets a bit more involved in the material from the previous lecture.
+So, in a sense there's not going to be anything new,
+and yet I hope it feels like it's a bit new because it's good to reinforce this basic distinction
+and understand what's going on.
+So, this gives me an opportunity to start introducing some of the branching paths
+and the mechanism of really making this stuff work.
+So, in the machinery when you choose to add more clusters,
+so often in a particular problem there's not just one kind of cluster that you want to structure by,
+not just tanks, not just stories, but also individuals and other things,
+not just regions of countries but countries themselves as well.
+When you add more clusters to the data,
+I actually think this is the least complicated thing.
+You need more index variables, so it's just categorical variables like before,
+and you just need to add population priors for each.
+So, this is not the hard problem at all.
+It's just copying and pasting and renaming parameters for the most part.
+Adding features is where the subtlety lies, and that's what we're going to talk about today.
+When you add features, you add parameters, sometimes quite a lot of parameters,
+hundreds or thousands or tens of thousands.
+And what this means is there are more dimensions in each population prior
+because there are more aspects of each cluster which can vary,
+and this leads to additional complexity and additional interpretation issues.
+So, I'm going to slowly move through an example which I'll build over this lecture
+and the next to help you understand this engineering, if you will,
+and why it's really useful for research.
+One of the things that helps me not get too lost in the possible branching past
+is to keep reminding myself what I'm trying to do.
+This is step one of drawing the L.
+And varying effects for us are a way to try to estimate unmeasured confounds.
+This is quite often what they're for.
+Confounds in the soft sense of competing causes,
+or confounds in the hard sense of common causes that are unobserved.
+So, the varying effect strategy to remind you is we have unmeasured features of the clusters.
+We believe they exist, or they are worried that they exist,
+and these leave some imprint on the data.
+But we have multiple observations from each cluster,
+and this gives us the possibility to actually estimate things we have not measured.
+And the reason we use partial pooling is because it gives us better estimates
+of those things because it borrows strengths from across the clusters.
+From a predictive perspective, this is important because it gives us better estimates
+and is more accurate in our predictions.
+It gives us regularization.
+From a causal perspective, there are inferential threats.
+The things we have not measured are the most terrifying things.
+But repeat observations within clusters give us some hope.
+You've already seen some examples of this.
+Thanks back to the introductory causal inference lectures.
+This example of education of grandparents influence on the education of their own children
+and their grandchildren.
+And I introduced the idea of this haunting that neighborhoods induce shared exposures
+between parents and their kids,
+and this is a thing that stops us from doing a mediation analysis
+on measuring the direct effect of grandparents on their children.
+But if we have families in the same neighborhoods,
+then we have repeat observations on those neighborhoods,
+and then we can use estimation, varying effects estimates
+to estimate those unmeasured features of neighborhoods potentially.
+In the trolley problem example,
+I ended that example by talking about the fact that each individual
+had responded to, I think, 30 different trolley problems,
+and individuals vary a lot in how they make use of the subjective scale.
+And that adds a lot of noise to the responses as this is a competing cause.
+If we could estimate those individual features,
+let's just call it personality,
+that affects how reactive they are to the scale,
+that would help us get better estimates of the treatment effects.
+I think it's also quite likely in that particular experiment
+that these individual features also affect participation,
+and therefore those unmeasured individual features may be a confound,
+and so it's even worse than that,
+that they're sampling bias through those personality features.
+A political science example.
+So I had a colleague back in California
+who was really interested in why some countries go to war
+and some governmental forms go to war.
+There's this kind of folk saying that democracies never go to war against one another.
+And so you can imagine in a schematic,
+you've got this idea that you have some time series
+and there are periods in which different nations are at war with one another,
+and they have different governmental forms, G1 and G2 at that time,
+and you've measured some other stuff about them,
+like their economies and so on.
+Those are the X1 and X2 variables of the countries 1 and 2.
+And the problem in inference in this,
+which makes this a sort of never-ending debate,
+is that there are lots of potentially unmeasured things about nations
+that can influence all of these variables and therefore are confound,
+things like their geography, their natural resources,
+their cultural history, and so on.
+And these are things that we might be able to estimate with repeat observations.
+So the point of all these examples is to say we're interested in varying effects
+both from a predictive perspective because they regularize
+and from a causal inference perspective because it's a chance for us
+to estimate unmeasured confounds.
+There's an alternative approach called the fixed effect approach.
+If you watched one of the bonus rounds from last week,
+I described it there, but if you didn't very quickly,
+fixed effects are varying effects with an infinite standard deviation,
+and so they don't do any pooling at all.
+In effect, they use only the data from each individual cluster
+to estimate features of that cluster.
+This leads them to overfit, yes,
+but they have some advantages in dealing with group-level confounds,
+as I described in that bonus round.
+They have the disadvantage of not allowing you to study cluster-level causes.
+In the bonus round, I argued that there are plenty of times when fixed effects are fine.
+In this lecture, I'm going to show you one of the reasons
+that in realistic research with finite sample sizes,
+they're often quite impractical,
+and the good news is they don't offer any unique benefits over varying effects.
+We can deal with group-level confounds and varying effects as well,
+as I described in that bonus round.
+But in general, with all these terms flying around like fixed effects
+and varying effects, don't panic.
+Draw your assumptions, make the generative model,
+and focus on that to get your thinking straight first
+and worry about the estimator later,
+because most of the big problems in research are about getting the story straight.
+Okay, lots of practical difficulties,
+and that's sort of what we're focusing on here.
+Varying effects are great as a default.
+I often tell people that we shouldn't be making excuses to use varying effects.
+We should be making excuses not to,
+and sometimes there are good excuses not to,
+and sometimes it's the practical difficulties, for example.
+How do we use more than one cluster at the same time?
+And as I told you, you duplicate,
+but it's easier said than done.
+In many cases, you need examples if you're going to make progress there.
+Calculating predictions with varying effects gets trickier
+because now you have to talk about at what level you're making predictions.
+Are you making predictions for whole new clusters,
+or are you making predictions for new elements inside of previously experienced clusters?
+And those are really different kinds of predictions.
+I'm going to say that again, because I know this is weird.
+So imagine we were making a prediction for a new tadpole
+in an existing context that we had varying effect estimates for.
+It's a different kind of prediction task than making predictions
+for new unobserved tanks that tadpoles might appear in.
+We need to use different parameters from the models
+to make those different kinds of predictions.
+And then there's just this issue of drawing the owl.
+How do we get the chains to sample efficiently?
+And as you make models more complicated, this gets harder.
+But don't worry, I'm here.
+You don't have to go alone, and I'll show you the tricks.
+Fourth, group level confounding.
+This is a real threat in models, and it's often ignored in the varying effects literature.
+It's something to really think about.
+And as I said in the bonus round from last week,
+I showed you one effective way to deal with this
+that's essentially equivalent to the fixed effect approach.
+The example I want to stick with in this lecture and the next
+is the 1989 Bangladesh Fertility Survey.
+So Bangladesh is a very densely populated country,
+and in the 1980s, a typical woman, by the time she finished,
+her reproduction would have had seven or eight kids.
+I think that was the median.
+And these days, it's around two.
+So there's been a radical demographic change in the last decades
+in Bangladesh, as in many parts of the world, much of Asia.
+And there are many good reasons to study this change,
+both descriptively and causally.
+Descriptively because countries need to understand what's happening to them
+so that they can plan appropriately,
+and causally because as human scientists, we want to understand why this happened.
+So I'm going to give you a relatively modest data set here
+that's in the rethinking package.
+It's a data Bangladesh.
+It's 1,934 women from 61 districts in Bangladesh.
+And Bangladesh is a highly variable place with cities and rural areas.
+And the outcome we're going to be interested in is contraceptive use.
+This is a survey in the 1980s, late 1980s of contraceptive use,
+when it was just being heavily pushed by the government.
+We have some other variables we're going to think about too,
+just to make this spicy.
+The age of the woman that was interviewed,
+how many living children she had at the time,
+and whether her location within the district is urban or rural.
+So lots of people request more advice about how to draw DAX.
+This is extremely common.
+So, and my response is always, well, you need domain expertise,
+and that's true.
+But I think there are some heuristics as well that can help.
+So let me try with this case to show you how I would go about trying to draw DAG
+with just these variables.
+Of course, there are other variables that matter,
+but hang on, we're going to get there.
+Let's not punish ourselves.
+Let's start simple.
+So the variables we're going to nominate so far,
+we've got contraceptive use, that's our outcome of interest.
+We've got the age of the woman, how many living kids she has.
+Urbanity, I'm calling it.
+Does she live in an urban area or not?
+Or in principle, you could make that a continuous variable,
+how urban is the space, or distance from an urban center.
+And then the district, which is this variable,
+which is just an index, but remember, we're interested in it
+because it's going to represent unmeasured things about districts.
+That may affect all the women and all the families within them.
+So the first thing you can do is focus on the cause of interest.
+What are the causes of interest?
+Why are you doing this research at all?
+And in this case, we're going to think about the idea that we would like to,
+at minimum, describe the association between age and contraceptive use
+and family size and contraceptive use, how many kids the woman has,
+and possibly even estimate causal effects of these things.
+Although, as we'll see, that's not so easily to do.
+Then there are competing causes.
+Other things can influence the outcome,
+but that we're not necessarily directly interested in,
+but that we may want to stratify by so we can get better estimates
+or deal with confounding.
+So naturally, the district may influence contraceptive use
+because there may be many things about the economy of the district
+or its resources or its population density or its cultural history,
+which may also influence the behavior of people in it,
+and then urban spaces and rural spaces are quite different as well.
+And then there are relationships among those causes.
+So in this case, nothing influences age.
+This is a great thing about the variable age.
+Nothing influences it because it's just a clock,
+and unless you have a time machine, you don't have an arrow into age.
+But age can influence other things, like how many kids you have,
+the longer you've been alive, the more kids you can possibly have, right?
+And urban living may also influence kids because of the cost of them,
+and the district you're in, again, could easily influence the urban living
+because some districts don't have cities.
+You could draw more arrows here.
+I'm not making a strong argument for this particular diagram.
+I'm trying to stimulate your imagination,
+but I think these relationships are a plausible start
+so that we can do something useful and educational.
+There are also unfortunate relationships.
+You shouldn't just draw the stuff that's easy for you.
+Imagine the haunting.
+Imagine the ghosts in the dark.
+So for example, here's a group level confound.
+The unmeasured things about districts
+may also influence features of individuals in those districts,
+not just the group level variables, like whether there are cities.
+So for example, there may be things about the history of particular districts,
+which influence family size.
+It could be the ethnic composition of that district, for example.
+And then imagine stuff you haven't measured that may also haunt you.
+So in this case, families can be quite large.
+And remember I said in around 1980,
+a typical woman would have had seven or eight kids.
+So there are going to be a bunch of sisters within a family,
+and they may be similar in contraceptive use
+and their family sizes because of common socialization.
+This is another kind of cluster variable.
+But if we don't have it in the dataset, then it could be a confound.
+Okay, let's get started.
+Don't panic.
+It feels simple and build up one step at a time.
+And we're just going to think about building the tadpole level version of this dataset.
+And what I mean by that is we're just going to cluster by district
+and describe the variation in contraceptive use by district.
+And this is already a lot to do,
+and there's lots of advanced statistical machinery already in this.
+So we don't need to push too much harder until we've got this done.
+And often when you're doing a data analysis on a structured dataset like this,
+this is always the place to start.
+Get your varying effects structure in place,
+get it to work right because there's often some tinkering to do as I'll show you,
+and then worry about the causal effects second.
+But whatever you do,
+never try to go to the end point and put all of the variables in you think you need.
+You've got to build it one step at a time because sometimes it's not going to work.
+And if you've done it all at once, you won't know what's not working.
+One step at a time, test and keep going.
+So our estimate is very modest right now.
+It's just contraceptive use in each district,
+and we're going to use partial pooling.
+And you'll see that's been necessary for the survey
+because the coverage is not very uniform,
+and in some districts there just isn't a lot of data.
+So we're going to estimate a varying intercept on each district.
+And this really, from my perspective,
+is just another chance to help you understand partial pooling
+because let's face it, it's weird.
+Here's the model we want.
+This has the same structure as the tadpole model from last week.
+But still, I want to remind you of the pieces and what they mean.
+The first line, this is the prior for the observed outcome variable.
+There's Bernoulli with some constant rate piece of i,
+where piece of i is a function of the log odds parameter alpha,
+which is the log odds of contraceptive use in each district.
+And then we have our regularizing prior for districts.
+This is a prior with parameters inside of it,
+and that's the third line of this model.
+These are the alpha j's.
+And then alpha bar is the average of the district,
+the log odds of contraceptive use in the average district,
+and sigma is the standard deviation among districts.
+Here's the code.
+This looks very much like the code from last week.
+However, I want to call your attention to just one thing,
+and we'll get to it in a moment.
+So the top line is not new at all.
+This is our Bernoulli outcome, a 0-1 outcome for contraception,
+because that's the way it was recorded.
+Then we have our link function, logit, for the probability,
+and we have a is our log odds bracketed by district d.
+And then here's the new bit.
+I'm defining the vector a, not by bracketing with d,
+but by explicitly declaring its length at 61.
+There are 61 districts in this survey,
+but not all of them were surveyed.
+And so for some of them, you don't have any data.
+And so if you bracket by d in that case,
+you're going to end up with an error,
+and I wanted to save you from that problem.
+But otherwise, it's all the same.
+You've got a bar and sigma inside the normal,
+and then the priors for those two parameters.
+Those parameters are often called hyperparameters.
+Hyperparameters are parameters that determine other priors.
+It's a weird thing, I know.
+And then sigma exponential.
+You've run this model.
+You will not encounter any difficulties,
+and it samples extremely efficiently,
+but you do get a terrifying number of parameters as you see.
+There are 63 parameters in this model.
+It's really not that much compared to things that we could do.
+But it's not the kind of thing you just stare at the coefficient table
+and understand, right?
+As always, we need to push out predictions and understand
+from the posterior predictions what the model thinks.
+So the foreground, that you have to appreciate the variation
+in the amount of sampling that was done in each district.
+Some of the districts, there are almost 120 women sampled,
+like District 1.
+And in other districts, there are very few, like District 3.
+I think that's two women sampled in District 3.
+District 49 has three women, for example.
+And poor District 54 has none.
+There are definitely women living in District 54,
+but none of them wanted to talk to a fertility researcher.
+This variation is the sort of situation where partial pooling is a huge help
+because there's much more evidence for some districts.
+And so we can be very confident about estimates there,
+but there's much less than others.
+So let's think about posterior predictions,
+and I'm going to layer them on.
+Here's the raw data.
+These black circles are calculated just by taking the number of women
+who reported using contraception in each district.
+The districts are arranged on the horizontal axis from 1 to 61,
+and dividing that by the number of women who responded at all in each district.
+And then you get a proportion reporting,
+and that's what these black circles are.
+As you can see, for example, that in District 3,
+all of the women who responded, which I think is two, reported using contraception.
+And then we put on the posterior means for each district.
+These are the partial pooling estimates,
+just the posterior means for each end,
+as you should expect by now,
+just like in the tadpole example, they're shrunk towards the mean.
+That's the effect of pooling information across districts,
+districts that don't have a lot of data get pooled more.
+And then here are 89% posterior intervals
+to give you an idea that there's uncertainty about these.
+We don't know the mean, right?
+There's still a lot of uncertainty in each of these cases.
+And I want to spend a little bit of time studying this graph
+so you understand what we called shrinkage last time,
+why some of these estimates are,
+some of the red circles, which are the posterior means,
+are very far away from the black circles,
+which are the empirical means,
+and others are right on top.
+Yeah, and this has to do with, well,
+how much data there is in each district.
+So let's take some interesting cases here
+and just label the sample sizes.
+So they're starting on the left.
+For district three, only two women responded.
+That's where that two is on the black circle.
+And you'll see that the model is not fooled by this.
+It is not at all confident
+that all women in district three use contraception, right?
+It would be a foolish model if you thought so.
+Yeah, however, if you used a fixed effects model,
+that's what it would think.
+And then on moving from left to right,
+we've got some districts who really low reported use,
+10 and 11, and they all,
+they have modest sample sizes as well,
+and their estimates are strong towards the mean.
+So the model does not think that almost no one uses
+contraception in those districts.
+Again, for, there's a low one,
+it has 14 observations there in the middle,
+and all the way far on the right,
+you'll see the ones at the bottom,
+district 49, only four women,
+and then one with six and one with 10.
+I've highlighted also a couple districts
+that have large sample sizes
+and have sort of pulled their district double estimates
+up above the mean,
+and you'll see those labeled with the 35 sample size
+and the 45 sample size.
+More women in those districts use contraception
+than is typical in Bangladesh in 1989,
+but the model has been, has agreed to be pulled up
+because there's more rate of evidence in those cases.
+Okay, the point here is just to understand
+that all of this is logical, right?
+The model is just following the logic,
+the probability theory, and doing what's necessary,
+and that's why the shrinkage happens,
+and it's also why sometimes it doesn't.
+Interesting case is this district right over here,
+and you'll notice there's no black dot in this column
+where I've marked no data because that's the district.
+I think it was 49, where there's no data at all,
+and not 49, it must be 50 something,
+54, something like that,
+but there's no data at all.
+Nevertheless, there's a posterior distribution for it.
+Yeah, remember, the minimum sample size
+for Bayesian analysis is zero because you have a prior.
+In this case, this is an informed prior
+because it's been estimated from all the other districts,
+and so that estimate, the posterior mean at the red circle
+and the 89% interval for the district where we have no data,
+is in essence a prediction that comes,
+that has been educated by the data from all the other districts.
+But it's not that it thinks that this district
+must be like all the other districts,
+it uses the variation as well,
+because remember we're estimating that sigma parameter,
+the variance among districts,
+and that's why it's a bit wider, as you can see,
+than the typical district.
+The pink band is wider than it is for most other districts.
+Okay, that's partial pooling,
+and after a while you get really used to it
+and you come to expect it,
+and one of the funny things about it, of course,
+is that it's a reason that we don't expect the model to,
+we don't want the model predictions
+to exactly recapitulate the sample.
+I'll say that again.
+We don't usually want the posterior predictions in the model
+to exactly recapitulate the sample,
+because remember there are features of the sample
+which are not regular, and we're trying to regularize.
+So that's why we use this approach.
+We have done no inference yet,
+so we can think about that next.
+What about urban living?
+Urban spaces impose different economic costs on people
+and crowding, and there are cultural effects
+of urban living as well,
+and opportunities for labor,
+which compete with reproduction,
+and so on.
+There are many, many theories about this,
+but typically urban populations have smaller family sizes
+and greater uptake of contraception than rural populations.
+So let's take a look at this.
+Can we at least describe the association between urban living
+and Bangladesh in 1989 and contraceptive use,
+and maybe squint really hard at it and convince ourselves
+it's a causal effect.
+The issue here right away is that district features
+are potential group level confounds,
+and different districts have different levels
+of urban development,
+and so we need to also stratify by district,
+and we want those varying effects in place.
+Ideally, we'd use the Mundlax machine
+that I talked about before,
+but I don't want to overcomplicate this example.
+So if you're interested in that,
+you can go back to that bonus round and take a look.
+The total effect of U, a variable U,
+which indicates how urban the place where the woman lives,
+passes also through K kids in my DAG.
+You see that.
+It's got a direct effect and an indirect effect.
+So this is just a reminder.
+You don't want to just throw everything into the same model.
+You got to think about which estimator you're using
+and only use the right adjustment set for that.
+If you did stratify by kids,
+you would block part, perhaps most,
+of the causal effect of urban living.
+Here's the model.
+There's a lot of choices about how to parameterize this,
+and I'm going to choose one that I think is the most broadly useful
+because it's a structure that lots of people use
+when they make these sorts of models,
+and that is to add a slope, if you will.
+So U sub i in the data set I've given you
+is an indicator variable.
+It's zero when the woman does not live in a city,
+and it's one when she does,
+and we're going to have a coefficient in front of that indicator,
+and there's going to be a different beta for each district.
+So it's a whole new vector of parameters
+because we're going to let the effect of urban living vary.
+So the variable U sub i effectively just turns on beta
+on different lines for different women,
+depending on whether they live in a city or not.
+Nothing changes for alpha sub j.
+We add beta sub j.
+It's the same kind of structure.
+We've got a beta bar, which is the mean effect of urban living.
+It's the same for across districts,
+and then a scale parameter, tau,
+is that weird cute-looking t there.
+And tau is just like sigma.
+It just has a different name.
+So alpha sub j is regularizing prior for rural.
+Beta sub j is regularizing prior for the urban effect.
+It's the difference between rural and urban contraception rates
+on logout scale within a particular district j.
+And then we have the averages and the standard deviations
+as before.
+So in a sense, it's the same model.
+We've just got some duplication and renaming that's been done,
+and the code shows that quite clearly.
+We have another vector of link 61, but it's named B,
+and it's got its own mean and standard deviation.
+Okay.
+When you run this, not all is well.
+You're likely to get some scary messages like this.
+Warning, 4 of 2,000 transitions ended with a divergence,
+and then there's a link, never a good sign.
+Warning, 3 of 4 chains, had an e, b, f, m, i,
+whatever that means, less than 0.2.
+Is that good?
+It sounds bad.
+There's a word warning in front, and again, there's a link.
+Never a good sign.
+What's gone wrong here?
+Well, actually, the markup chain is fine in this particular case,
+but it's worth paying attention to these warnings
+because there's a way to fix them, and when you fix them,
+you'll have a lot more confidence that the estimates are good,
+and it'll take less time to get them.
+It'll make it more efficient.
+If you look at the crazy output for this model,
+you'll see that the n, f, the effective sample size
+and the r hats are not great, especially for tau.
+We took 2,000 samples here,
+and tau's effective sample size is 45.
+That sounds bad, and its r hat is way above 1.
+If you look at the trace plot and the trance plot,
+these are unhealthy chains.
+Now, if you run this model long enough,
+you're going to get the right posterior distribution
+in this particular case,
+but in some cases, when you see warnings like this,
+no matter how long you run the model, it's not going to fix it.
+So, it's worth taking a little bit of time
+to figure out how to recode the model, actually,
+so that it runs better.
+But let's do that after a break.
+Go back and review the first half of this.
+Think about your branching paths again.
+Maybe go find a copy of a two-year-old adventure book,
+read it through, and come back whenever you feel like it.
+I will still be here.
+Welcome back.
+So, before the break, I introduced this idea
+that we could fix the problems with the Markov chain
+in the Bangladesh model that includes urban versus rural.
+And the trick for doing it is going to seem weird.
+I'm just going to tell you right now.
+And I'm not even going to explain why it works in any deep way,
+but at the end of this week, I'll do a bonus round
+to explain the details in more depth, I promise.
+But for now, I want to keep moving.
+We have good flow and you can get the top-level concepts instead.
+So, the problem in this particular model arises from the fact
+that there are priors inside of priors.
+That is, that we have parameters that define the shape
+of the priors for other parameters.
+There's nothing wrong with this.
+In fact, it's essential for making varying intercepts work,
+but it can be challenging to sample
+because it creates awkward spaces for Hamiltonian Monte Carlo
+to cruise around in.
+This kind of prior where parameters appear inside the prior
+for other parameters, like the priors shown in red on the screen,
+are called centered priors.
+The idea is that there are parameters which center them
+or locate them in particular places.
+But we can re-express this exact mathematical statistical estimator
+without centering the priors.
+Here's the idea.
+I just want to give you the intuition.
+So, there's this thing called a Z-score.
+A Z-score is a standardized Gaussian deviation.
+You can calculate it from any same sample from a Gaussian distribution
+by subtracting the mean of that distribution
+and then dividing by the standard deviation.
+So, this formula on the screen.
+Z or Z, if you prefer, sub-J is equal to alpha sub-J minus alpha-bar.
+So, we're taking the particular value alpha sub-J
+and subtracting the mean, and then we divide the remainder by sigma.
+And that's called the Z-score.
+It's a deviation in a standardized normal distribution.
+It's used in a bunch of statistical tests.
+You can do this with any normal distribution.
+It's a perfectly harmless transformation.
+You can always reverse it.
+In fact, to reverse it, you just use this formula.
+Alpha sub-J is alpha-bar plus the Z-score for that J times sigma.
+And then you're right back on the original scale.
+So, we can use this trick to do all of the posterior updating on the Z-scores.
+And what's nice about that is that the Z-scores don't have any parameters inside them
+because they're normal 0, 1 in the prior.
+I'll say that again.
+We can use this trick to re-express this model
+so that the Hamiltonian Monte Carlo doesn't have to move around inside the distribution of alpha sub-J.
+It just has to move around inside the distribution of Z-alpha sub-alpha comma J.
+And that has no parameters in it.
+It has no hyper-priors.
+But it's the same model.
+I know it's a super weird trick, but it works.
+So, we re-express the model in the so-called non-centered version on the right of the screen.
+These two models are the same model.
+They are mathematically identical.
+But when you use them in your computer to do Markov chain Monte Carlo, they're not equivalent.
+They reach the same answer eventually, but the one on the right is a lot more efficient.
+So, let's code the model that way.
+The code looks worse because it's got some extra lines, but it's much more efficient.
+The only thing to note here is I have expressed these deterministic relationships for the alpha vector and beta vector.
+Same length, and I put save in front of them so that we get them back in the posterior distribution,
+even though they're not true parameters because they're strictly functions of the other parameters,
+alpha bar, beta bar, z sub alpha, and z sub beta and sigma and tau.
+This model samples much better.
+And again, the less efficient model works.
+You just would have to run it much longer to have the same confidence in the posterior samples you get.
+Okay, I know this is a strange trip, and it's just a weird fact about scientific research, as in art,
+that there's a bunch of technical stuff that's really annoying that you have to deal with to make things work
+and get the final beautiful product.
+And that's what this non-centering trick is like.
+You build your varying effects model based upon scientific principles and interests,
+some desired estimate, and then you have to wrestle with a Markov chain,
+like this glass blower has to wrestle with all the details of melting temperature and ovens
+and putting things together in the right way and how much lead is in the glass and so on.
+But there's just no way to avoid that.
+If you want the beautiful end product, you have to deal with the technical monsters in between.
+And that's what this varying effects trick is like.
+There are other things about estimation and finite samples, which are similarly just not what we got into this business for,
+but end to end, it's all worth it.
+Okay, and this is what we get.
+Now we have, I'm repeating that same kind of structured plot from before,
+where I'm showing the posterior predictive distributions for each district,
+and now I'm splitting it by rural and urban.
+So in the top plot, we have rural.
+All the districts are arrayed from 1 to 61 on the horizontal axis,
+and then probability of using contraception on the vertical.
+And this is not the same plot as before, because we've taken out the urban districts.
+And then on the bottom, we have the urban districts, the same sort of plot shown in blue,
+but only the urban parts of each district.
+There's a lot of complexity here, and a lot to investigate, and we're not going to try to just deal,
+they're not going to try to analyze this in too much detail.
+Just a few things I want to point out.
+First, let me label the really extreme empirical values, the black dots, with their sample sizes, like I did before.
+This is the action of partial pooling, and there's a couple things to note here.
+This is another chance to appreciate how partial pooling works.
+The cases where the sample sizes are small, you get a bigger difference between the red circle and the black circle,
+because there's more shrinkage towards the mean, because there's less evidence in that particular district.
+So you'll see, like in the top plot, where you get sample sizes of 4 or 7 or 6,
+there's a greater distance between the posterior mean and red, and the raw empirical mean in black.
+Same is true on the bottom.
+We have even more extreme small sample sizes on the bottom, a number of districts where there's only 2 or 3 women from urban areas,
+because those districts aren't very urban.
+They only have small towns in them, really.
+And this illustrates another factor about partial pooling, is that as you begin to cut up a data set by stratifying by various predictors,
+and you will need to, because you have some particular estimate in mind, you're going to get smaller sample sizes in each unit.
+And in that case, partial pooling becomes increasingly valuable, because the shrinkage guards against overfitting.
+The overall result here, you probably appreciate it already, is that there's more contraceptive use, often a lot more in urban areas,
+but there's also a lot of variation in the urban areas.
+And it sort of seems like from eyeballing it, there's more variation across urban areas of districts than there is across rural areas of districts.
+Let's just say on average, women living in urban areas use contraception more, but they also vary more.
+So we can take a look at the sigma and tau parameters for these effects, for these features.
+And that's what I've done here in the bottom half of this slide.
+These are the posterior distributions.
+For the sigma and tau is the standard deviations of rates of use across rural areas in red and urban areas in blue.
+And then I've added the prior here.
+This is something I often like to do in my own projects, is superimpose the prior for particular distribution to make sure that the data did some work at all.
+You want to see the posterior move from the prior.
+So what's going on here, as you can see, is that actually there's a very wide range of standard deviations consistent with urban, and many of them are quite large.
+There's much more evidence about what's going on in rural areas.
+So this is not a confident assertion.
+There's just more variation across urban areas because there's just less data from urban areas from Bangladesh in 1989.
+It wasn't very urban at the time.
+And you want to think of this as another example of the case where sometimes what the posterior distribution tells you is that it doesn't know how much variation there is.
+And that's what you're seeing in the urban area.
+It could be consistent with low or high, or the same as rural.
+Okay, a final thing to say about this as a bridge to the next lecture.
+A more natural way, perhaps, to plot these posterior predictions is to have a graph like the one on the screen where the x-axis is the probability of contraceptive use in a rural area.
+And the vertical is the probability of contraceptive use in the urban area, and each point is a district.
+So the horizontal axis is computed using the alpha, and the vertical axis is computed using the alpha plus the betas for each district.
+And what I've shown you so far is just the posterior means and those dashed lines that intersect there are showing you the 50% on each axis.
+So to the left, we have less than half of women using contraception.
+To the right, we have more.
+And above the midpoint line, we also have more than 50% using.
+So the first thing to appreciate, of course, is what you saw on the previous slides, is that there's more contraceptive use in urban areas.
+Okay, the other thing, though, that's revealed now that was quite hard to see in the previous slides is that there's a strong positive correlation between contraceptive use in both rural and urban areas within a district.
+Yeah, you see that?
+I'll say that again.
+There's a strong positive correlation between contraceptive use in the rural and urban areas within each district.
+And that's why this cloud of points goes up to the right.
+And that correlation is extra information that we have not exploited in any particular way.
+I'm going to show you, it's also a feature of the uncertainty about these points.
+So what I'm going to do next is impose the whole posterior distribution on here in the form of these 50% compatibility regions.
+This is not a beautiful plot.
+I know, but what are these?
+These are 50% compatibility regions of the joint uncertainty from the joint posterior distribution of the alphas and alpha plus betas in each district, just to show you that they also tilt up and to the right.
+There's a correlation in the uncertainty of them as well.
+This is a little easier to appreciate if we just sub-sample down to about six of them, and you can see it better here.
+This correlation, both in the posterior means and the whole posterior distributions of these parameters, alpha and beta, is information that we can use to make even better estimates, actually.
+But I'm going to leave that story for the next lecture, because it's a bit involved.
+But the good news is there's more information on the table, and we can do even better with tinkering with the machinery using the right pencils to draw the L.
+To summarize, what I've tried to show you here is examples of how to develop additional features into a multi-level model and how to begin to think about the co-variation among those features.
+In this case, the features are rural versus urban within each district.
+In the next lecture, I'm going to show you how to get some extra value out of the joint uncertainty in the features.
+We're in week seven.
+We're doing yet more multi-level models, and this will be a launching point to keep going forward into special topics that use these estimation technologies in future weeks.
+I'll see you next time.
+Thank you.

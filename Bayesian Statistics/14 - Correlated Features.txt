@@ -1,0 +1,984 @@
+Welcome to lecture 14 of statistical rethinking of 2023.
+We're going to have to pick up regularly left off in the previous lecture.
+But first, let me reassure you that all this highly technical stuff that we're doing this week
+in these lectures is really a necessary part of drawing the owl.
+We start with the full picture in our mind, some plan of what we want to draw,
+but then it's a lot of detail, just like drawing a real owl.
+You have to work in layers, and there's just no way to avoid that kind of work.
+And so it's my responsibility to teach you about the little techniques
+that people don't realize you used when they see the final product.
+I want to assure you it's worth it to have reliable results
+and see the final image that you have in your mind to start with.
+Your estimate, your completed owl.
+Where we stopped last time was working through drawing the Bangladesh owl,
+this 1989 fertility survey in Bangladesh,
+and I had sketched out a kind of playful dag for you.
+It's not completely ridiculous.
+It's missing some things that I had trimmed off so we could have a good flow.
+The first thing we had accomplished last time was just to think about
+the varying effect strategy for estimating the unobserved district effects
+so that we could have a description, a stratify, contraceptive use by each district.
+And this is what we got from that.
+This variation across districts, divided by rural and urban,
+is where we ended up in the end.
+And you can see that there's, in general, more contraceptive use in urban areas
+than in rural areas.
+There's also less data in the urban areas,
+and so the uncertainty intervals are larger.
+And this brings up this issue.
+Rural and urban are features of the clusters.
+I'll say that again, rural and urban are features of the clusters.
+The clusters are the districts, they are subgroups in the data,
+in which you have repeated observations,
+and then features are aspects of these groups.
+And they can typically vary by these groups,
+and often our research depends upon a good description of that variation,
+both for descriptive and causal inference questions.
+And where I ended last time was trying to convince you
+that when we stratify contraceptive use in this sample by district and by urban and rural,
+you get this plot on the right here, where each point is a district,
+and there's a strong positive correlation between contraceptive use in rural area,
+the rural part of the district and the urban part of the district.
+And maybe you're like, well, yeah, that makes a lot of sense,
+because there are common effects in the district shared by the rural and urban areas.
+But this means there is certainly information on the table that we have not exploited
+because if you only knew the rural contraceptive use in a district,
+you could make a better guess of the urban contraceptive use if you knew this correlation existed.
+So it's not you knowing that matters, it's the golem, it's the model.
+And so in this lecture we're going to focus on building golems
+that can learn the correlation among features
+and exploit that correlation to learn faster by doing partial pooling across the features.
+And sometimes, not always, but sometimes there are big gains to come from this,
+especially when some of the features are under sampled relative to others.
+And then the partial pooling can be very important.
+So here's the overview, and then we're going to work through a detailed example
+using the Bangladesh data again.
+To add correlated features, we're going to start adding multiple dimensional priors.
+So the idea is for each cluster type in your analysis, you need one prior distribution.
+And all of the features for that cluster go into the same joint prior.
+So for example, if you only have one feature, which is what we've done in the simplest cases,
+then you just need a one-dimensional normal distribution,
+and that's the simple, usually called varying intercepts,
+partial pooling prior that you see on the top right there.
+With two features, like in the example with districts where we split rural and urban,
+now we have two features, ideally what we'd want is not two one-dimensional distributions
+for alpha j and beta j like I did in the previous lecture,
+but a two-dimensional distribution, this multivariate normal, mv normal,
+sometimes abbreviated simply mvn.
+That's a multivariate normal.
+It's a normal distribution in two dimensions, or even more,
+in which we have two means and two standard deviations,
+but also a correlation between the two dimensions,
+and that correlation will be a parameter that will be learned from the sample,
+and it will allow partial pooling across the features,
+and I want to build this up for you and show you the advantages it brings.
+In general, you're not limited to two.
+You can go to n features, however many you have, and scale quite large, in fact.
+The hard part here is learning associations.
+You typically need much more data to learn the correlations well
+than you do to learn the means or standard deviations.
+You're easy, standard deviations are hard, and correlations are very hard.
+That's the heuristic.
+Nevertheless, it's worth trying to learn them,
+and if you don't have a sample sufficient to learn them,
+you'll just get the prior back, so it's no harm done.
+Let me give you a toy-animated example
+before we actually build up the real golem and work through the data example.
+I want you to think back to the UC Berkeley admissions example,
+and this isn't going to be exactly that,
+but I want you to think about a population of academic departments
+considering applicants, and we have a prior for the population.
+This is a multi-level model, and there are two features of each department
+that we're going to try to estimate, the average log odds of admission,
+and then the average difference between applications that identify as female or male.
+The horizontal axis is like an intercept,
+and the vertical axis is like a slope.
+It's a difference. It's an effect.
+There's some population of departments,
+and we don't really know how these features are related,
+and so we have some vague two-dimensional Gaussian prior,
+and that's what this hill is, or these concentric rings you see on the screen.
+It's like looking down on top of a Gaussian distribution in two dimensions,
+and there's no correlation in this Gaussian distribution.
+Then we consider a department.
+When we haven't seen any application decisions from this department yet,
+it's got a vague prior as well that comes from the population.
+Basically, anything could happen in this particular department.
+We're going to consider five departments,
+and I just want to run through a cartoon example
+where we visit each of them in sequence, starting with department one and then department five,
+and first we look at only applications marked male,
+we get an estimate of the average log odds of admission in the horizontal axis,
+and then applications marked female,
+so we get some estimate of the difference, that is the vertical axis,
+and I want you to watch how the whole screen updates every time we get any data
+because this is a multi-level model,
+and the population of departments prior in the upper left
+is going to update with every time we update a department.
+Let's visit department one first thing.
+We get some information from department one about their average log odds of admission,
+intercept A on the horizontal axis there.
+You'll notice that this moves the population prior to the right
+because there's a very high rate of admission,
+so this is log odds, so zero means 50-50.
+Most applicants, the majority of applicants,
+some 70% of them I think are admitted in this department,
+and that moves the whole thing up,
+and you'll see the gray in these plots marks the prior
+and then the posteriors are shown in blue for the population
+and in red for the departments.
+The blue crosses in the departments are just there as a visual reference for you.
+Okay, a visual reference of where the population of departments mean is.
+Yeah, that's why it's in blue.
+So I'll say that again.
+The blue crosses in each department is a visual reference of where the population average is,
+and you'll see that it moves, tracks the plot in the upper left.
+Okay, now that posterior distribution, it has no idea about B, about the average difference.
+We get some data on that, and it turns out it's also high.
+So female applications are advantaged in this department with high admissions rates,
+and we update the posterior there.
+We know a lot about department one, so we've got a pretty tight posterior distribution there.
+The other departments are still very vague, but they have updated.
+And what I want you to notice is the population, posterior distribution in blue,
+and all the others have tilted up into the right a little bit,
+and that's because there's a positive correlation found between A and B in department one,
+which is the only department we've seen.
+So let's continue.
+Now we visit department two.
+We find law guards for average admission around one,
+and then we inspect, which is right on the population average,
+and then we inspect the data to help us estimate B, and we find that that's about average as well.
+So that's perfectly consistent with the population prior.
+Now department three, we look at department three,
+and its estimate is a little bit below the population average to the left of the vertical blue bar,
+and then we estimate B, and it's below as well.
+So this reinforces the idea that there's a correlation between the two axes,
+between the average log size of admission and the average difference,
+and so you see in the population, posterior and the upper left, it tilts even more.
+So this is basically updating learning the correlation across clusters,
+and so on with department four.
+It's even lower, has a very low rate of admission, and a lower difference as well,
+or negative difference, and we get an even steeper correlation in the upper left.
+Now before we visit department five, look, it expects a correlation.
+Yeah, that's the prior in red of what's expected.
+If you were to make a prediction for what you're going to find in department five for A and B,
+you would expect them to be correlated modestly.
+And then we look, this one has a very low rate.
+Now I want you to see, looking at the red posterior distribution for department five that's shown there,
+look where its center is.
+Its center is below the blue horizontal line.
+The blue horizontal line is the average population,
+and the population, posterior and the upper left.
+So we haven't seen the information for department five yet that lets us estimate the B,
+but the expectation is that it's lower than average because the A was lower than average,
+and that's what the partial pooling across features does for us.
+In a model that doesn't use a joint prior like this, that just has independent Gaussians for A and B,
+it wouldn't have this prediction that it's below average because it learns nothing across the features.
+And then we update, and since it's my example, it is indeed below average.
+Okay, that was meant to give you a kind of cartoon view of what the advantages are,
+and why it makes sense, why it's rational to use a word that I really don't like to pool across features.
+And we get pooling across features only when we use a multivariate prior that includes all those features together,
+and we can learn correlations.
+So we're back to our problem of estimating the total causable effect of U.
+Remember from the DAG on the right, this means we don't include kids because that would block the indirect path according to this DAG.
+And what we want to do is take the model we had used before for this and add the correlated prior and modify it.
+So to remind you, this is the model we had from the previous lecture.
+This has the feature, the urban feature, but it uses two independent normal priors,
+and this was the non-centered version.
+I promise I'll have a bonus at the end of this lecture where I explain why this non-centering trick works,
+but for now I just take it as a bit of a technique that you need to use and mimic to get more efficient change sometimes.
+And we're going to modify this now to make it into something that is a multivariate prior.
+So here is the centered version of this same model,
+and I want to go back to this one to make the pedagogy a little bit easier.
+This is the model that is easier to think about conceptually,
+but it's equivalent to the non-centered model that was on the previous slide.
+Just to remind you, we have an alpha for each district,
+and in the mathematical version of the model on the right,
+each alpha j is a normal prior with some unknown mean and standard deviation that we're going to learn from the sample,
+and this will give us partial pooling across the alpha j's.
+And analogously for the beta j's, we've got a normal distribution with some unknown mean,
+a bar and some standard deviation tau.
+We're going to learn those from the sample as we learn the beta j's,
+and so we'll get partial pooling to improve the estimates of the beta j's.
+All right, now what we want to do is we want to collapse that alpha j and beta j,
+those priors together into a joint prior, and that's what we're going to do now.
+So the implication when they're independent is that if you plot it out,
+the posterior distribution of alpha j's and beta j's or the prior distribution,
+it would look like a perfectly circular hill from the top.
+This is a bivariant normal distribution with no correlation between the dimensions.
+It looks like a circular hill.
+If we collapse them together into a joint distribution, the possibilities grow.
+Now we can have correlations between them.
+We can model the correlations, and so the way I like to do the notation for a multivariant normal
+is by splitting it into three things that describe its shape.
+So we're going to talk about this multivariant normal in some detail here.
+If this is new notation for you.
+On the far left, we have a vector of features that are for each unit j.
+That is to say for each district j, there's an alpha and a beta,
+and they are drawn from a multivariant normal.
+And so for each district j, they all have this same prior that's on the right,
+but they get their own alpha and beta values that are unique to that district.
+And then the first argument inside of the multivariant normal that determines the shape
+is a vector of means of the same length as the number of features.
+So we have alpha bar and beta bar.
+Then we need a correlation matrix.
+This is the correlation matrix needs to have the same dimension as the number of features.
+So in this case, it's a two by two matrix, which implies actually that there's only one correlation inside of it,
+because we've only got two features, and so there's only one correlation to learn.
+But for larger numbers of features, you get more and more correlation coefficients to learn,
+and it can become much more complicated.
+And then finally, our familiar vector of standard deviations, one for each feature.
+And so the idea is that, as I'm trying to illustrate in the graph on the right here,
+that correlated normal distribution be described by that kind of stretched elliptical hill.
+And if we drew samples from it, which is what the points represent,
+they would in the limit represent this correlation,
+but any finite sample, it could be quite hard to learn the correlation.
+Let's put this back in the model.
+So now there's one more thing, one more entity has appeared in this, and it's the correlation matrix R.
+And what kind of prior do we assign to a correlation?
+There are many possibilities, and in the stats literature, you'll see all of them.
+My preference, at least for these sorts of simple problems, is to use something called the LKJ family of priors,
+correlation matrix priors.
+This is a prior for correlation matrices of any dimension, in fact.
+Ours is quite simple.
+The LKJ comes from the authors of the paper.
+I say much more about this distribution in the book if you're interested in details, take a look.
+What you want to think of it as is it tends to have shapes as shown in the upper right there.
+So here for a single correlation coefficient inside of it for the shape parameter value 4,
+it looks like this gently regularizing hill.
+So the horizontal axis in that plot in the upper right is a correlation.
+The correlations can vary between minus 1 and 1, and the LKJ priors are symmetric,
+and the shape parameter determines how skeptical the prior is of extreme correlations.
+And so bigger values are more skeptical of extreme correlations.
+They pile up more probability mass on the diagonal in the matrix, which means no correlation.
+And so for 4 here, which is not a special value in any sense, it gives you this kind of hill
+where it's skeptical of extreme correlations, but it does not rule them out.
+Sometimes you want tighter ones.
+Sometimes you want looser ones.
+As always, what we want to do is a prior predictive simulation and see what it looks like
+because the joint prior, the multivariate normal for alphas and betas,
+depends upon all these parameters.
+It depends upon the priors for alpha bar and beta bar for R, or actually that's a row.
+It's a capital row Greek letter and sigma and tau altogether.
+So in the bottom right of this slide, what I've done a prior predictive simulation
+for the bivariate Gaussian distributions that come from,
+they're specified by all those parameters jointly.
+And here I've just drawn, I forget, maybe a dozen Gaussian distributions
+and I've just drawn their 89 percentile ellipse, confidence ellipse, to show you their shapes.
+And as you can see, in this prior, there are a bunch of possible relationships.
+Some with very high correlations, some with very low, going in every which direction.
+Okay, just to remind you again of this artistry metaphor, you start out with this idea of some estimate
+and that's the al, you can see it in your mind's eye, right?
+And now we're doing the fine level sketching to get exactly the sort of effect we want here.
+And it's really worth doing that kind of work.
+So let's take a break now.
+You can think that over and review this first half of the lecture
+and when you come back, we'll turn this into code.
+Welcome back.
+So before the break, I had tried to give you a conceptual understanding
+of these multivariate normal priors.
+Now let's actually make the machine.
+This is, this is the fun part.
+So here's the code from, here's the code for the centered version of this model,
+which will be conceptually as easier to understand
+because it'll look much more like the mathematical version on the right.
+Let me walk you through the bits in a piece so you can see the correspondences.
+The first thing is we just need to specify a multivariate prior.
+And so the awkward thing about this encoding is that what this means is that
+we end up with a matrix of parameters because we have 61 districts
+and each of them has two features, alpha and beta.
+We want a matrix with 61 rows and two columns to hold all of the varying effects.
+And that's what I've set up here in the lower part of the model,
+a matrix of 61 rows and two columns named V just for varying effects.
+And it has a multinormal distribution with a vector of means that I'm calling A bar
+and a correlation matrix row and a vector of standard deviations called sigma.
+And so A bar then has to be a vector of length two and you'll see that it is
+and sigma has to be a vector of length two as well.
+And I've given row as a correlation matrix.
+That's the type of parameter it is and it has that LKJ core prior.
+And then there's this machinery up top that is meant to map the varying effects
+onto the A and B parameters in the linear model up top.
+This is just for our convenience.
+You could use the elements of the V matrix in the linear model,
+but it makes the model harder to read and it makes posterior predictions harder to process.
+And so often I do this kind of remapping, redefining the effects in terms of other parameters.
+And so what the code I've highlighted here does is it just takes the first column of V
+and it assigns it to the vector A or there's 61 alphas.
+And it takes the second column of V and assigns it to the symbol B.
+So there's 61 betas and that's just for convenience.
+There's no statistics going on there.
+And then we get to have our same convenience and interpretable linear model up top.
+Right.
+So here's our LKJ core prior that I had mentioned before.
+And again, there's nothing special about the value four,
+but it creates a potential regularizing hill and you should, when you're learning this,
+try other values, try very large values and see if you can squash any posterior correlation.
+Try very low values and see if you can make correlations larger.
+You run this model.
+It does an OK job, but it's not very efficient as Markov chains go.
+This is not broken in any sense, but you're likely to get a couple of warnings about chains
+with some problems, maybe even a scary message about divergent transitions.
+And this happens a lot with multi-level models, as I mentioned in the previous lecture.
+And again, I promised I'd explain in a bonus round.
+And there's lots in the textbook about this as well.
+What's going on here, the main problem is the second element is a sigma vector.
+This is the standard deviation of the beta parameters, if you will.
+And you'll see that one's having a problem.
+It has low effective sample size and a larger r hat.
+You see that plot in the upper part of this slide.
+I've plotted the, each point is a parameter.
+A lot of parameters in this model, right?
+Because we've got two features and there's 61 parameters for each feature.
+I've plotted them for each.
+We've got the number of effective samples on the horizontal and then the r hat on the vertical.
+And ideally, they would all be to the right of that red line,
+which is 10% of the, an effective sample size, which is 10% of the total sample size, right?
+So 200.
+And you don't want parameters near that area.
+It's kind of a danger zone, right?
+It's just a heuristic, but you want to stay out of the danger zone.
+And you want lower r hats too.
+You want to be on the, piled up on the bottom.
+Okay, if you ran this chain longer, it'd be fine.
+Actually, it's not broken at all, but it can be made more efficient.
+And this comes back to our centering versus non-centering thing.
+You can create non-centered versions of multivariate normals as well.
+And this is often essential for getting these sorts of models to run.
+So to remind you, here's the, here's the correlated varying effects version of the,
+of the contraception model with the centered priors.
+And remember it's centered because there are parameters inside the prior.
+Yeah, it's a, there are priors for priors.
+But just like with one dimensional normal distributions,
+we can factor out all those parameters and reconstitute the whole thing and have
+something which is technically the identical mathematical model,
+but which samples more efficiently in the computer.
+And here's what it looks like.
+So I'm going to explain this in the bonus, not in this main lecture,
+because I think doing so in the main lecture distracts and overwhelms from the
+conceptual lessons about this stuff.
+And this is also the kind of trick that you can use without understanding,
+because you can copy the code and put it in.
+You need the conceptual understanding to know how to piece it together,
+but you don't have to understand exactly why it works.
+I know it's a weird thing for a statistics teacher to say, but it's true.
+And eventually you will come around and learn the technical issues,
+but you don't have to in the beginning.
+But what I want you to see, the part I've highlighted in red,
+is we've swapped out our multivariate normal for alpha and beta with the z thing,
+or z thing if you will, and z is a matrix.
+It's like that matrix in the code.
+It has 61 rows and two columns.
+And that's what the jk subscripts are for a district j and a feature k.
+And every element of this matrix is assigned the same prior,
+just a standard normal distribution.
+So there are no parameters inside the prior.
+None of the priors have parameters inside of them now.
+But then we have to do all this extra nonsense to reconstitute the effects.
+And that's what the code just above it is, all the deterministic relationships,
+including that line of matrix algebra where we build up v from this
+diagonal sigma Lz.
+Yeah, it's just a way of building the pieces back together
+through just the simple logic of how z scores work.
+But it's matrix algebra, so it's compact.
+I realize models like this are a bit terrifying.
+It's like you dredged up some old god from the ocean,
+and it's flailing, it's probability tentacles at you,
+and will devour you in the world.
+But don't worry, you get used to this stuff very fast,
+and these sorts of parameter transformations have huge efficiency gains.
+So again, just like there are many annoying features of artistry,
+there are many annoying features of methods,
+but there's nothing to do except tame the beast.
+Yeah.
+And in this case, it's actually not that bad.
+So we have a code version of this model,
+and here it is in the working code.
+Now, of course, keep in mind, as many of you know,
+in standard software packages, all of this artistry is buried away from you,
+and you never know it exists.
+But I feel like it's my duty to tell you that it exists,
+because all those software packages use defaults,
+and sometimes the defaults are wrong for you,
+and so you get a lot more power out of that.
+And also, seeing these examples of how the machine works,
+eventually, if you stick with this and you become a methodologist,
+you're really good at this, and you can build your own machinery
+that do custom things, and in the lectures next week,
+I'll show you some examples.
+But anyway, let's analyze this code a bit,
+and let me show you what's going on and how it corresponds
+to the non-centered correlated varying effects prior.
+So the first bit of this, of course, are the priors,
+and I can remind you, there are no parameters inside any of these priors.
+We have this Z or Z matrix on top.
+Sorry, I misspoke.
+It's inverted from the others, or transposed, rather.
+It has two rows, one for each feature, and 61 columns,
+one for each district, and every element of this matrix
+is assigned to normal zero one prior.
+And then the rest is basically the same except there's this thing
+where the correlation matrix row has been replaced by a parameter,
+which is L underscore row, and its type is Kolesky
+or Sholesky factor core.
+And this is a particular factorization of a matrix
+called the Kolesky factor.
+It's used a ton in statistics because it's very efficient,
+and this is just part of the wizardry that makes the non-centering work
+and makes it efficient.
+But it still uses the LKJ correlation matrix.
+Priors determine the same way.
+It's just with the Kolesky tact on the end,
+but it has all the same prior properties.
+It's not a new distribution.
+And then sigma is the familiar issue as well.
+All of this stuff, then, there's this machinery up here,
+which is all deterministic math.
+It's just reassignment and adding and multiplying things,
+which reconstitutes our familiar alpha and beta vectors from these things.
+So the third line there is this matrix algebra.
+I have a convenience function called compose non-centered,
+which takes the necessary elements,
+the sigma, the Kolesky factor for the correlation matrix,
+and the matrix of standardized varying effects,
+uncorrelated standardized varying effects,
+the Z or Z matrix,
+and then does the necessary linear algebra
+to make the V varying effects matrix with 61 rows and two columns.
+And then we put the means back in on the two lines above that,
+and then we're right back to our familiar linear model.
+The bit that's in the code that you don't see on the right
+is this final line to convert the Kolesky factor to a correlation matrix
+because mortals cannot interpret Kolesky factors.
+They're derived from a correlation matrix,
+and they don't contain correlations necessarily.
+So what we want reported in the posterior distribution is usually the correlations
+because we might actually have research questions that hinge upon those correlations.
+And so this last line just does that.
+Okay.
+Code aside, here's what we get.
+We get a posterior distribution for the correlation between the features.
+And there's a reasonably strong negative correlation
+between the alphas and betas across districts in this.
+And I show you here the posterior distribution in red,
+almost all the probability mass is below zero.
+And just for comparison, I show you the prior.
+It's often nice to compare the prior distribution to the posterior
+to make sure the model learns something from the sample, right?
+And the consequence of this is if you plot up the posterior means
+for the alphas and betas from the correlate varying effects model,
+they look like this.
+The pink hill there in the middle is the posterior bivariate Gaussian distribution
+for the alphas and betas, the joint prior for them,
+updated with the sample.
+And you see the negative correlation.
+It's nice to compare this to the model that has alphas and betas,
+but ignores the correlation between them.
+It just has the independent partial pooling priors.
+That's the one we did in the previous lecture.
+And so we plot up the alpha and beta estimates for each district.
+In that case, with uncorrelated features,
+you'll see it looks quite different, right?
+So it's not that they're completely uncorrelated here.
+There is a little bit of a negative correlation,
+but it's not as strong.
+Learning the correlation helps a lot because it enables partial pooling
+across the districts, across features.
+What consequence does this have, though, on the outcome scale?
+So these alphas and betas are little cogs in the machine.
+They're not easy to relate to the observable outcome
+because any prediction may depend upon both of them simultaneously,
+and they have joint uncertainty.
+So we can look at this a couple ways.
+Bear with me.
+Here is a way that we looked at in the previous lecture.
+We think about in each of these plots, on the horizontal axis,
+we have all the districts arranged from 1 to 61 on the horizontal axis,
+and in the vertical is the probability that a woman uses contraception in that district,
+and the red points are rural and the blue points are urban.
+And so you can see easily that the model has learned
+that there's more use in urban areas.
+There's also quite a lot of variation across urban areas.
+The top is our new posterior means using correlated features,
+and the bottom are the previous ones from the previous lecture using uncorrelated features.
+Now, if you squint, I have another plot coming, but hang on.
+If you squint and you compare the blue points on the top and the bottom,
+what I want you to see is there's more variation among the blue points on the top
+than on the bottom.
+On the bottom, they've been shrunk towards the mean much more aggressively.
+You'll see that, yeah?
+They're sort of bunched up more in the same range.
+The red points are relatively similar on the top and bottom,
+although some of them have moved a bit.
+So first thing to notice is this has made a difference.
+It's the right thing to do, and it has made a difference.
+Let's look at this in the outcome space now on the probability scale.
+So we take the link function, and you just produce posterior predictions
+for each district for a woman who's living in a rural area
+and a woman living in an urban area, and that's what this plot shows.
+Here is what this plot would look at for the model that ignores the correlation.
+So I showed you this at the end of the previous lecture to whet your appetite for correlations.
+You can see the strong correlation.
+This correlation arises largely because alpha is in both of these things.
+It overlays the correlated features model,
+and you can see that a lot of the points move sometimes quite substantially.
+So this has made quite a big impact.
+Why have they moved?
+Well, this is because of the transfer of information across features.
+In many of the districts there's little, if any, information about women in urban areas,
+but for some of the districts there's a lot.
+The correlation, the negative correlation between contraceptive use in rural and urban areas
+within districts can be used to produce better estimates for those districts
+where there's little information about urban women, and sometimes this moves points quite a lot.
+What does that negative correlation mean, though?
+And I say there's a negative correlation.
+So the negative correlation between contraceptive use in rural areas
+and the difference in contraceptive use in urban areas.
+It's a negative correlation between the amount of contraceptive use in rural areas in a district
+and the difference to urban women in the same district.
+What the negative correlation means is that when a district has high contraceptive use in rural areas,
+the urban areas are more similar to it.
+They're less different.
+Most urban areas have very similar contraceptive use rates in this 1989 sample,
+but the rural areas vary a lot across districts.
+So we get this movement here that helps quite a lot in updating these things and things that moved a lot.
+And this is the better model given all the assumptions.
+Okay, so that's estimating the effective view.
+All of that machinery is needed to do that.
+And there's lots of other stuff we could do with this sample, of course.
+We could estimate the direct effective view as well.
+And you might want to try this, maybe in a homework problem.
+And to do that, using your coming back conceptually to the high level,
+I'll zoom out again and picture the aisle in your mind.
+Yeah, we're not doing detailed sketching now.
+If you wanted to do that, you would need a little golem that stratifies by kids.
+Yeah, and there are many, that's a subtle sort of thing to think about too
+because what does it mean to stratify by kids?
+Yeah, kids is a strange variable.
+You don't have half a kid, but there's no sense in which each kid has to have the same effect.
+And we need to stratify in some reasonable way to block this mediation.
+There's also the effects of kids themselves, which is often a very strong policy interest
+because women often have stopping rules for desired family sizes.
+We know this because they tell us they do.
+And so this is something of interest as well.
+And I'm going to ask you to do this in the homework problem.
+Those of you taking the course will be forced through it.
+Those of you who are just auditing or watching this even years later,
+the solutions are up on the website and I encourage you to take a look.
+There's a lot to learn from the details of this,
+but it doesn't involve all of this varying effects, shenanigans.
+Just high-level thinking about how to properly stratify by a cause of interest.
+Age has a similar set of issues.
+Notice that to estimate the effect of kids, we're going to have to simultaneously stratify by age.
+Obviously age is a strong influence on how many surviving children a woman has.
+And age similarly as a variable often can have strong and awkward functional relationships to other variables.
+Final thing in this lecture and the previous,
+I haven't done the synthetic data simulation and testing of the golems.
+And I apologize for that, but there's just no way to pack it all in.
+And one of the reasons is that for this kind of example,
+these kinds of demographic population examples,
+a satisfying synthetic data simulation could be quite complicated.
+So when we say that age influences the number of surviving kids we have,
+obviously that's not linear, right?
+Because at least for humans, the range of years that a woman is fertile is a tiny proportion of her life.
+And so you don't expect some linear relationship between age and number of kids, right?
+There's some distribution of age at first reproduction and then there are interbirth intervals.
+A synthetic data simulation in these demographic scenarios is not a trivial thing actually.
+And in many of the previous examples, the synthetic data simulation,
+I have sort of made trivial by just making it look like the stat model.
+But in this case, that's not going to be adequate.
+And so I've punted on it.
+I might give you a homework problem in which I ask you to make an attempt at this.
+But I just want to make it clear that synthetic data simulation and testing is just as important in these scenarios.
+It's just harder.
+And sometimes it's the hardest part because you're doing, well, an agent-based population simulation essentially.
+There was one example of this earlier in the course when I showed the Cliterbias example of marriage and happiness,
+that I used an agent-based simulation in that case to generate a cross-sectional sample to show you how the Cliterbias can arise.
+We need a similar sort of issue here where we have a dynamic simulation and we draw a cross-section from it because we have a cross-sectional sample.
+All right, let me try to sum up.
+This lecture has been about correlated varying effects, which is one of the sort of standard artistic techniques,
+if you'll allow me that, of doing Bayesian statistical modeling.
+And it's this feature, actually, which has drawn a lot of people to Bayes just because this is the most effectively to fit such models.
+And these sorts of models have lots of advantages.
+So all philosophy aside, in the behavioral sciences and biological sciences, the growth of Bayesian statistics has been driven in large part
+by how much easier it is to fit these correlated varying effects models using Bayes than using other techniques like maximum likelihood.
+What's the point of them?
+Well, they contain priors that learn correlation structure.
+And this has two strong advantages.
+First, it gives us partial pooling across features, which can sometimes substantially improve estimates.
+And second, it learns the correlations.
+We get a posterior distribution for the correlations among features.
+And sometimes the research question is about that.
+And in the lecture next week, I will have an example of that, so just hang on.
+I want to remind you, I mentioned this already in the lecture, varying effects in the posterior can be correlated even if the prior doesn't learn the correlations.
+So if you use a varying effects model with uncorrelated features, it's not the end of the world.
+And you can still learn that there are correlations.
+You just won't have a parameter for it, and you won't get partial pooling.
+So you're giving up a little bit.
+The best thing to do is to use correlated varying effects in almost all cases,
+unless you've got some exotic argument otherwise.
+Sometimes it's technically not feasible, and we all understand that.
+But I want to point out, and this is going to be sort of my open science dad persona now,
+it is an ethical obligation to use the best methodological techniques that we know.
+It is not okay to say, well, it's just going to turn out the same, or we didn't have time.
+That is not a justification, especially if you're publicly funded, right?
+If you're privately funded, then you answer to somebody else.
+If you're publicly funded, you answer to posterity.
+And it is an ethical violation to ignore the best methods that you know.
+Okay, thanks for your indulgence.
+This has been week seven of statistical rethinking in 2003.
+And next week we're going to get more specialized.
+I'm going to start out, and I'll call it multi-level tactics on this slide.
+And we're going to start out with a whole lecture about the social network analysis.
+And I hope to see you there.
+I was sitting in the rain the other day, getting soaked, watching those football players play.
+My team was losing so it wasn't even funny.
+An old dumb me, I bet all my rent money.
+I got so shook, I could hardly even talk.
+So I got my base, and we went for a walk.
+We started walking.
+Are you still there?
+I'll give you a bonus.
+So I avoided a lot of the detail in the lecture and the previous one about why this non-centering of multi-level priors helps with sampling from the posterior distribution.
+So I'm reminding you by showing you the slide here that we had some inefficiency in the correlated features model,
+in particular the standard deviations for the features sampled inefficiently,
+and had low numbers of effective samples relative to the total samples and higher our hat than the other parameters.
+In this particular case, this isn't a major problem.
+We still get a sufficiently accurate picture of the posterior distribution.
+And if you ran the chains longer, the statistics would look better.
+But sometimes for more complicated models, you really can't fix things just by running the chains longer.
+And you're going to get some biased samples from the posterior distribution as a consequence of this inefficiency.
+And so that's why the non-centering is an essential skill to make this stuff work.
+And some software packages like the excellent BRMS and R-Stand Arm, which also rely upon stand,
+use non-centered multi-level priors as their default.
+But sometimes centered priors are better than non-centered priors.
+It all depends upon the details.
+So in this bonus round, I'd like to explain the principles behind this transformation,
+give you a better idea how it works.
+But I'm already sure you that you don't have to completely understand the mathematical basis of why this works
+in order to make good use of the two different forms of priors.
+You can switch between them, and you need to know both of them.
+The basic reason that multi-level priors are often hard to construct posterior distributions
+that are harder to sample from is that they construct surfaces,
+that is, posterior distributions, with steeper curvature.
+Once you start embedding parameters on top of other parameters,
+you can get very rapid changes in the plausibility of the observations,
+and you can get what is effectively a very steep skate park and with vertical walls almost in some places.
+And it's harder to explore or to do a Hamiltonian simulation on such surfaces
+because you have to use very fine small steps in the simulation in order to follow this steep curvature.
+You risk essentially punching through the wall of the skate park.
+I'm going to show you some animations in a moment to give you an intuition about this.
+When this happens, when you essentially punch through the wall of the skate park in the Hamiltonian simulation,
+the simulation will usually detect it,
+and it will report something at the end of your model run called divergent transitions.
+Each of these divergent transitions is a rejection of a proposal that was caused by one of these inaccurate simulations.
+To remind you, the Hamiltonian is the total energy of the physical system that's being simulated,
+and so it has to remain constant from the start to the end of the trajectory that we simulate in the Hamiltonian skate park,
+that is our negative log posterior distribution.
+And so the algorithm detects inaccurate simulations by monitoring the value of the Hamiltonian,
+and if it's different at the end than it was at the start, then something went wrong,
+and then we're likely to reject that proposal.
+However, if there are regions of the posterior which are very hard to explore because they're steep
+and you get lots of divergent transitions whenever the trajectory wanders into them,
+then you can't sample from those regions, and that's no good.
+And this is when transforming.
+The priors can help because it ends up transforming the geometry of the bowl we're trying to roll around in.
+So I'm going to show you some simple examples, and then we'll return to the example from the lecture briefly.
+And the goal here is just to give you both some intuition for why this works,
+some deeper understanding of what these scary sounding divergent transitions are.
+If you're like me, it sounds like a good thing.
+You like divergent things and you like transitions,
+but maybe most people don't like the sound of divergent transitions.
+It sounds bad.
+Sometimes it's called divergent trajectories, yeah.
+But you shouldn't be scared of them.
+You need to understand that they're rejected and they're rejected probably because they're rejected proposals
+and they're rejected probably because of some steep curvature in some region.
+Okay.
+Here's a posterior distribution.
+We're looking down on it, like in these other sorts of diagrams like this,
+in its posterior distribution for two completely arbitrary parameters that I've made up,
+X on the horizontal and V on the vertical.
+And there's no data in this example.
+It's a sample from essentially a prior distribution.
+But remember, priors and posterior is the same thing.
+It's kind of an illusion of our mind to think that they're different.
+And I show you on the right of this slide the probability assignments that define this particular skate park there
+where it's deepest in the middle where you see the simulation rolling around.
+And then it has these very steep walls on the bottom.
+It has a normal distribution.
+It was centered on zero with a standard deviation of a half.
+And then X, the horizontal axis variable, also has a normal distribution centered on zero.
+But its standard deviation is a function of V.
+And as a consequence, as V gets small towards the bottom, the standard deviation gets small.
+I'll say that again.
+As V gets small towards the bottom of the graph, the standard deviation on X gets small.
+And this creates this very narrow valley that contracts towards the bottom,
+or a funnel it's often called in this literature.
+In the textbook, I call this the devil's funnel.
+It's particularly wicked and difficult to sample from.
+And I'll show you some examples of what can happen when this thing wanders down in there.
+If we make it even narrower now, by changing the standard deviation of V,
+we can make this more or less pernicious.
+As the standard deviation of V grows large, the devil's funnel can get arbitrarily narrow.
+And your simulation wanders down in there is likely to crash into the wall.
+So let me show you what will happen when we make the standard deviation on V3 instead of 0.5.
+Now the devil's funnel down there at the bottom is very narrow.
+And when our virtual skateboarder wanders into it,
+you see the little line segments are how fine those are the steps in the trajectory
+of the Hamiltonian simulation that approximate the smooth path of actual physics.
+And when he gets into the deep funnel there, he starts moving faster,
+and those trajectories are not, rather the line segments are not small enough
+to stop him from just punching through the wall.
+And then weird physical results happen like he's launched into space.
+You'll see again as the animation repeats, either he's in orbit, yep, orbit again, yeah.
+And the red points are the rejected proposals.
+And so the chain starts over after such a rejection, but this is inefficient in the first place.
+And second, if you can't ever draw samples from the funnel, then you don't know what its shape is.
+Remember, when we're actually running a Markov chain, we can't see the surface.
+That's why we're running the Markov chain.
+I've just chosen a simple example where we can actually draw the surface
+so you can see what's going on.
+The other thing that can happen is you can get stuck in the funnel,
+as you'll see the simulation is doing here.
+It has a hard time getting out as well.
+Okay, so this is what happens in a multi-level prior because a multi-level prior,
+a centered version of a multi-level prior has parameters inside of it
+and a parameter for the standard deviation.
+And that's the kind of thing that can make this happen.
+Oh yeah, the red points are the divergent transitions.
+Okay, why do these divergent transitions happen?
+The basic problem is when there are big changes in the curvature of the posterior
+in different regions of it, like in the example on the screen here,
+the same step size for the Hamiltonian simulation is not optimal everywhere.
+You want really fine steps when you're in the funnel,
+and you want bigger steps when you're out of it.
+There's this kind of big, smooth, safe plane to cruise on once you get out of the funnel,
+but the algorithm uses the same step size everywhere.
+So what can you do?
+Well, you can use a smaller step size, or you can reparameterize, or you can do both.
+Okay, small step size can work, but this results in incredibly slow exploration, right?
+So in the smooth part up there, you're just taking forever to explore.
+So it's inefficient for another reason now, but it can handle the funnel better, right?
+Because it actually doesn't punch through walls, it just rolls off of them,
+because it's got a smaller, smoother simulation, you see.
+The other option is this non-centering trick that I had showed you,
+but not really explained in any satisfactory way in this lecture and the previous one.
+So here's the Devil's Funnel again.
+It's in the centered version of it.
+Now we're going to make the non-centered version of the Devil's Funnel.
+And that means take the parameters out of the X, out of the prior for X.
+How can we do that?
+Well, we redefine X as a deterministic function of some new parameter.
+Let's choose it, let's call it Z.
+That's my go-to choice, or Z, if you prefer.
+And we're going to assign Z a standard normal prior distribution.
+This is a great choice because this makes a very nice scapegoat for Hamiltonian Monte Carlo.
+Normal distributions are easy to skate on because they're parabolas in the minus log probability space.
+They're perfect parabolas.
+And then we convert back.
+So X is equal to Z times E to the V.
+And this gives us the X we want.
+So this is essentially saying for any X that we might draw from the prior we really want,
+that is the normal with a mean of zero and exponent V, that X will have some Z score.
+It will have some standardized value.
+We get by dividing by the standard deviation.
+That is dividing by exponent V.
+So since we divided by exponent V to get the Z score, we can get back to X just by multiplying by exponent V.
+I'll say that again.
+Since we get the Z score by dividing X by exponent V, which is the standard deviation of the X distribution,
+we get back to X from the Z score by multiplying the Z score by exponent V, which just means E to the V.
+And that is the non-centering trick.
+It's the same trick that I showed you in lecture.
+It's just a little simpler here because there's no mean to subtract as well.
+The mean is zero.
+So what does that do in this case?
+Well, now the Hamiltonian Monte Carlo doesn't have to sample from anything with a funnel.
+It's got two normal distributions, one with a standard deviation of three and the other with a standard deviation of one.
+And it can cruise around very nicely in this because it's just a parabolic bowl to skate around in.
+And on the right of this slide, I'll show you a simulation with two skaters, a blue and a purple.
+And they occasionally collide with one another, but the simulation doesn't care.
+This will be like two chains when you run your Markov chain.
+The chains run in parallel in the same surface, ignoring one another, taking samples from the same surface like this.
+And this is a very easy.
+These multi-dimensional Gaussian posteriors are easy to sample from.
+Works very nice.
+So if you can transform it, transform your hard problem with the Devil's Funnel into an easy problem with a big Gaussian bowl, that's often the best way to go.
+So you can play with this with ULAM.
+You can program the Devil's Funnel directly into it.
+And this example is also in the book.
+And you just program the Devil's Funnel directly into it.
+Notice there's no data here, right?
+You can just sample from priors using ULAM.
+And in the first version, in 13.7, the centered version of the Devil's Funnel, you get a bunch of divergent transitions.
+Yeah.
+And the NF of 7 for V, that's not great.
+And an R hat of 1.4.
+That's big.
+I've done worse before.
+I've had R hats of 20.
+I think that's my record, around 20.
+And anyway, that's not a reliable.
+You wouldn't trust that posterior distribution, I hope.
+But the bottom one, which remember, we get the same samples for V and X that we want.
+It's just that X is a computed quantity from Z now, right?
+We sample and then we transform in the non-centered version.
+In the centered version, we sample, or rather, we transform and then we sample.
+And in the non-centered version, we sample and then we transform.
+And often, well, each of these is better in different circumstances, but often the transforming at the end after sampling is easier.
+Let's see what these chains look like, just to convince you how bad the Devil's Funnel can be.
+So here's the centered version.
+These are bad chains.
+They are not exploring the same space.
+Yeah.
+And then here's the trace plot for the centered version with the auxiliary parameter X in there.
+So V and Z are perfect fuzzy caterpillars, exactly kind of trace plot you want to see.
+Good numbers of effective parameters.
+Good R hats.
+And then X down there is the transformed version.
+And you might think that's a weird looking trace plot, but that's exactly the distribution of X.
+And the reason is because X sticks to a very tight range, but then when it gets in the, it can have these, it has a very long tail, right?
+And that's what those excursions are out in probability space.
+That's a consequence of the exponentiation.
+Okay.
+So here's the example from lecture with the contraception model and the centered version on the left and the non-centered version on the right.
+And the non-centered version has this weird line in it that I declined to explain where there's some matrix algebra.
+So let's spend some time on that matrix algebra line.
+And now, if you're not familiar with matrix algebra, that's okay.
+Just kind of hum along and acquaint yourself with the function of this line and what it's meant to do and not with the detail calculations,
+because your computer will take care of that and do a better job than we ever could.
+So what does this V equals?
+Diag, sigma, L, Z transpose.
+That little weird T means to transpose, which is like rotating the matrix.
+What does this mean?
+So V is a matrix of varying effects, remember, and the first column of which are the varying effect offsets for the alphas.
+So we just get back on the scale by adding the mean to them.
+And the second column of V are the varying effect offsets for the betas.
+And we get back on to the standard scale by adding the mean back to them.
+And then we can use our same open-ear model at the top, as always.
+So this matrix algebra, this nasty bundle of matrix algebra here just takes the standardized uncorrelated Z scores.
+Z scores exactly in the same spirit of the Z score in the non-centered devil's funnel and puts them back on the unstandardized scale.
+And in this case, it's not only that they're unstandardized, so we're getting the standard deviations back in,
+multiplying again by the proper standard deviations.
+But we're also producing correlations between the features by putting correlations back in.
+And that's the weird thing about the multivariate non-centered parameterization,
+is there's a way that we actually factor out correlations, and then we have to put them back in.
+And there's a great trick to this.
+So let me step through this one piece at a time, demystify it a bit.
+So V is a 61 by 2 matrix because there are 61 districts and two features.
+If you had more features, there would be more columns.
+If you had more districts, there would be more rows.
+The first thing inside this is what's called a diagonal matrix.
+That's what that dyag function was on the previous slide.
+It just takes a vector and it spreads that vector along the diagonal of the matrix,
+making a square matrix of the same dimension as the length of the vector.
+And so for the vector of two standard deviations, we end up with a 2 by 2 matrix
+where the standard deviations are on the diagonal, just like this,
+with sigma 1 and sigma 2 being the standard deviations of the two features.
+Then we have this thing, L, and this is our magic ingredient.
+This is the Koleski factor of the correlation matrix across features.
+And I'll say a little bit more about this before,
+but it's actually just sufficient to understand that it's something you compute
+from a correlation matrix.
+Every correlation matrix implies a unique Koleski factor,
+and that Koleski factor can be used algebraically to sort of encode
+the correlation structure in a very efficient way,
+and then we can put this stuff back in there,
+get the correlations back in using it with this equation.
+Capital Z here is the 2 by 61 matrix of Z scores.
+Remember, every element of this is exactly the same prior, and there are no correlations.
+That's the big multi-dimensional Gaussian bowl we'd like to cruise around in.
+And then again, this little t means to transpose,
+so that the result of all of that matrix algebra on the right-hand side of the equals
+is to produce a 2 by 61 matrix, the same dimension as Z.
+But for convenience, we prefer to have the districts on the rows
+and the features on the columns, and so I just rotate it.
+But obviously, that's not essential as long as you keep straight,
+which margin means what?
+So, what is this Koleski thing?
+Koleski was a man, and Koleski's up pretty obviously a Polish name,
+but he was a French citizen,
+and he fought in the First World War on the side of the French,
+and he came up with this ingenious, an artillery commander,
+and he came up with this ingenious method, I think during the war, actually,
+for solving systems of linear equations,
+and that's where this Koleski factor comes in.
+It's an incredibly practical and useful method.
+In fact, it was used in geography, I think first, not really artillery.
+So, here's the part of it.
+If your French isn't that great, I took French in high school,
+and my French is now absolutely terrible,
+but here's my struggle attempt at translating the relevant bits of this.
+The title of this paper, it was actually communicated by another commandant,
+commandant Benoit, and wrote this paper on a method for solving normal equations
+resulting from the application of the method of least squares
+to a system of linear equations, a smaller number than the unknown.
+It just rolls off the tongue, doesn't it?
+This is what math papers are like. They have very descriptive titles.
+There's really no poetry here.
+There's more poetry in the introduction to this paper,
+which is one of the best introductions to a mathematical paper I've ever read.
+It begins, the artillery commander, Koleski, or almost certainly Koleski,
+they would have said, of the geographical service of the army killed during the Great War, imagined.
+During research on the compensation of the geodetic networks,
+a very ingenious process of solving the equations known as normal,
+obtained by application of the method of the least squares to linear equations
+and a lower number than that of the unknowns.
+Okay, it's a long sentence.
+The point is, this fellow, Ange, Louis, Koleski, came up with a very, very clever thing,
+and it is now a workhorse way to factor matrices to do very practical linear algebra chores.
+And I want to show you, your computer is going to take care of this for you.
+You can give or any correlation matrix and just ask it for the Koleski factor, and it'll do it.
+So you don't ever have to calculate these things by hand.
+But I just want to demystify a bit by showing you what it's doing.
+Eventually what the Koleski factor is doing is it knows exactly which, to get correlations into a matrix of variables,
+it knows exactly how much of the other variables to mix into the others and in what amounts.
+And it knows how much because you told it how much through the correlation matrix,
+but then it figures out the most efficient equation for doing this.
+So that's what, here's this world's simplest Koleski correlation blending example.
+I'm going to define a two-dimensional Gaussian distribution where the two variables have a correlation of 0.6.
+It's a pretty strong correlation, but the amount doesn't matter.
+And I'm going to give the first one a standard deviation of 2 and the second a standard deviation of 0.5.
+But I'm going to build up this two-dimensional Gaussian by sampling independent z-scores for each.
+So z1 is our first variable and this is just independent normals, 0, 1.
+If you don't tell our arguments for our norm, it assumes 0, 1.
+And z2 is the same, so these are independent now.
+So z1 and z2 form a two-dimensional Gaussian distribution where there's no correlation
+and they have the same standard deviation of 1.
+But now, using the Koleski factor for a two-dimensional correlation matrix with a correlation of 0.6,
+we blend them back together.
+And the way we do this, we get our first variable by just taking the first z-score
+and putting it back on its unstandardized scale by multiplying it by its standard deviation.
+So that's all the line at the bottom here is.
+Yeah, a1 is equal to z1 if z-score times its standard deviation.
+So there's nothing mystical about that, right?
+So this is how these things always start.
+But then the second one needs to be infiltrated a bit by the first.
+So this one's a function of both z-scores.
+So we have the correlation rho, which is 0.6 in this example, times the first z-score.
+So this is mixing in the other variable plus the square root of 1 minus rho squared times z2.
+And you're asking yourself, where does this square root 1 minus rho squared come from?
+That's from the Koleski factor.
+You factor the correlation matrix and it tells you that that's the right factor to use to reconstruct the correlation.
+And then we take that whole sum and we multiply it by the proper scale for the second dimension.
+And you can try this code out and show you the output on the right of this slide.
+It really works.
+And it works with bigger correlation matrices as well.
+There's nothing special about the two-dimensional case.
+It's just that the Koleski factor in the two-dimensional case is exactly this simple.
+It's really, really simple.
+It's more complicated for bigger matrices, but the principle is the same.
+Okay, I hope that was educational, if not entertaining.
+A little bit of mathematics, a little bit of history.
+The practical lesson to take from this is that both the centered version of a multi-level prior and the non-centered version are better in different contexts.
+So you can't just always decide to use the non-centered version, although quite often that's your best default.
+The reason is that the centered version will actually sample more efficiently when the probability of the data is dominant.
+And that happens when you have a lot of data in each cluster.
+So if we had, in this example, in each district, we had a very, very large sample of women such that there was very little partial pooling or a lot less partial pooling,
+then the prior wouldn't matter as much as the data.
+And in that case, the centered version actually can sample much more efficiently in some cases.
+And you can actually get divergences if you use the non-centered version in that case.
+And in contrast, like the example in the lecture, the non-centered version tends to be better when there are many clusters and there's farce evidence in some number of them.
+In this case, the prior is dominant, at least for some dimensions of the posterior distribution, and then we're likely to get those things like the devil's funnel.
+Okay, I'll see you next week where we'll talk about social network modeling.
+And that is certainly an application where we need to use non-centered priors most of the time.
+I'll see you there.

@@ -1,0 +1,604 @@
+Welcome to lecture 18 of Statistical Rethinking, 2023.
+One of the difficulties in teaching this course is that I have to find a way to move your mind
+from the narrow perspective of introductory statistics and help you see that those kinds of
+approaches and models are very special cases. It's not that the man is moving, but the river,
+and once you realize things like this, lots of solutions to, well, ordinary realistic scientific
+problems open up. There are still coding challenges, but the conceptual part is the most important
+one, and that is to get your mind to move and stop seeing the river or the man.
+In the previous lecture, I showed you this much more realistic kind of analysis. Finally,
+we're almost done with the course. A data set that has lots of missing values. To remind you,
+this is the primate family tree. The ends of each branch there is a species, and the dots
+represent different variables. There are just three of them, and we'll become reacquainted with
+these variables later in the lecture. And where there are missing dots, there are missing values.
+We simply don't know the values for those particular species. They haven't been measured.
+I'd like to thank you in the previous lecture when we spoke about measurement error,
+that I started to convince you that an observed variable is a very unusual thing,
+which is to say an observed variable with no error or uncertainty of any kind. In this lecture,
+I want to double down on that intuition and convince you that missing data is quite typical.
+In fact, it's the ordinary case. Observed data, that is data that we treat as if it had no
+uncertainty at all, is a very special and unusual case in real research. Sometimes it does occur
+because our measurement device is really, really good, and we're measuring exactly what we want to
+measure. But most of the time, we're just fooling ourselves into believing that we have measured
+something with no error at all. So measurement error in the previous lecture is a set of methods
+for confronting that directly when we have some information about the measurement process
+so that we can put bounds on the uncertainty of a measurement. And in this lecture,
+we're going to think about data that are completely missing. That is, we have no measurement of all
+of them directly. This is what is usually called missing data. That is, some cases are unobserved.
+Now, of course, there could be whole individuals or cats or whatever it is you're measuring that are
+also unobserved. And you could also call those missing data, but we usually think of that as a
+sampling problem. But I think it'll start to soak in that it's really the same kind of problem,
+and we can approach it through probabilistic modeling as well. In either case, missing data
+are not really missing when you have a generative model. Because just like in the measurement error
+case, we do know something about them because there are implications that come from the generative
+model for cases we have not observed. We know, for example, the constraints on the variable because
+we know something about the nature of the variable. Now, so assume we were studying human height.
+You had measured a particular individual's height, but you know that it's positive. Yeah,
+that's a constraint. You also know something about the valid ranges. It could be,
+it's not going to be seven meters. Yeah. The other thing you often know about missing cases
+are their relationships to other variables. And you know these things through the causal model.
+And those implications through probabilistic modeling can be very powerful and help you
+make use of the available measured data when otherwise people just tend to throw it away.
+So in this lecture, I hope to show you how we approach this first conceptually. How do we think
+about drawing assumptions about missing data into causal models and then talk about the sorts of
+procedures that people use to deal with missing data because in most real research, you will have
+some. One of the things that's often done is simply to drop all cases that would be species,
+or countries, or whatever it is, whatever the unit on each row is to drop all those cases that
+don't, that aren't complete, that have any missing values in the variables of interest. And sometimes
+this can be justified, but it can only be justified through drawing causal assumptions.
+Now, so there's just no way out of it. And the same causal assumptions that will allow you to
+drop cases with missing values will also permit you to do something called imputation,
+which allows you to make use of the present cases. That is the observed variables for the
+cases that have some incomplete values and therefore recover some efficiency in estimating
+some of the parameters in the model. Let's start with the concepts up through the break,
+and then after the break we'll do some calculations. Okay, so let's think about a totally abstract
+parable about missing data now. Let's suppose, as is often rumored, that students don't like
+to do their homework and sometimes the homework is not turned in. And there are various reasons
+for this. So we're going to look at a simple DAG here where there are students and they
+cause homework and we're interested in the quality of homework from different students.
+That is ingrating them. But we don't get to observe all homework from all students because
+some students just don't turn it in. We don't know how good their work would have been if they had
+done it. So I'm going to draw the dotted circle around homework, meaning we haven't observed
+the true vector of homework values. Instead, we've observed this descendant of it, h star,
+which is also a vector, but it's got missing values. That is, the students who didn't turn
+in their homework, they're just blanks in there. This is what we usually mean when we say missing
+values. We've observed for some cases and not observed for others. Now, what can be done about
+this? Should we just ignore the students who have not turned in homework? What should we
+think counterfactually about their homework? Well, it depends upon what we believe is causing
+homework to go missing. Let's consider the simplest case. Say the students say,
+my dog ate my homework. Here's the dog. This is a mechanism that leads to homework to going to
+missing. And so the descendant h star, the vector of homework with missing values, is influenced
+both by the true homework that was submitted or would have been submitted had the student done it
+and the dog that eats homework. Yeah. And in this particular DAG, I want you to pay attention
+to the dog. That is the missingness mechanism in general. And what is influencing the homework
+that the dog eats? And in this particular case, the dog is, as we say, random. There are no,
+to figure out if there's any bias that will arise from the missingness and analyzing
+only the present samples, we need to well obey the due calculus. Analyze the graph with your eyes
+and think about biasing paths. Is there any biasing path connecting the homework
+to the cause of interest, the treatment of interest, that is the student's ability? Yes.
+And there isn't. There isn't. And I'll show you an example in the next slide where there is,
+and you'll see how to work with that. But in this case, there's not because
+the dog is just like a competing cause. It eats homework at random. It's not influenced by the
+student's ability. And we don't expect a bias in most cases in this circumstance. So we say that
+the dog, the random dog is usually benign. I do say usually because in particular
+measurements sometimes even randomness can be bad. Here's a simple simulation. So you can play
+with this and think about this causally. There's 100 students and 100 dogs simulate standardized
+student abilities in variable S. And then their homeworks are correlated with their abilities.
+And then the dog eats 50% of the homework totally at random without any regard for the
+quality of the homework, as dogs do. And then we have an observed variable h star,
+which has those missing values in it. And we can plot. And what I'm showing you on the right
+is the total sample in black. That's the total sample. And then the incomplete sample in red.
+And if we draw regression lines through these, you'll see that the slopes are about the same
+on average. And you can run multiple simulations here to play around with this and reassure yourself
+I haven't picked any special simulation. We don't expect a bias for missing us when the dogs are
+random like this. We do lose data though. And that's not good. So we lose efficiency and we lose
+precision. Okay, let's modify the parable of the dog in the homework. And let's draw an arrow from
+student ability to the dog. That is that the dog is influenced by the student's ability. Maybe for
+example, students who study a lot and work really hard on their homework and don't pay enough attention
+to their dogs. This makes the dogs grumpy. And the dogs eat the homework more as an active revenge.
+Yeah. This is a possibly biasing path. We're ignoring the missingness mechanism. That is the
+reasons the dog eats some homework and not other could result in confounding in the general sense,
+plain English sense that I often use it, meaning that you will be misled. So this is a possibly
+biasing path. The way you could think about this kind of dag is that the dog eats conditional on
+the cause of homework. Yeah. Some cause. It doesn't have to be the student. But the student in this
+case is the cause we're interested in. And so this is the most alarming sort of situation.
+So this can be benign. Yeah, but I'm going to show you benign case and then a less benign case. It
+depends upon the measurement scales and the functions that relate the variables. Unfortunately,
+you just have to think harder about the generative process in this business. So again, a simulation,
+100 students, 100 dogs, 100 homeworks. Same relationship between student ability and homework
+quality. Now the dog is going to eat 80% of the homework, but only for students who are above
+average. That is s greater than zero. And because they neglect to play with their dogs.
+And then we plot. And what I want you to see is the black points, the total sample
+are showing on the higher values of s because the red values, the observed sample has been
+depleted in that range. I'll say this again. The black points for the total sample are showing
+in the on the right hand side of that graph for students above average ability because the observed
+sample, the red points have been depleted in that range. Now for linear functions, like I've
+assumed here, you see the two regression lines doesn't have much of an effect, right? Because
+it's linear. It doesn't matter what value of s is. There's the same relationship to the quality
+of the homework on the vertical. But that's a special case that has to do with the functions
+I've chosen here. And the linear additive case is sort of the most benign sort of situation you
+could assume, which is why people often assume it. But it's very implausible for lots of situations,
+including homework, right? So let's imagine something a little more realistic that as
+student ability goes up, there's a ceiling effect on the quality of the homework. All right,
+eventually you just get everything right on the homework and it can't get any better.
+Right, we're not grading on penmanship here. So now the dog eats the homework of students who
+study too much, just as before, but there's an on linear ceiling effect on homework. I've chosen
+a particular exponential function for this just to make it curve. So if you look at the black
+points plus the red points, that's the total sample. And you'll see how it eventually homework
+stops getting better with increasing s. Yeah, left starts to level off. Now we deplete the sample
+again for the students of high ability because their dogs are upset with them. It's an active
+vengeance and we observe the red points and we fit straight lines. And you'll see we do get the
+wrong answer here because we're using the wrong function. Yeah, so this is just to remind you
+that part of the generative, the reason we go from DAGs and then write generative models with
+functions is because the functions matter. Okay, this can unfortunately get worse.
+And often is worse in real data. Now let's draw an arrow from the homework itself to the dog.
+What could this possibly mean? Well, say the dogs have a preference for a certain quality of homework,
+bad or good. In particular, say students who do bad homework and are aware of this tend to feed
+their homework to their dogs. Now it's the quality of the homework moderated by the students
+who that cause a certain homework to go missing. This situation is very bad. Yeah, so now you've
+got a biasing pass for sure. And unless you can model the dog, you can't close it. There's nothing
+you can do. Yeah, the dog eats conditional on homework itself. This situation is usually not
+benign. In fact, it's the it's kind of nightmare of statistical context. And again, a simulation on
+the left, I chose linear functions again, we'll go back to the simple case. But now what's leading
+the dog? The dog eats 90% of homework, where the homework is below average. Yeah, so students are
+feeding their their below average homework assignments to their dogs. And we plot again on
+the right. And the black plus the red is the total sample. And we only observe the red because the
+bad homework on the bottom half of the graph, bottom half of the y axis are depleted. And we
+fit two lines and we get a bias. Yeah, I hope this is intuitive to you. It tends to make more sense.
+This situation is very hard to recover from, unless you can model the missing this mechanism.
+And you know something about the functional forms. Let me try to summarize. These are three idealized
+cases. And they're certainly not all the situations you can be in, because you can get
+complicated. And you can have missing this in multiple ones. And, and so don't think this is
+the universe of things. But these are the stereotype cases. And you want to start
+by being easy on yourself and learning the stereotype cases. So you can scaffold up your
+conception of the problems. So the first one I showed you at the top here is the what I call dog
+eats random homework. Sometimes in stats, this is called missing completely at random. But that's
+not a very memorable phrase. Think about the dog, the dog eats random homework. In this case, in this
+sort of situation, if you want to drop incomplete cases, that is, cases where there are missing
+values, that's usually okay. That won't result in a bias, but it does result in a loss of efficiency.
+If we had other variables here we needed to adjust by, we would be throwing away
+information that lets us estimate coefficients for those adjustments. Yeah.
+And that's, that's a shame. We want to use all the information on the table.
+But it's not wrong to drop incomplete cases. Number two, dog eats conditional on cause.
+Again, in stats, this is dreadfully sometimes called missing at random,
+which again is completely uninformative sort of name. Think about the dog. The dog is eating
+that it's conditional on a cause, some variable that we have observed. Yeah, a treatment or
+something we want to adjust by. And what we need to do is we can need to condition on that cause
+or stratify by that covariate in order to deal with the missingness. But we must model it correctly.
+And that was the point of my example where there were diminishing returns on the quality of homework.
+There's no, there's no get out of jail free card here. And then finally, level three of the inferno.
+I hope you never find yourself here. The outcome of interest itself
+is causing missingness. And it's extremely difficult to deal with situations like this.
+But they're not rare. The dog story is obviously
+comic. Yeah, it's meant to entertain you and draw your attention and be memorable.
+So you can come back to these stereotype cases. But there are lots of variables which are,
+which cause them, where their own value causes them to go missing. I'll say that again.
+There are lots of variables where the value itself increases the probability that you will not observe
+it. Think about income. You're trying to do a survey on income. And people in certain income ranges
+will be motivated either to refuse to answer or to lie. Yeah. Now, a lie is not missing.
+You might call it measurement error. But that just makes it worse than missing in many ways.
+This sort of thing is not so unusual, unfortunately. I'd say at the bottom of this slide,
+this is usually hopeless. That's the word that I don't tend to like to use because I'm a hopeful
+person. But this is usually hopeless. You just want to report it honestly that this is a likely
+thing and describe the sample you have and say you can't draw causal conclusions because of the
+missingness. That would be the honest thing to do, I think, in most cases. But there are times
+where hope springs forth and you can do something about it if you know enough about the missingness
+mechanism. A really common case of this is survival analysis. I had a bonus in an earlier lecture
+when we analyzed the black cat adoptions which use survival analysis. And in survival analysis,
+we nearly always have missing values. There are adoptions which have not happened yet.
+But we know enough about the missingness mechanism and we have strong enough distributional assumptions
+about the adoptions that haven't happened yet that we can recover those cases and we can do
+something about it. So it's not always hopeless. So what do we do in those cases? Well, in all
+those cases, in the standard middle case, dog eats random homework, dog eats conditional on cause,
+and exotic cases like survival analysis, what we want to do is something called imputation
+or a more mathematical trick which achieves the same goal but just avoids having to develop
+probability distributions for the variables themselves, something called marginalization.
+What does this mean? Bayesian imputation, it means we compute a posterior probability
+distribution for each missing value. Remember, in Bayes, an unobserved variable is a parameter
+and the special rare case is a perfectly observed variable. We call that data. But data is in the
+minority in science. Usually we have imperfect measurements and those things require distributions.
+Information goes into those distributions, of course, and gives us priors, but then we need to
+update through a generative model. So we're going to do Bayesian imputation in this lecture and I'll
+show you how it works. In principle, you've already done Bayesian imputation in this course. When we
+did multi-level models, remember the Bangladesh fertility example, there was a district which
+we had no data for, but we nevertheless got a prediction for it. That was Bayesian imputation.
+It just happens automatically and I'll show you some examples after the break.
+The next sort of thing which achieves the same result is this thing called marginalizing unknowns.
+Often we don't really care about the posterior probability distributions of the missing data,
+but we want to leverage probability theory so that we can use the efficiency in all of the
+observed data without throwing away incomplete cases. And in that case, we can do this marginalization
+trick. We don't have to bother with computing posterior probability distributions for those,
+for the unobserved cases, the unobserved values. Instead, we can just sort of average over them
+using the probability distributions of the other variables. I know that sounds weird,
+but it's an automatic sort of thing you can do with probability models. I'll say a little bit
+more about that in a moment. And in principle, you've done it in the previous lecture in the
+misclassification example. I just didn't call it that. Okay. Why does Bayesian imputation work,
+this idea that we can compute the posterior distribution of the unobserved values? Well,
+because if you have a causal model of all the variables, and that's what a Bayesian generative
+model is, it's a joint probabilistic model of all the variables at once, then there will be
+implications for the values that are missing because the available evidence gives you probability
+distributions for the coefficients that tell you how the variables are related to one another,
+how they're associated. And that lets you do the imputation and lets you put bounds on the plausible
+values of the unobserved variables. Conceptually, this is weird, but technically it's even weirder,
+so I'm going to go slow here. But don't worry, this is a very common sort of thing to do. It's not
+at all on my guard. So sometimes you don't need to do imputation at all. It's just unnecessary. So
+if you have discrete parameters, for example, then we almost never bother with imputation,
+and it's quite expensive and difficult to do the sampling anyway. And so the misclassification
+example in the previous lecture was sort of covert example of this, where I had missing
+x values that was the extra pair of paternity assignment of each child, and I didn't bother
+to compute probability distributions for those. I just averaged over them using that little
+probability tree. That's marginalization. Sometimes you want to do imputation, though,
+because it's actually easier than the marginalization. And one example of this is actually in survival
+analysis with censored observations. If you have a complicated hazard function, the hazard function
+is what determines the scheduling of the event that is time to event. If it's at all complicated,
+something more than a simple exponential, the marginalization can be very computationally difficult
+and sometimes quite unstable. And in those cases, it's actually easier to treat the censored cases
+as missing values and model them as parameters. And there's an example, a coded example of how
+to do this in the script that goes with this lecture. For marginalization, there's a fully
+worked example in the book, and I apologize for not putting in this in this lecture, but this
+lecture would be three hours if I did all the interesting material in the missing data chapter.
+I'm sorry, it just has to be this way. But please take a look at that if we start with a generative
+model and we build up to the marginalization code and talk about numeric stability issues and the
+whole thing. The focal data example for this lecture is just going to be the primate data
+from the previous lecture, but now we're going to deal with the missing data, and we're going to
+revisit that analysis, and we're going to do imputation for the half the data that are missing.
+And you might be saying, but that's a lot of data. Can we really do that? Of course we can.
+Remember, in Bayes, the minimum sample size is one, or actually zero because you get predictions
+just from the priors. And all of this also goes for imputation. There's no magic number,
+which tells you how much data you're allowed to impute. Yeah? If you don't learn anything from
+the samples and the posterior won't be different from the prior, and we can always check that.
+So just relax and trust the axioms. Yeah? To remind you about this data, we've got 301
+primate species, lots of missing data in the three variables of interest that is mass,
+body mass, and grams, brain volume in cubic centimeters, and typical social group size.
+There's also measurement error here, and lots of potential for unobserved confounding.
+I want to spend a little bit of time just talking about this sample again, conceptually,
+before we get back to the data. So remind you what the tree looks like. I started the lecture
+with this picture, the 301 species. If we did a complete case analysis, which is what we did before,
+then we end up dropping half the species, and this is what we're left to analyze, just those.
+And you see you end up with big gaps in certain parts of the trees, because there's some species,
+which are just not so glamorous as apes. Apes are quite well measured, but even in the apes
+we're missing a lot of data. So we're going to impute some primates. The key idea, as I keep saying,
+but maybe it's good to hear it over and over again, is that we already have probabilistic
+information about missing values because of the relationships among observed values in the sample,
+and that lets us leverage all the data that we have observed. So say there's a species where we
+haven't measured body mass, but we've measured their group size. We want to use that group size
+to inform the coefficients in the model, not throw it away. And the imputation will let us do that.
+And the good news is it sort of happens automatically from the same statistical model.
+You don't have to really do anything different writing the mathematical version of the stat model
+to justify imputation, because in Bayes there's no deep conceptual distinction between data and
+parameter. A missing value will be a parameter, an observed value will be called data, but they're
+just observed and unobserved. That's all there is. And so whether something's a prior or a likelihood
+is, well, that's whether the river is moving or the man is running in it. It's your mind that moves,
+not the distribution. So let's take you through this. And as I say at the bottom of this slide,
+this is conceptually weird, but you get used to that in a little while, right? Do you use in
+meditation? Think about the man in the river catching fish. It'll come to you. You can pivot
+your mind's eye back and forth between the duality of parameters and data. The coding is
+awkward. And there's just no way around being honest about that. I will always be honest with you.
+The coding is awkward. It just is. And sometimes packages will hide this from you, and that's great.
+But at some point, you have to face that technical awkwardness, and there's just no way around it.
+But worry about the after the break, the technical awkwardness. Before the break here,
+we're not long from the break. Let's just focus on the conceptual issues of drawing the missing
+into this particular case. Okay, to remind you, here's the dagger I had drawn in the previous lecture
+where, actually, it wasn't the previous lecture. It was like two lectures ago.
+We've got group size and brain size and body mass. And there's some evolutionary history,
+which is influencing a bunch of other confounds. And that was the justification for including
+phylogeny. And we use the Gaussian process to do that.
+However, all three of these variables, group size and body mass and brain size,
+have missing values. And so what we want to do is draw that on the dag. We haven't observed the
+full g vector. We've only observed g star, which is group size and missing values. And it's influenced
+by some missingness mechanism, which I write here as little m sub g. Now, what is influencing
+missingness? The typical assumption is that it's totally random. But that's very unlikely
+in evolutionary ecology studies. Yeah, we know scientists don't study species at random. And
+so the species we have data for are a non random sample of all the primates. So for example,
+there's a very strong bias among primatologists to study species that are closely related to humans.
+Why? Well, because we're basically narcissists, right? And that's the whole premise of my field
+of anthropology. It's deeply seeded and unembarrassed narcissism. But the consequence here is that it
+means the smaller and less related to humans primate gets the greater the probability we're
+missing some some variable for it. Another possibility is that larger species are just easier
+to observe. And so body mass is one of the other variables in the data like body mass might influence
+missingness on group size. So for small imagined small body primates, they live in trees, they're
+hard to observe, we don't know their group sizes. Yeah, that seems plausible as well. But for something
+large like a chimpanzee, they're easy to spot you can count them. You know how many chimps are in a group.
+Another possibility just to give you night terrors is that the variable itself group size in this
+case influences its own missingness. And what would that mean? For example, well imagine solitary
+species are less studied. And so we don't know their group sizes. Yeah, these sorts of things can
+happen. And so they're worth considering. And maybe you know enough scientifically that you can
+reject this option. But it's the sort of thing that is an assumption. Yeah, and it's an assumption
+that can't easily be tested with the sample. So all these arrows are potentially in play.
+Whatever assumption you end up making, what you need to do is use the causal model to justify
+an analysis procedure. Yeah, to build some either you admit defeat and simply describe the sample
+and don't claim that anything, any causal estimates can be made. Or you argue that here are the
+assumptions that are necessary to interpret the results as causal. These are all good options.
+You just want to put your assumptions on the table, because the assumptions are what
+license conclusions. Yeah, if your conclusions would hold under any assumption, it doesn't sound
+like a conclusion, does it? Arguments always depend on their premises. So lay out your assumptions,
+lay out your premises, let your colleagues inspect them. I'm not meaning to argue here for any
+particular version of this dad, because I don't know what causes the missing values in this sample.
+I just gave you some hypotheses. But I want to show you if you were willing to say it was something
+like evolutionary history or body mass is influencing missing missing group size,
+then we can proceed. Yeah, but only because we have drawn out those assumptions and we can
+prove that there's a way forward from there using the generative model and testing the analysis pipeline.
+The reason we can make progress is because once you've got the generative model
+and you program this as a probabilistic model, the missing values, even though they're uncertain,
+that uncertainty will cascade through the whole model in exactly the right way.
+You don't need to be clever or intuit how this works, just trust the axioms.
+And all of the necessary constraints on the information will be obeyed.
+And the posterior distribution will take it all into account.
+So with that, I think we should pause. I really encourage you to review the first half of this
+lecture before you continue after the pause. This is conceptually strange. I admit that
+took me a long time to wrap my head around missing data and imputation when I started this.
+So I'm completely sympathetic to that. So do the review, jot down what's confusing,
+you can bring that confusion to me if you can't resolve it on your own,
+and then take a break, take care of yourself. And when you come back, I will still be here.
+Welcome back.
+Before the break, I had added missing values to group size, but obviously all three of these
+variables, mg and b, have missing values. So I've added the analogs for them, b star for the
+observed brain sizes, and m star for the observed body masses, and then missing this mechanisms
+for each of them. And if we assume that missing this is totally at random, that is,
+there are no causes into those little m variables on the graph, we know a model that will deal with
+this because we did it back in the Gaussian process lecture when I introduced phylogenetic
+regression. We will have a covariance kernel k that is informed by the phylogenetic distances,
+d among the species that we get from the consensus primate phylogeny. And then we stratify
+by body mass because we believe it is a confound, right? It's at the middle of a fork
+between g and b. Okay, that's just review.
+If we were only modeling it this way, this is the sort of reduced graph, the way you think
+about it, that g and m are influencing b. This is like a submodel of the whole thing,
+the only part, the only causes that we're interested in, right? We're not modeling the
+influence of body mass on group size, and so the tag at the top of the screen has deleted
+all the arrows that are not represented in this statistical model. And we don't necessarily need
+them, right? The due calculus says we don't need to estimate those relationships. Given our assumptions
+to estimate the influence of group size on brain size. But to do imputation, well,
+often we need the whole graph and the other relationships because the tag simultaneously
+implies a relationship among the other variables, right? We didn't focus instead on a different
+estimate on group size and the influence of body mass on it. And it will also be confounded
+by phylogeny or evolutionary history, shared environments, lowercase u in this graph.
+And so there would be another simultaneous phylogenetic regression that we could run
+to estimate that, the influence of body mass on group size. And of course, there is also the
+influence of evolutionary history on body mass itself, neither g or b by assumption in this
+example influences body mass, but evolutionary history does. And so we might want to estimate
+that as well. This would be for the evolutionary biologists, this would be an example of trying
+to measure the phylogenetic signal on body mass. All three of these regressions, big Gaussian
+process regressions coexist simultaneously in the tag, and we can run them simultaneously,
+and that will be the way we will do imputation on these things at the same time and be perfectly
+compatible with the assumptions in the causal model. And any other approach, any other ad-hoc
+approach to doing this is going to go wrong somewhere, yeah? And this is the point at which
+I want to point out too, that even though I'm using the word imputation, and this is the word
+that's used in non-Basian missing data methods as well, what we're doing is different.
+Non-Basian imputation does not involve assigning probability distributions to unobserves,
+right, because they don't do that. It involves simulating data sets using a generative model
+and then running the analysis multiple times. We're not going to do that, we're going to run the
+analysis once, and we're going to get posterior distributions for all the unobserves simultaneously
+compatible with the generative assumptions.
+Okay, a model like this, 3D simultaneous Gaussian processes, is not something to take lightly.
+You don't want to try and build it up all at once. You want to take small steps, and even then
+you're going to fall down. Making these models is hard. It's hard for everybody when you start out,
+so you take tiny little steps, you want a friend walking beside you the first time you try it,
+and even then you might fall down, stumble a bit, and when your friend laughs,
+they're not laughing at you, they're laughing with you, and they're there to pick you up.
+Eventually you can build it all together and practice and get it to run,
+and in our business we all fall down, so don't feel bad.
+So we're going to take it slow. I'm not going to draw the whole ally once here,
+I'm going to draw a little sub-component to this model and build it up, and remind you
+if I were doing this as part of a research project, I would also have a generative simulation
+with synthetic data, and I would be testing each little step of building the estimator of
+the statistical model as well. I have to leave that out of this lecture because it would be three
+hours long, but that's the sort of thing that's really worth doing. It's not a trivial case
+to do a synthetic simulation of phylogenetic data, but there are packages to help you do that.
+Okay, we're going to go slow. The first thing we're going to do is we're just going to ignore
+all the cases with missing brain values. Why? Well, that's the outcome, and the species with
+missing brain values, the model will at the end be able to make predictions for those,
+but we don't anticipate getting any value out of imputing the missing cases in the outcome,
+those are just predictions. We then want to impute GNM, ignoring the models for each,
+which is almost certainly the wrong thing to do, but I want to show it to you because,
+first of all, this is how you build up code. You start with things that are slightly wrong,
+but have some structure to them so you can get the machine running, and then you add in the
+complexity and layers. It will also turn out to be very useful for showing you the consequences
+of adding the causes of GNM into the imputation. You'll understand this when I get there.
+So then we get to step three, and we impute group size using the model, and you'll see the
+consequences of that. What I mean by using the model is using the causes of G, which is
+both body mass and evolutionary history. Then finally, we'll get to step four and we'll do it
+all. I'll show you the results that arise from all of that. I will not walk you through the detailed
+code of the last model because it would take up multiple screens, but all the code is in the script
+for this lecture. What does it mean ignore cases with missing B values? Well, we can take a look
+at what's missing here. So here's a table where we see what's present for all the complete cases
+where brain size is present, and you'll see that there are patterns of missing this as well,
+what we're left with after we reduce ourselves down to all the species where we have observed
+brain sizes. You can see that what this little table does is true means observed and false means
+missing. So you can see that we're missing a lot of values for group size, and there's some
+correlation in missing this as well in these variables. But this is what we're left with.
+You get that 151 number. That's the case where both M and G are observed, and that's what we saw
+before. So now let's impute group size and body mass ignoring the models for each. What do I mean
+by that? What I've got on the screen right now is the full thing, the full luxury base approach
+we're going to end the lecture with. When I ignore the models, that means I just treat G and M as if
+they were standard normals. Yeah, no causes at all. This is not the right answer, but this is almost
+always the right place to start when building a fancy model like this. Go easy on yourself because
+you're going to slip on the ice, okay? Gotta take small steps or your fall is going to hurt a lot
+more. So when GI is observed, this is the thing to think about this distribution, normal 01 that's
+assigned to G sub i. Some of the G sub i values have been observed. They're measurements. So when
+it's observed, conventional statisticians would call this a likelihood. It's a likelihood for a
+standardized variable. Yeah, it gives us the probability of observing that measurement. It's
+okay to assign it to standardized because we can just standardize group size, right? When G sub i
+is missing, however, since we're basians, we get to call this the prior. But again, this is your mind
+moving and not the variable. Yeah, is the man moving or is the stream moving? These categories,
+likelihood and prior are features of our mind. They're not features of probability theory.
+And we can exploit that dualism. We only need one definition, whether G is observed or missing.
+It's just that sometimes when it's missing, there's a parameter in that place.
+And so we will get a posterior distribution for it. And in this case, normal 01 will be the prior
+for it. And but that will not necessarily be the posterior. It'll get updated. And
+when it's observed, it'll inform the coefficient for it, for that variable. So this looks like a
+typical, this is the same kind of code we used in the Gaussian process lecture. This is a Gaussian
+process regression, where the phylogenetic distance matrix there is DMAT. And no surprises, I hope.
+You run this and you get a huge factor of imputed values. You get two imputed body masses. Remember,
+there's only two missing body masses in these. In this case, body masses is much more often measured.
+It's easier to measure than group size, because it's not a behavior. And then a bunch of missing
+group sizes you see there that have been imputed as well. And you don't want to stare too hard at
+this table, because it'll drive you to madness. Yeah, that's not how we interpret the outcomes
+of these things. We want to plot posterior predictions. Yeah. And so let's do that.
+Think about body mass on the horizontal here versus brain volume on the vertical. And what's
+the relationship between these things? And you see the black points to the observed cases,
+there's a very strong correlation between body size and brain size. This is totally unsurprising,
+because bigger bodies have bigger brains. And the imputed values there, I'm showing
+you the posterior distributions for the imputed values in red. And each of those is a single
+point. Remember, there's only two. And the circle is the posterior mean. And then I think those are
+89% intervals. You'll see they follow the trend, yeah, even though they both had the same normal
+zero one prior. And that's because the coefficient was estimated. And so the imputed values follow
+the trend. Yeah, because we know the brain volume for the species, and that gives us information
+about its body mass. Now, what about the relationship between body mass and group size?
+The model we just ran is silent on this, because there's no coefficient to connect these two
+variables, even though we believe body mass is related to group size. It's certainly strongly
+associated in the sample. And you can see that in the plot on this graph in the black points,
+that's the raw data. There is an association. It's not nearly as strong as the association
+between body mass and brain size, but they're associated. But look at the imputed values in
+red. Those are just posterior means. Each of those is an uncertain point. Remember that.
+But these are the posterior means for ease of visualization. And you'll see they don't follow
+the association trend between these two variables. We've left some information on the table. And
+this is a consequence of ignoring the full generative model. Yeah. And so we're going to
+fold that information in now by updating the generative, putting the generative model into
+the statistical model. And this will change. Okay, what happens to the estimated causal
+effect of group size on brain sizes, the consequences of this imputation? Well, it gets a lot smaller,
+actually. As you see here, the black posterior distribution on the right is the so-called
+complete case analysis. That's what we did in the previous lecture. And the red is after we've
+done this imputation. This is the kind of thing I would call naive imputation because it ignores
+their relationships among the right-hand side variables. We just treated them as normal zero
+one in the prior. And that's almost certainly a mistake because the DAG says it's a mistake.
+But this is the first step. It's still right to do this first, both because it helps you get the
+code to work. Remember the bear on the ice takes small steps, you will fall down.
+But also because then we can later compare and we can learn from that comparison.
+So let's do that. Let's still going to ignore body maps for the moment, but remember small steps.
+We're going to add the generative model for group size, which means we're going to fill in the
+regression in the middle here, the center column, so that there's a coefficient for the effect of
+body mask on group size. And again, we have a file genetic covariance matrix, but it's a different
+one, right, with its own parameters, but it uses the same distance matrix, the so-called phyletic
+distances among the species. But it has its own parameters. See, they all have sub-g on them.
+And that's because the file genetic signature for different traits can be different.
+Okay. And now we run this. And on the top, I do it without phylogeny, which is to say,
+body masses influencing group size. But we don't, but I don't worry about
+phylogeny confounding on group size, so we ignore that issue. So there's only one
+covariance kernel in there. Yeah, one Gaussian process line in the middle. And so that's this
+model here. Yeah, you can see the model on G. The brain model is just above it. And it's just
+an ordinary normal regression. It's not one of those multi-normal Gaussian process monsters.
+Yeah. So again, this is not where we wanted to be, but we take it step by step, and you would do
+the top model here and get that to run and mix, and then you would put in the Gaussian process.
+And that's what I have at the bottom down here, where I convert that G
+tilde normal to G tilde multi-normal. And we have another Gaussian process covariance kernel,
+KG this time, the covariance kernel for group size. And it looks the same, but it has its own
+parameters. Yeah. That weird REC vector thing in the middle is we just want the means here
+to be zero. Yeah. And so that they're just phylogeny in this example so that I can contrast the two.
+Again, this is not where we want to be because I've taken out the influence of body mass in the
+bottom model. But this will let me contrast the effects of considering phylogeny versus the effects
+of considering just body mass. And then we can combine these two things in the same model,
+just by putting the line from the top, the new is AG plus BMG times M,
+into the bottom model as well, and get them. So I'll show you all the combinations. And I apologize
+for taking all these tiny steps. Actually, I don't apologize at all. I'm not sorry at all.
+I'm taking all these tiny steps with different submodels because this is the way you should
+develop stuff, even though you know where you want to be, but you can't get there right away.
+You would take too big a step and you'd always fall down. So let me show you.
+This is what we had before, this relationship between body mass and group size, the black
+points or the observed values, the red points of the posterior means of the imputed values.
+This is obviously not so great. Yeah, it'd be nice if they followed the trend.
+So let's do that. Let's layer in on the right. I'm going to layer in the other effects.
+Here are the imputed values, the posterior means of the imputed values for
+the model that only considers the influence of body mass on group size, ignoring phylogeny.
+And you can see now it captures the trend. Yeah, it follows a regression line that's
+clumsily drawn through all those points. Yeah, but notice it's still quite weird in the sense
+that group size has a very weird distribution. And this is one of the issues because there are
+lots of solitary species there at the bottom. Yeah, those are the ones at the bottom. Those are the
+ones that where adult females live alone. So they're what we call solitary in primatology.
+And there are a lot of solitary prosimians. So also some apes. Yeah. And our imputed values are not
+doing a very good job of accommodating that sort of thing. That's not too surprising, but it's the
+sort of thing you want to remark on. Then we consider phylogeny only ignoring the influence
+of body mass. And these are the blue points. These are the posterior means of imputed values
+using phylogenetic covariance. And that is when we don't know, haven't observed
+the group size for particular species, the imputation of its group size is informed more
+by its close relatives on the phylogeny. I'll say that again. When we haven't observed the
+group size for particular species, the imputed value is informed more by its close relatives
+on the tree. And now you see there's a lot more structure here. Yeah, this is because there's a
+lot of phylogenetic signal on these things. And so it captures a regression relationship
+without assuming anything about a linear relationship between these two variables.
+It's just the information in the phylogeny. So here's the way you can think about that.
+We plot the OU, Ornstein-Ulembeck Gaussian process kernel here. And you see that there's
+a lot of phylogenetic signature for group size in these data. And that's why the imputations
+for nearby species are hugging one another so much in the graph on the right, the blue points on the
+right. Okay, now purple points. I know this is one of the uglier, if not ugliest data visualizations
+I've ever done in this class. I'm always trying to outdo myself. The, remember to remind you,
+the red is the relationship that ignores phylogeny, only pays attention to the influence of body
+mass. The blue is the only phylogeny ignoring body mass. And now purple is phylogeny plus body
+mass, right? It's blue plus red, which is purple. And you see this is very much like the phylogeny
+part because the phylogenetic covariance is so strong it really dominates the imputations here.
+Yeah, it moves a little bit. You see the purple points are moved a little bit towards
+what you might call the regression line. But the phylogenetic information really dominates
+imputation here. And that's not, that wasn't our assumption, right? It's a natural consequence
+of the generative model. So now let's summarize the inference of all of this. And remember
+in the previous lecture when we only did the complete case analysis, that's what I call observed
+here, the black posterior distribution that was the largest effect, strong effect of group size
+on brain size. And the different kinds of imputation models only reduce this. The one that reduces it
+the most is the one that ignores phylogeny. And as you add in phylogeny, it moves it up a bit.
+But overall, doing the right thing, the honest thing in imputation reduces the strength of the
+evidence that there's a strong causal relationship between group size and brain size.
+Okay, we're not done. Yeah, so now we need to do the M model too because body mass also has
+files in the next signature. So to remind you, so the left column that's the model we started with
+is the brain size model, the model from the Gaussian process lecture really. The center column is
+the model we just focused on where we're modeling the influence of body mass on group size and
+simultaneously the phylogenetic signal to deal with phylogenetic confounding between these
+variables. And now on the right, to get the body mass imputations, right, we also want to think
+about phylogenetic signal. And we can do that at the same time. So this is a very big model. I'm
+not going to show it to you, but it's in the script for this lecture. And here's what we get.
+If you want to see the details of this, it's in the script. As I said, at the top of this slide,
+I'm showing you posterior distributions for the regression effects. And I'm contrasting the
+complete case analysis to the full luxury imputation, but on the same model. So when I say complete cases,
+I mean the full model that considers phylogenetic covariance matrices for all three variables,
+for brain size, for body mass, and for group size simultaneously. And I'm going to show that in black,
+in each case, and then the red is the full luxury imputation. So on the top left, you see
+the effective interest, as it were, the one that motivated this example. What's the effective
+group size on brain size? And it's essentially unchanged for the complete case analysis.
+So you might feel a little disappointed, say you went through all that effort,
+and you got the same result. But listen, this is duty. It's not enough to say,
+well, I didn't do the right thing, because it might not matter. You have to show it doesn't
+matter. It makes sense. It's just an issue of professional responsibility. And sometimes it
+doesn't matter. And that's because of, well, the generative model, saying that you could get away
+with the complete case analysis in the first place. But you have to show it. The other effects,
+it does matter a little bit. And so there might be something going on here that's worth following
+up on, if you were really into this question. So the effect of M on B has gotten larger.
+And after imputation, and the effect of body mass on group size has gotten a little bit smaller.
+This has to do almost certainly with non-random missingness on these variables.
+This is the kind of thing, if I were interested in this sort of project, I would explore a
+through synthetic data simulation to see the kinds of biases that arise from complete case
+analyses when you have these sorts of sampling artifacts. At the bottom, we're showing the
+phylogenetic signatures, so to speak, in these cases. And on the left, phylogenetic figure for
+brain size is very small. But remember, this is after accounting for the things in its equation
+that is net body mass and group size. There's essentially almost no covariance among the
+brain sizes of primates after considering those things. And then in the middle, phylogenetic
+distance, a kernel for body mass. So this has changed, yeah? And this is one of the things
+that changes the coefficients at the top, is that there's less phylogenetic signature after doing
+the imputation. And then on the right for group size, the imputation leaves that essentially
+unchanged. So I hope I convinced you that this is worthwhile, despite it being incredibly
+awkward. You learn things from the contrast between the complete case analysis and the imputation
+modeling. But it's also duty. The key idea here is you already know things, or rather,
+probability theory knows things about missing values. And it knows those things because you
+have taught it a generative model, and therefore it can deduce posterior distributions for the
+unobserved values. Yeah. If you believe the model you teach it, then you can believe those
+distributions. But remember, when we say we believe the model, this is a very small world
+statement, there's always model uncertainty, that at least in my opinion, cannot be easily put under
+the umbrella of probability theory. There's a vast model space, an unimagined model still,
+and it's a different kind of creative, really artistic exercise to come up with scientific
+models and interrogate them. And the little deductive part of the small world where we build
+posterior distributions from specific generative assumptions is indispensable. But we need to
+bounce back and forth between this highly deductive and objective process of Bayesian
+updating and specific models, and the more subjective and imaginative part of science,
+that is most of science, which is theory construction and debate.
+To build the small world part, in this lecture, we have another example of thinking like a graph.
+We had multiple equations, we used them simultaneously. So eventually, when you see enough of these
+examples, it starts to sink in, and it starts to seem natural to you, and doing isolated regressions,
+single equation regressions will seem very weird. I hope this example also convinced you that
+imputation of relationships among the predictors is a very good idea. If they're in your model,
+and you start doing imputation, you probably want to start thinking like a graph immediately,
+so that you're modeling the covariation among the predictors. That'll give you partial pooling,
+in fact, I didn't make that point during the lecture, but it'll give you partial pooling among
+the imputations across the variables. And final thing, even if it doesn't change the result,
+it doesn't mean you wasted your time because you did your duty. And remember, do the analyses that
+you would like your colleagues to do. You don't want your colleague to tell you that they didn't
+do something that they knew was the right thing to do because they thought it would be hard and
+it might not change the result. That's never a professional excuse. Okay, I hope that was useful,
+and we're closing in on the end of this course. Next week, I will start off by talking about
+something I call generalized linear madness. By that, I mean I will introduce scientific models,
+which are not typical statistical models, but actual scientific models based upon premises
+of the thanks for modeling. And I hope to see you there.

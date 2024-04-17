@@ -1,0 +1,908 @@
+Welcome to lecture 16 of statistical rethinking in 2023.
+I think back to very early in the course when I introduced Gaussian models in linear regression.
+I told the story about how many different microarrangements of coin tosses on a football field,
+a soccer field, will inevitably produce approximately Gaussian distribution.
+This is a very common phenomenon in statistics and science in general, really in nature,
+is that there are many little microcauses of the state of the system,
+but the macro state of the system can be largely insensitive to those details.
+And so, in this case, there are many different unique sequences of coin tosses that will result in the same position on the field,
+and there are vastly more sequences that will put individuals near the center line
+than far away from it, and this phenomenon produces inevitably Gaussian distributions.
+This is a really important sort of phenomenon, this distinction between micro-level causes and macro-level states,
+because it often makes it possible to do inference.
+On the one hand, it means that we can't look at a normal distribution and know what happened at the micro-level,
+but it also means it allows us to average over those micro-states
+and learn things about relationships between entities at larger scales.
+In this lecture, we're going to extrapolate this basic phenomenon
+and make really good use of normal distributions again to study processes at very large scales.
+In the previous lecture, we were in Nicaragua and we studied sharing,
+and now we're going to go to the other side of the world and work to the Pacific,
+return to the Oceanic Society's example from earlier in the course,
+and we're going to be worried about the confounds that arise from the spatial relationships of these societies.
+Oceanic societies are separated by large bodies of water, but they've never been isolated from one another.
+Well, except maybe Hawaii, as we'll see.
+Also, there are geographical similarities among societies that are closer together,
+just due to the geology of the islands they live on,
+and I had neglected to deal with those confounds previously,
+but now we have more equipment in our toolkit and we're ready to do it.
+We're going to return to the Oceanic Technology dataset,
+and there's another version of it called Client 2 in the rethinking package that has some additional data tables,
+and so we'll be working with that version.
+To remind you, in this project, we're interested in understanding how the number of tool types in a society
+is related to population size because many different models of the evolution of technology
+have population size as a big driver because it manages the innovation rate.
+The basic problem in this inference is that there are lots of other things that can also influence technology
+that you find in a society like, for example, islands that are close together will share their technology
+and also share other unobserved confounds like raw materials that are available
+or the sorts of challenges they need to overcome.
+Here's a visit to DAG that we saw earlier.
+The outcome of interest is the number of tools, that's the complexity of the toolkit.
+These are historical toolkits, and we're interested in population as a so-called treatment.
+That is what's the influence of population size on the equilibrium of complexity of a toolkit.
+Usually we had tried to deal with some of the spatial confounding issues with this binary-coded contact variable
+and acknowledge that there were a bunch of unobserved confounds that would influence both population size
+and the complexity of the toolkit, but we were going to ignore them in the previous lecture, and we did.
+Now we're going to try and deal with that.
+Of course, there are many different histories of interaction and many different things that could make toolkits on neighboring islands similar,
+but we don't necessarily need to understand all that detailed history to deal with that confounding statistically,
+and that's what we're going to develop in the first part of this lecture.
+To remind you, this is the model we had settled on in the previous lecture.
+This is a dynamic model of toolkit evolution, a simple cultural evolutionary model where the change in the number of tools per unit time
+is equal to some innovation rate alpha times the population size to some exponent beta, which governs the diminishing returns.
+Each additional person does not have the same impact on innovation, but less of an impact is the idea.
+And then the tools are lost at some rate gamma, so we subtract at the end of that equation.
+And then I showed you that we can solve this equation for an equilibrium rate of tools, T-bar, shown at the bottom of this slide,
+and that will be our expectation to examine in the data.
+And that's just review. That's what we did before.
+How do we get space into this? The fact that some islands are closer to one another,
+and so we expect their deviations from this expectation from T-hat, that little circumflex over the T is called a hat.
+How do we get the expectation that closer islands will be more similar in how they deviate from that expectation?
+How do we get that into the model?
+Here's the idea.
+This is an area of statistics. We think of a spatial covariation or spatial confounding islands close to one another share confounds,
+and they also share invasions, which in this sense is kind of like a confound.
+And the effect of this unobserved confound is to make closer islands more similar to one another.
+So let's develop a model where we ignore a population for a moment, just so this is easy.
+Now, remember, in the second half of the course especially, but definitely in your own research,
+the models are sufficiently complicated, the generative models and the statistical models,
+the estimators, that you don't want to build them all at once.
+You want to take them in steps and test each step and make sure you understand it.
+Along the way, often you learn things that will lead you to revise your plan.
+But so we do it step by step, first of all, so it works, so we do quality assurance.
+And secondly, because they're real intellectual benefits of doing it step by step for understanding what the model means.
+So in this example, we're going to start with something that doesn't have population in it at all.
+We're just going to model the spatial covariation among the islands as a function of their distance from one another.
+Now, how do we do this? Well, it's going to be a very intercept model, like you've seen in previous lectures,
+but the prior on these intercepts is going to be strange.
+So I'll take this step by step, and I think you're going to like it.
+So we have tools, T sub i is a Poisson variable with some rate lambda for each society i.
+And we're going to do this GLM style with log lambda, just the most basic sort of very intercept model you can think of.
+And we have some mean alpha bar across all islands.
+That's just an average tool kit complexity.
+And then each society s gets some deviation from that, and that's what these alpha sub s bracket i's are.
+Nothing new so far. These are varying effects, so we're going to do partial pooling on them.
+And we need a vector, therefore, of all of them.
+And there are 10 societies in this particular data set, but if you had a bigger data set, it would be a longer vector.
+The model would work the same.
+And of course, we give this a multivariate normal prior.
+We're going to sample them all at once.
+I shouldn't say, of course, we're going to do this thing that we hadn't quite done before.
+We're going to put all of these into a multivariate normal prior, and we're going to model the covariance among these intercepts
+the same way we had modeled the covariance among features in the previous lecture on correlated varying effects.
+And the reason we're going to do this is this is going to let us smuggle distance, how far apart islands are, into the model.
+So we have the mean of this multivariate normal is all zeros, because these are offsets from half a bar.
+And then we have this big covariance matrix, capital K here. This is often called a kernel.
+So we'll use K for kernel.
+And what does this covariance matrix look like? Well, it's horrifying. It looks like this.
+It's a 10 by 10 covariance matrix. It's symmetric, so I'm only drawing the upper triangle.
+The diagonal is all variances, those sigma squareds.
+And then there's a unique covariance between every pair of islands in this thing, and there are 10, right?
+So altogether, we've got 45 covariances to estimate. We've only got 10 data points.
+Yeah, not a lot of hope there. But here's a cool trick.
+We don't have to estimate all of these covariances independent of one another,
+because we actually think if space is what's leading to covariation,
+there will be a lot of structure among these different covariances,
+and so we want to model them as a function of space.
+And that means we will need many fewer parameters. We don't need 45.
+Here's the idea. This is a technique known as Gaussian processes.
+You had another term that indicates that statisticians should never make up terminology.
+What does this mean? A Gaussian process, if you look it up on Wikipedia,
+is defined as an infinite dimensional generalization of multivariate normal distributions.
+Okay, yeah, thanks. What does that mean?
+The idea is, just as I tried to explain on the previous slide,
+instead of a conventional covariance matrix in which every correlation is free
+outside the constraints of being a valid correlation matrix,
+we're going to use a kernel function, which just means some function
+that determines the entries in the covariance matrix using a small number of parameters
+and some predictor variable.
+So it's a way of putting predictors inside the covariance matrix
+and having a smaller number of parameters and regularizing the varying effects
+that come out of this kernel.
+The reason it says that it's an infinite dimensional generalization
+is because, well, it is, once you have the kernel function,
+the covariance matrix can get arbitrarily large, in principle, infinitely large,
+because that doesn't add any new parameters.
+Yeah, it's an infinite dimensional normal distribution.
+You can predict for new cases that are at any arbitrary distance.
+One way to think about this is just pick a point in the Pacific Ocean
+and this model will make a prediction for how similar a society at that point
+should be to all the other societies without adding any parametric complexity
+to the model at all.
+And that's what we mean by infinite dimensional,
+that in principle it will make a prediction for an infinite number of points
+at any arbitrary distance from the other points.
+So that's what we're going to do.
+We're going to use distance as the observational input into the kernel function
+and I'll show you what the kernel functions are in a moment.
+But in principle, it doesn't have to be distance.
+In this case it is because we have a spatial confounding problem.
+There are islands on the surface of the earth.
+But it could be anything else.
+It could be differences in any kind of variable.
+It could be differences in age.
+Age is a funny variable because we expect individuals of similar age
+to their similar unobserved confounds.
+But we expect that similarity to decline as the difference in age increases.
+So again, this is a kind of nice way to deal with age effects to cohort effects.
+Space is the one we're focusing on now, but also time is a kind of distance.
+And many other things have this kind of flavor to them as well.
+The way you want to think about all of these problems is that these are continuous-ordered categories.
+Yeah, distances and ages and times.
+And we want to do partial pooling because we like regularization,
+but we want points that are closer to one another to pool more with one another.
+So I'm going to spend a few slides now going through the abstract version of Gaussian processes
+so that you understand it in a more graphical geometric way.
+And then we're going to come back to the Oceanic Tools Day step,
+but put the tools aside for a moment,
+and we're just going to think about Gaussian processes in the abstract.
+And I know lots of people when they're starting out in this business,
+you don't like abstractions.
+You like solid examples.
+But part of the skill in this business is getting comfortable with the abstraction
+so that you can use the tools across contexts.
+So indulge me.
+I think this is the kind of thing you want to get used to doing.
+So think about on this slide some arbitrary x-axis variable.
+It could be location.
+It could be age.
+It's something, some kind of continuous-ordered category.
+And then a y-axis variable, which is some measurable response from the units in this.
+It could be toolset kits.
+It could be political attitudes if you're a political scientist,
+and the x-axis variable is age, for example.
+And then on the left, I'm showing you there's one data point,
+that black circle in the middle labeled one,
+and that's the only observation we have so far.
+And then those squiggly lines, the blue, the red, and the cyan lines,
+those are possible functions which describe the relationship between x and y.
+And the thing about Gaussian processes is we consider an infinite number of functions,
+basically all the functions, with no particular parametric shape,
+just any old continuous function that passes through the points.
+And on the right, I'm showing you the kernel function,
+which specifies the covariance at any given distance between points.
+I'll say that again.
+What the kernel function does is it specifies the expected covariance
+between the points on the curve at a given distance.
+So right now we only have one point,
+but we can think about animating this and sampling from the prior
+and this covariance function you see.
+Since there's only one point, it's anchored at that point,
+but the curve can do anything elsewhere.
+But then we observe a second point, number two here.
+And it anchors the curve in another location.
+And then you can see what the kernel density function does
+in describing these functions is there's a distance between points one and two.
+And I tried to label this with the red line segment.
+And we can put that same red line segment on the x-axis of the plot on the right.
+And this is the distance between the two points.
+And then what the kernel function says is the expected covariance
+between two points that have that distance from one another
+is given by that kernel function by the black curve on the right.
+And that's the y-axis on the plot on the right.
+And what this does is it also applies to all of the unobserved points.
+And so now this constrains those wiggly functions.
+I'm going to start animating them again in a moment.
+Just hang on.
+It constrains them so that they can't wiggle as much
+when they're closer together at small ranges.
+It constrains how wiggly they can be.
+The rate at which they can change in local space is one way to think about it.
+But I like the word wiggly.
+Yeah, it sounds very good and scientific, right?
+So I'll start animating this again.
+You'll see that they wiggle way less between the two points.
+Those points are not as free to move and they wiggle much more further on.
+And as we add more and more points, here's a third point.
+We get more constraint, right?
+We learn more about the function.
+And the kernel function is what determines how much these curves can bend
+between the known points.
+Yeah, how wiggly the functions are allowed to be.
+And every pair of points has an implied covariance.
+And that's what we're seeing on the right when I draw the 1, 2, 1, 3 and 2, 3.
+Let's go to watch these a bit, back up and look at these slides again
+if you like and get an idea about what's going on
+and how when we make additional observations,
+it gives us information about the unseen regions of the functions
+and the kernel function is what determines how free
+the function can be between the known points.
+So if the kernel function is specified a lower covariance,
+we would get more wiggly.
+The other thing that goes on here is usually when we observe a point like point 1,
+we don't know it with certainty.
+There's often measurement error.
+And so I've put these gray regions on this slide to show you what happens then.
+Now the unknown functions can wiggle around that point
+given how much measurement error we might think there is.
+And they don't have to be rigidly affixed to the point in general.
+And this is the usual situation we're in because we have an observation
+that has some measurement uncertainty to it.
+Or we expect that the process is generating a scatter of points
+for that particular location.
+And then there's more freedom and even more wigglyness.
+But don't worry, Bayes can handle it.
+We're going to use basic Bayesian updating to do all this stuff just as before.
+No new machinery is actually required.
+You just have to define the model differently.
+Okay.
+So here's an example to give you an idea about how this regularizes in continuous Bayes.
+So I've put in a case here where we've got a point 4,
+which is inconsistent with the others.
+Points 1, 2, and 3 are in a nice line sloping down to the right.
+Point 4 is off that trend.
+Now notice when we ask Bayes to tell us the posterior distribution for this,
+it draws curves that are sort of between points 1, 2, and 4,
+but goes down to 3 because 3 is not constrained.
+It's locally partial pooling.
+And 1, 4, and 2 are close to one another.
+And so you get kind of an average of them in between.
+Now on the right here, you keep watching this.
+I'm going to adjust the covariance.
+Now the covariance declines faster.
+And you see that this allows the functions to be wigglier.
+And then we get less regularization.
+Now because the covariance kernel on the right says that covariance declines faster with distance.
+And so this allows more wiggliness and we get less regularization.
+Here, the maximum covariance is now very low.
+And again, this leads to more regularization even though it declines faster.
+Points don't covariate that much at all in this particular example.
+By adjusting the parameters of the covariance kernel,
+you can get all kinds of different shapes and freedom with this.
+So yeah, we make the maximum covariance very low and now the function just becomes an average thing.
+And then back to the original example that I showed.
+Okay, in truth, we learn the covariance kernel from the sample.
+It's not something we assume is fixed.
+We do need priors for it, but that allows a huge number of potential covariance kernels.
+And the animation I'm showing you here is samples from the prior as we gradually add in three different points,
+showing you then samples from the posterior distribution of the covariance kernel.
+So we don't get a single covariance kernel at the end of Gaussian process analysis.
+We get a posterior distribution of covariance kernels.
+And I know this is a lot.
+In the beginning of the course, it was just a posterior distribution of proportions of water on the globe.
+Pretty soon we had posterior distributions of regression functions.
+And now we have posterior distributions of infinite dimensional covariance matrices.
+I'm not going to apologize because I'm giving you superpowers, right?
+You should be glad.
+But all the same basic Bayesian updating machinery from the very beginning of the course is sufficient to do this as well.
+You don't have to learn any new tricks really.
+So I want you to see here is the very strong nonlinear relationships between the shapes of the covariance kernel
+and the error variance that's assumed.
+So each of these colors is a different sample from the posterior distribution,
+but they correspond across the graphs.
+So you can see if the covariance kernel has a very high maximum covariance,
+then this also has implications for the wiggliness of the curves that are drawn
+and the amount of error around the observed points that you would estimate.
+And all of this is inferred jointly in the posterior distribution.
+It's maybe a little easier to see here if we just examine a single sample from the sequence of samples.
+That's what the animation is, but just a single one to reduce the complexity.
+And you can see as the covariance kernel on the right declines rapidly.
+You get very wiggly shapes.
+So watch it again.
+There'll be a point where it kind of slams itself against the y-axis.
+And then the curve on the right gets extremely wiggly, like a noise waveform.
+But then if it's relatively flat, the covariance kernel is relatively flat like there,
+then you get a smooth shape.
+Okay.
+So what are these magical kernel functions that draw these covariance curves?
+Well, you've got a lot of options.
+This is the scientific question how you want to model this.
+But again, we're talking about macro states.
+There's a bunch of different microprocessors that are influencing the covariation among these units.
+And we're not trying to specify a generative model of all those microstates.
+What we're trying to describe is the macro shape of these things.
+And so the basic problem is to say, what's the shape of decline in covariation?
+And a very common choice, of course, is the Gaussian,
+because lots of things in nature produce Gaussian relationships.
+And this is the so-called quadratic, or L2.
+The L2 norm applied mathematicians would call this a covariance kernel.
+And it's a Gaussian distribution, a sort of folded Gaussian distribution.
+And what makes a Gaussian is that quadratic term where X1 and X2 are the X locations on the graphs on the previous slides.
+And we take the difference and square it.
+And that's, of course, the heart of a Gaussian distribution is this e to the minus X1 minus X2 squared over sigma squared.
+That's a Gaussian distribution.
+We'll talk more about this function in a moment.
+Another really popular choice, and we'll look at this one in the second half of the lecture after the break,
+is the Ornstein-Ulenbeck kernel.
+This is very similar, but it's not Gaussian.
+It declines exponentially instead, but we take the absolute value of the difference instead of the square of the difference.
+And there are natural processes that produce this as well.
+And then sometimes you have a variable that is periodic, like time of day.
+And you want to model behavior, say, of people at different times of day.
+You don't want to treat time of day as a linear thing.
+You have to compute the distances as some periodic function.
+And in this case, there are periodic kernels like this one that uses a squared sine function to model it.
+And these are just fantastic.
+They work in lots of kinds of applications where you have circular kinds of variables like time.
+Time orientation is another one, which direction something is pointing.
+These are fundamentally circular variables.
+Okay.
+Now we need to insert this kernel function into the model.
+So here's what we're going to say.
+We're going to use the quadratic L2 norm function.
+And what we say is each entry for societies i, j, the covariance between them is k, i, j.
+It is going to have some maximum covariance.
+We're going to call eta.
+And I'm going to square this just as a sort of visual reminder to you that it must be positive.
+Yeah.
+And then we have the quadratic kernel function there, which is minus rho squared.
+So you can think of rho squared is one over sigma squared in a typical Gaussian version,
+but it's nicer to write it this way instead of having some divider in your model.
+And then we multiply this by the square distance between the two islands,
+which I have given you as a data frame in the rethinking package.
+So here's the distance matrix in thousands of kilometers.
+And this was loaded when you loaded client two, and we'll look at the code in a moment.
+And then we assign some priors for eta squared and rho squared.
+And I'm going to assign eta squared a prior of exponential two and rho squared a prior of exponential 0.5.
+Now, what in the world do these priors imply?
+Well, as always, if you stuck with the course this long, you have a good idea what I'm about to say.
+You should do a prior predictive simulation.
+This stuff is way too complicated to intuit the effect of the shape of these priors on the prior distribution of the covariance functions.
+And that's what we want to view.
+We don't want to think about these priors independent of one another.
+We want to think about them jointly and what they imply about possible covariance functions.
+So let's look at that.
+Here's a little bit of code just to simulate draws from the prior distribution of covariance functions implied by these two priors for eta squared and rho squared.
+And you can see they imply lots of different covariance functions, someone quite high.
+Covariance is sustained for a long time, others that are very low and flat.
+Some with very high covariance initially, but the covariance declines very rapidly with space and so on.
+Not much prior information at all in this.
+But what these priors don't say is that it's not plausible under these priors that there's extremely high covariance over many thousands of kilometers of ocean.
+Okay, now we have our model and we've done the requisite prior predictive simulation.
+So let's fit to the data.
+So here's a little bit of code to do it.
+There's no big surprises except there's a little bit of code here that's convenient.
+Instead of having to write some code that computes every one of those Kij's yourself, there's a little convenience function in a law called Cove underscore GPL2, which will do it for you.
+You just give it the distance matrix, that's capital D here, and the names of the parameters that define the kernel, A squared and rho squared.
+And then there's a force when they're 0.01, and this is the variance around each point from each particular location.
+This has no effect in this particular model because we only have one observation for each society.
+If you had replicates, then you might want to think harder about that particular parameter and estimate it.
+And this model sample is no problem, and you look at the pricey table and there is nothing to understand here, right?
+With these models, looking at the coefficients is rarely of any value at all.
+You have to push out posterior predictions to understand what the model thinks.
+This is the tide machine. Remember, these are the gears of the tide machine, and mortals are not meant to read these things.
+Okay, what we want to do, I think, is a really good idea with all Gaussian process models is you want to compare the prior for the kernel covariance matrices, covariance functions to the posterior.
+And that's what I'm doing on the left here.
+We have samples from the prior covariance kernels, and showing those in black, and then from the posterior in red, and you see that we have learned something from the sample here.
+The posterior update is that the maximum covariance is low, but you can get, it doesn't necessarily decline that fast.
+Yeah, you can get substantial covariance over a thousand kilometers away.
+And then on the right, we've got a more complicated plot, and I'm going to zoom in for that and talk you through it.
+Now, keep in mind, this is just pure spatial covariance here.
+We haven't tried to explain the covariance in any possible way, and neighboring islands could also have similar populations, and so we're going to deal with that next.
+So this is not an estimate of the effect of anything.
+This is a description of how similar islands are as a function of space.
+And what I've done is I've drawn line segments between pairs of islands and shaded them with the intensity of the covariance in the posterior distribution, the posterior mean covariance among them.
+And so you see that consistent with that posterior distribution of the covariance kernel on the previous slide, societies that are near one another like Malikula, Santa Cruz, Ticopia are expected to be, are more similar.
+And Laofiji, Tonga as well.
+And then there's poor Hawaii over there all by itself, where this also has the most complicated tool set, but the covariance function declines so rapidly that there's essentially zero expected similarity to Hawaii and the others because of spatial effects.
+Okay, so there's something about space here that matters, and things, islands that are closer to one another do have more similar toolkit complexities.
+That's what this is saying.
+Now we want to put population size back in this.
+Remember, that's the whole point.
+We're trying to deal with space as a compound.
+We've modeled the space part now and gotten that part of the new machinery to work, and now we've got to fold back in the previous bit.
+This is the step-by-step drawing of the owl, right?
+You start with the sketch, draw some circles, sketch in some features, do the detailing.
+Don't start with detailing, right?
+So we're going to do some detailing now.
+I'm going to put population size in.
+We go back to the model that has t hat in it.
+Remember this function where we have p exponentiated to the b, the elasticity.
+And now we're going to put in these deviations, a sub s, as offsets.
+But of course, lambda needs to be positive.
+So in the log model, it was just a sub s, but we just exponentiate those and we get a positive offset.
+So we can just multiply our previous thing t hat by e to the alpha sub s, and that's what I've done in this model.
+So one way to think about this is that if alpha sub s is zero, then e to the zero is one,
+and you have exactly the expectation from the equilibrium equation we calculated.
+I'll say that again.
+If alpha sub s is zero, meaning it's just an average island, then e to the zero is one,
+and you get no adjustment to lambda sub i.
+Yeah, but if it's greater than one, then it's bigger than expected,
+and if it's greater than zero, if alpha sub s is greater than zero, you get more,
+and if alpha sub s is less than zero, you get less.
+Otherwise, the code is essentially all the same, and we can run it.
+And again, this time we're not comparing prior to posterior on the left.
+I'm comparing the empty model, which was the first one we did, which had just the spatial varying effects from the Gaussian process.
+Those are in fact to the new one with population, and you see what has happened is as typical with varying effects in Gaussian processes,
+still draw varying effects, there's just a very fancy prior distribution that there's less explained by the varying effects.
+The covariance kernel has a smaller maximum covariance now,
+and that's because population has explained a lot about the similarities in tool sets.
+And so on the right, I'm trying to show you this again.
+This is the kind of graph I showed the first time you saw this data set.
+Now, some number of lectures ago, and where the blue trend is the population expectation,
+the effective population, or log population on the horizontal axis, and vertical is tool set complexity,
+and I'm superimposing across these points the same covariance matrix lines,
+and you see that the model still thinks there's something to be explained.
+There's still some residual similarity among neighboring islands, even accounting for population size.
+But population size still has a very strong relationship to the outcome.
+Okay, hope that was interesting.
+I think we should take a break now.
+You should probably review the first half, especially the core part, which just explains Gaussian processes in the abstract.
+Make sure that you understand the basics, maybe make a list of what's confusing you,
+and then take a break, take care of yourself, and when you come back, I will still be here.
+Welcome back.
+In the second half, I want to talk about another major application of Gaussian processes.
+That's in the study of the relationships among biological species.
+What you're looking at here is a consensus phylogeny of the primates, the family of mammals that you are a member of.
+The primates are very diverse, and they're also a very old group of mammals, and in some sense very basal or pretty simple critters.
+And they're different groups.
+You're an ape, I'm pretty sure, and you can find us here, Homo sapiens, in the group of the apes.
+The apes have big bodies, no tails, big brains.
+And they're, for the most part, kind of failures.
+They've been going extinct at high rates for a long time, even before people arrived.
+Then you have a very successful group, the African and Asian monkeys, which include macaques, which macaques are just like super mammals.
+After humans are gone, macaques will inherit the Earth, probably.
+And then American monkeys, these are mostly living in the South and Central America, and they are almost all arboreal, smaller-bodied.
+You have tarsiers and lemurs, lots and lots of lemurs.
+Yeah, and all of them living on Madagascar.
+And then the Gallagos and Lorises, which, although they look quite different from people, are very similar genetically.
+So, these are the primates, and one of the things that evolutionary biologists, especially anthropologists like myself, try to do
+is use the diversity of primates and to understand evolution.
+Evolution in long-living animals that produce small litters of offspring.
+And that's something that all the primates share, no matter how big they are or where they live.
+And that's unusual, actually, just as we are.
+So, there's a lot to learn by setting our relatives.
+And we're going to take an extended tour through a particular example so I can teach you how to use Gaussian process regression to deal with what are called phylogenetic confounds.
+This is a family of methods that are casually called phylogenetic regression, although at this point in the course I'm not even sure what regression means anymore.
+It has no fixed meaning in statistics.
+But that doesn't matter.
+We're going to make good progress.
+So, this data set is in primates 301 because there's 301 species, and the data come from this nice paper by Sally Street and colleagues, published in 2017, and the citations on the bottom.
+The data set is mostly life history traits.
+The basic idea is what are the relationships, if any, between the size of social groups and the size of brains, adjusted for body mass among primate species.
+So, this relates to a long-standing popular hypothesis that one of the reasons primates have such big brains is that almost all of them are social.
+They have long lifespans, they live in groups, and they have small numbers of offspring.
+Like people, people are just a really extreme exaggeration of the general primate trend.
+So, does the variation among primates support the idea that social group size is actually a cause of larger brains?
+That is that if you're highly social, you have new kinds of dynamic problems to solve, and this requires more core text.
+Okay, this is a realistic data set.
+It's a real data set from a real publication, and as such, it's got all of the nice, inconvenient features of real data sets.
+There's a lot of missing data.
+Not all of the variables we're interested in have been measured for all of the species.
+How do you think you measure the brain size of a primate?
+It's not something you do with a camera.
+There's a lot of measurement error on some of the variables, and the thing we're going to deal with is not those two things.
+We'll think about those two things in a future lecture.
+What we're going to deal with today is unobserved confounding.
+So, let me give you a representation of the missing data issue for now, and this will be foreshadowing for a future lecture where we talk about missing data a little bit more.
+So, here's the full consensus phylogeny with all 301 species labeled in color by their major groups.
+And if I drop out the ones where we don't have all three measurements for body mass, group size, and brain size, we're down to 151, essentially half.
+So, we can take those complete cases, and we're going to do the complete case analysis today, and then in a future lecture, we'll talk about doing better than this.
+But we'll do the complete case analysis today by dropping down to 151 species which you're fully observed, and I've plot out here just as a general sense.
+Brain volume in field circles scaled by the size of the brain.
+So, if you look in on the apes there, you'll see that there are some with big brains, including us with big field circles.
+And then there are some with small brains like the yellow points opposite.
+And then there's body mass, which is open circles, and then the triangles are group size.
+So, what you really don't want to do, and you know this, is peer at this and try to make up a story about covariation.
+We need to do something better, something model-based with a generative model.
+But there's a lot of covariation among these three variables.
+This is the classic kind of problem from very early in the course.
+You've got three variables, and they're all related to one another. They're all associated.
+And there's no way just from the sample alone to understand what's causing what.
+This is a chance for me to revisit my standard ax and grind it.
+Evolutionary ecology, like most fields, I don't want to single it out, but here I have to single it out because this is an evolutionary quality problem.
+It's not very good about thinking causally.
+And phylogenetic comparative methods that you'll see even in the best evolutionary ecology journals are dominated by a pattern I call causal salad.
+Causal salad means just tossing stuff into a model and then interpreting every coefficient or every changing coefficient as some causal estimate.
+And you know this doesn't work for all the logical reasons I've taught you since very early in the course.
+And this also goes for things like controlling for phylogeny.
+There's a tendency in this literature for people to use predictive criteria like AIC or cross-validation criteria like important sampling as a stand-in for causal inference, real causal inference.
+And they'll select a model based upon a predictive criterion and then interpret the coefficients causally, and this is very bad news.
+So this has to get cleaned up. And cleaning up starts with you.
+Controlling for phylogeny is a phrase used a lot in this literature. It's often required by reviewers and editors, but it's done in a mindless fashion.
+I'm not against controlling for phylogeny. I'm going to show you a way to do it, but there's no single way to do it because you still have to think causally.
+So let me give you an idea of what I mean by that. How we could add phylogenetic confounds to a DAG.
+So the social brain hypothesis is the thing we're talking about here. That's one label for it.
+The idea that if you live in a larger social group, this introduces unique cognitive demands on an individual so that they would benefit from having a larger brain,
+and their over very long time period selection would favor monkeys with larger brains if they lived in larger groups.
+Body mass plausibly influences both of these. And so if you want to estimate the causal influence of group size on brain size,
+you'd need to stratify by body mass because it is a confound. It is a fork that points at group size and brain size.
+But this is an assumption, this DAG structure. Of course, there are lots of other DAG structures which are possible.
+Body mass could mediate, right? Some of it, it could be the group size influences body mass.
+There could be unobserved confounds between brain size and body mass. Or there could be reciprocal causation.
+It could be in fact that, for the most part, brain size allows primates to live in larger groups.
+And so on the right, the error goes the other direction. This is just to remind you.
+I'm going to move forward with the DAG on the left for the sake of the lesson.
+But just to remind you of Nancy Cartwright's law, there is no causes in, no causes out, no interpretation without causal representation.
+At the end of this lecture, I'm going to revisit this issue a bit and suggest some ideas about a good way to go forward with these sorts of complex problems.
+But let's put that aside for a moment because I want to teach you some technology.
+Okay, back to the simple story here. Let's take this DAG as given for the sake of the analysis.
+And now what we have to imagine is unobserved variables, which are confounds among these.
+And it's very likely that there are unobserved confounds here represented by lowercase u, which influence all of these things.
+And what are these things? They're historical environmental variables that are shared among species that live in similar locations.
+They're relatedness. Sometimes species are just more similar, have more similar values of these variables, G and B, because they diverged very recently.
+And drift or natural selection hasn't had a much time to make them different.
+And so in a sense, history. This is history of shared environments, history of shared stressors, exposures, and history of descent all influence some big vector
+of unobserved confounds lowercase u. And all of those things point into all of our other variables.
+So obviously this is a bad situation to be in, and it's one of the reasons evolutionary colleges realized a very long time ago
+that naive regression on the traits of living species is not a great way to understand what's going on.
+Or at least it is a great way to learn what's going on, and you should absolutely do it.
+But you should do it in a subtle way that is conspicuously aware of historical relationships.
+And that doesn't just mean phylogeny in a strict sense, but it means shared environmental exposures as well.
+I think I want to draw this out some more, so bear with me. We're going to get back to the dataset soon.
+It's a nice idea to think about that phylogenetic influence, this historical influence, is not magic.
+It's not some sauce that's poured over the species that makes it more similar, and we have to deal with that and somehow control for it.
+You can draw it on a dag. It is nothing magical or weird about it at all.
+It's just you need a dag with time points. That is the values of traits at different points in time.
+So here's the first time I'm going to show you an example.
+Something like this. This is a time series dag in phylogenetic context.
+And it's complicated, but I'm going to do it step by step so you understand what's going on.
+Imagine some, way back in time, there's some primordial primate, the oor primate,
+and it has some group size g sub 1 and some body size b sub 1,
+where the one refers to the species, is an index for the species.
+And we're going to move up this slide in time to future values of these same variables.
+So then there's some speciation, and now we have two different primate species.
+One and two, and their traits are labeled with sub scripts one and two.
+And the new row I've added above the very bottom one is the later point in time.
+And so the arrows are drawn so you can see that, so we're going to assume that group size influences brain size, but not the reverse.
+But obviously the previous group size, way back in time, influences the group size now.
+Yeah, because it can only change at some certain rate.
+And that's what you see. Group size g sub 1 at the very bottom influences g sub 1 and g sub 2 in the second row.
+For both species, right, because they're descended from a common ancestor.
+And the same for brain size b sub 1 influences b sub 1 and b sub 2 in the second row.
+And then those red arrows indicate the causal effect of group size on brain size.
+Yeah, and they cross right over.
+So group size at time 1 influences both of those.
+And we can keep this thing going in time.
+So more time passes. There's not another speciation event.
+We still only have two primates, but one of them changes.
+And so I've changed this icon species 1. It continues to evolve.
+It has new group size and a new brain size, but it's only the most recent row, row 2s, and influences row 3, right?
+It's not possible for the values way, way back in time to exert causal force on the most recent ones.
+And this is the sense in which there's a time series analysis here.
+There's some dynamic evolutionary process.
+Now this would actually be better to represent a continuous time.
+I'll mention this again at the very end, but this is a schematic to give you an idea of what we mean when we talk about phylogenetic causation.
+It's not magical at all. It's just a dynamical systems model.
+Close out the example. We can get another speciation event there.
+Now we have species 3, which shares the most recent common ancestor with species 1.
+But again, all the red arrows and such are consistent with the basic tag, but they only apply to the most recent time.
+The problem we're faced with in real research is that we only get to observe the tips and the evolutionary history is unknown to us.
+But it would be good to know because if we knew all the values going back in time, we could use standard backdoor criterion analysis and know what we needed to stratify by,
+and there'd be nothing mysterious and weird about this at all.
+But since we don't know that, we're back in this position like with the Oceanic Islands, where there's a bunch of stuff that could have happened in the past,
+all these micro histories that could have happened.
+And they've influenced some macro state, that is the pattern of covariation among the observed living species.
+And we want to somehow model those macro states in a way that is responsible and averages over the large number of possible histories that could have happened.
+And there are lots of ways to do this. The most common way is got a couple of simultaneous problems, and we use them together to make some possible solution.
+And that is phylogenetic regression.
+So the idea is first, we want to infer the history from the current trait values.
+And this is a part of evolutionary biology called phylogenetics, phylogenetic inference.
+And then the second is after you've done some inference of the history among these species as the pattern of branching influences when they diverge from one another,
+how do you use it to model causes or to control for unobserved confounds?
+So let me say a little bit more about each of these in turn.
+The first one, what is the history? This is a very hard problem. It's a long-standing problem in evolutionary biology.
+And I want to say from the outset, it's a very unresolved field still, even though it's a very big field and it's central to the project of evolutionary biology.
+And it's unresolved because it's very, very hard, and there are lots of inferential problems attached to it.
+We've gotten a lot better recently with the advent of modern genomics.
+It's gotten very cheap to just sequence whole genomes, and we understand a lot more about race of evolution, molecular evolution, and this has helped a lot.
+But big challenges remain here. Even in the best cases, there's huge uncertainty.
+And part of that uncertainty arises from the fact that we don't really understand all the details of these evolutionary processes.
+Many species that evolved leave no trace, and that makes it hard to understand things like diversification and extinction.
+You just can't get it from extant species. It's just not a solvable problem.
+And the evolutionary process, whatever it is, is not stationary. It changes over time.
+And the big problem, of course, is that usually in this literature, the goal is to infer a single phylogeny, a so-called resolved phylogeny, for all traits.
+And this does not, by the basic principles of evolutionary theory, exist at all.
+And it's because different parts of the genome can have different evolutionary histories.
+I'll say that again. Different parts of the genome can have different evolutionary histories.
+And so if you insist, for a large group of species on a single tree, chances are none of the traits will fit the tree exactly at all.
+And there's nothing mysterious about that. It's just how evolution works.
+There's this thing called crossing over. And that changes.
+I mean, the whole structure of the genome changes over evolutionary time at a pretty startling rate.
+And so it gets very difficult to even know how to align different genomes of species that are just only related to one another.
+A lot of these sounds like I'm complaining, but I'm not.
+What I'm trying to say is if you're a hard-working and creative person, you can make a really big impact on addressing major inferential problems in evolutionary biology
+by focusing on phylogenetic inference and moving away from the single tree obsession.
+Yeah. Statistically, a big problem is exploring tree space.
+Tree space is really big. There are many different branching configurations.
+It's like network inference. Yeah.
+And we really don't have good algorithms for exploring tree space.
+And this remains another area where applied mathematicians who are interested could make huge contributions.
+Okay. There's also a very small tribe of folks, some of them at my own institute, who construct cultural and linguistic phylogenies.
+And I think this is an area that has a lot of promise, but it's even more sort of unresolved than ordinary biological phylogenetics.
+Among those that do it, there's a tremendous amount of enthusiasm.
+But among folks who don't do it, basically very few people find it convincing.
+And one of the main reasons is because they're using genomic software, ordinary software for biological phylogenetic inference to do inference for cultural histories.
+And obviously, you need different assumptions.
+There's culture doesn't involve like genes.
+Yeah. This is not a thing that anybody's going to argue with.
+And so you have to squint really hard and really, really hard to interpret such phylogenies as the history of traits.
+So for example, languages are kind of like sociological fictions, right?
+And what a linguistic phylogeny really is, is a phylogeny of a very tiny core amount of vocabulary that is specifically chosen because it's not borrowed at the high rates of most of the features of languages.
+Nevertheless, core vocabulary is also borrowed and often quite a lot.
+English is a startling example where a lot of our core vocabulary comes from other languages like old Norse, right?
+The word sky in English is borrowed from Norse.
+And dealing with those issues is something that requires new inferential tools, but there aren't a lot of people working on such new inferential tools.
+So to be clear, I'm not against this research.
+I just think it's want to make it clear that there's a lot to do.
+And if you're an inventive, energetic, creative person, you can have a really big impact by working on inference in these areas.
+Remind you of this basic truth that was also true of social networks.
+Phylogenies don't exist, yeah?
+Every molecule in biology will have a different evolutionary history.
+What we do with phylogenies, like with social networks, is we're trying to do some regularization, some data reduction.
+We have a very complicated set of observations, like a genome, and we're trying to reduce that down to some course description that we can do some work with that we can understand.
+But we should never make the mistake of believing that there is a phylogeny.
+Yeah, that's just not true.
+Species themselves are kinds of fictions, right? They're ephemeral things through evolution that come and go.
+And that's fine. There's no big problem with that.
+We can use these latent constructions, like phylogenies, to do really good work and learn a lot about evolutionary history,
+without believing that they exist in some unique truth way.
+Yeah, there's no problem with that at all.
+But that means we've got choices to make, right? What do we want to do with this phylogeny, since there's no true one, and how do we want to infer it?
+We're going to skip over that, because it would take me many lectures to teach you phylogenetic inference.
+So let's move to the second part of this.
+Say we have a phylogeny. Now what do we do with it?
+And there's no universally correct approach here, because as I hope I convinced you with that DAG example,
+it depends upon the nature of the traits and how they influence one another over time.
+The rate of speciation and extinction and all that stuff will determine through the backdoor criterion what we need to adjust by to do things, right?
+So if we knew the full evolutionary history, had the full phylogeny in all the internal trait states,
+like in that one slide where I drew out the three mythical primate species,
+we could just use ordinary do calculus to figure out the right thing to do.
+And sometimes you don't need to adjust your history at all. It's just not necessary.
+And other times you will need to, but you want to do it with one particular set of traits, not others.
+So there's no universally correct approach here.
+So what's often done, and I don't think this is a bad idea, but we just have to keep in mind that it's not magic that always solves the problem,
+is to do a Gaussian process regression where we use the phylogeny to think about distances between species and use that as a proxy for shared confounds.
+So here's the idea. I'm going to have to build in some new machinery here and I'll show you how to do it.
+We're going to start by forgetting about phylogeny for a second and just think about an ordinary linear regression where we would try to deal with this DAG on the right,
+where we've got this confound M and we want to stratify by it.
+So we make a linear regression with brain size as the outcome. We're trying to estimate the causal effect of G of group size.
+And we also stratify by M body mass at the same time. And this is what the model looks like.
+We did this many weeks ago, right?
+What I want to show you now is that you can always re-express a linear regression of this type with a multivariate normal outcome distribution.
+I'll say that again. You can always replace a linear regression where there's a normal distribution assigned to each individual outcome, in this case B sub I.
+You can always replace this with an equivalent notational model where the outcome is multivariate normal at top.
+And notice I've taken the subscript I off of the B up top and that means it's the whole vector B, all species.
+And so what we're saying is all of the species in the data set, in this case all 151.
+There were 301 but we dropped a bunch of them because we didn't even have brain sizes for them.
+All of them come from some multivariate normal distribution with some vector of means mu and some covariance matrix, capital K.
+And so now you get, this is the foreshadowing, there's going to be a Gaussian process there. But hang on, not just yet.
+Each element of the vector of means mu is the same as before. There's no new action there, not yet.
+And then the covariance matrix is this weird thing, capital I times sigma squared. What does that mean?
+Well, capital I in matrix algebra is the identity matrix. It's the matrix version of the number one.
+You multiply a matrix by the identity matrix and you get the same matrix back. That's the point.
+And so the identity matrix times sigma squared just gives you this covariance matrix where there are no correlations, no covariances in the off diagonal.
+And then you have the same variance in every element. So this is why it's a standard linear regression because this is the same assumption of a standard linear regression.
+It's just a different and perhaps annoying notation.
+But it's going to be very convenient for specifying the Gaussian process because the Gaussian process is, specifies all these covariances and we're going to fill in those zeros with non-zeros.
+Okay, but let me show you the code to do this. So on the left I show you what I call the classical regression form.
+There's no new surprises here. The B tilde normal. So each element in B has a normal distribution with mean mu and sigma.
+But then on the right I show you the multivariate form. You just replace normal with multi-normal and you insert this matrix K now.
+And it's a matrix which has dimensions of the same number of rows as there are species and the same number of columns as there are species.
+So in this case it's 151 by 151 size matrix. Yeah? Don't worry, no problem. Your computer can handle it.
+And it's defined as the identity matrix which I pass in as data. You'll see in the dat list on the left where I define it, times the variance sigma squared.
+And these models run no problem and they give you exactly the same inference. Yeah, they're equivalent.
+Okay, but the one on the right is going to be easier to specify Gaussian process then. So that's what we're going to do now.
+You want to think about these unobserved confounds like each species I has some use of I which is adjusting the expectation.
+It's like a residual and those residuals are correlated across species in a way that's patterned after their evolutionary histories, their shared evolutionary histories.
+And so we'd like to get that phylogenetic information about their evolutionary distance from one another into that covariant structure.
+Excuse me. The background of this in an animated way is to think about that covariance among species arises from lots of possible micro histories, as I said at the start of this section,
+and a combination of a branching structure of a phylogeny like the one shown on the screen here and an evolutionary process which means rates of change,
+rates of innovation among traits, the rates at which some traits transition to other traits will produce patterns of covariances at the tips.
+I'll say this again. A combination of a tree structure like this one which represents the history of bifurcations when different groups became largely reproductively isolated from one another
+and an evolutionary process which includes assumptions about rates of change and other things will together give you a distribution of covariances at the tips.
+And that's the macro state we can use to do some de-confounding even though we can't learn all those micro details.
+So for this particular tree structure what I want you to see is that there's lots of bifurcations near the tips.
+There's not much action. So the diversification rate is lower in this and so you have lots of splitting all through the phylogeny.
+And then if we start doing an evolutionary simulation on this for some arbitrary innovation rate you'll see that closely related species are more similar to one another.
+That's what the colors indicate, particular trait values.
+But for any particular simulation you get different outcomes.
+But it's possible for us to specify for any particular tree structure and assumptions about evolutionary rates what the distribution of covariances at the tips will look like.
+So if you make an assumption that the tree looks differently, here's a tree where there's lots of bifurcation in deep time.
+You look in the middle of the circle and you see lots of splitting and then you run the same evolutionary process on this tree.
+You get a different pattern of co-variation at the tips because there's lots of time on those long branches for other changes to happen.
+And you get different patterns of co-variation, essentially less co-variation.
+Okay, let me try to summarize.
+The idea is if you have some evolutionary model or range of evolutionary models and some trees, some tree structure, this will imply patterns of co-variation at the tips.
+And that pattern of co-variation at the tips is what we want to use as a proxy for the unobserved confounds.
+And the idea is that the covariance declines with phylogenetic distance.
+And so if we can use the tree structure to measure phylogenetic distance, which in the simplest sense just means the branch length from one species to another.
+That means you put your finger on one species at a tip and then you move in the tree down into the tree along branches and then back up on the shortest path to some other species.
+That's the phylogenetic distance.
+There are other phylogenetic distance concepts, but I don't want to get too into the weeds in this lecture.
+Okay, then you need to assume something about rates of change because that will specify how the covariance declines.
+It could be that it doesn't take very long for evolution to make species essentially independent of one another, meaning that there's essentially no expected co-variation.
+Or it could be that evolution is very slow or that shared environments are maintained over very long evolutionary time due to niche maintenance.
+And both of those sorts of mechanisms would give us higher expected co-variances over longer evolutionary distances.
+So the simplest sort of model, the oldest, is the so-called Brownian motion model where you expect a linear relationship between phylogenetic distance and co-variance between species.
+And another, which I think is increasingly common and at least in the literature I read, basically replaced Brownian motion, is the Ornstein-Ulenbeck one.
+I don't know if these things named after people are terrible, right?
+And both of these, Brownian and Ornstein-Ulenbeck, are actually named after people.
+The Ornstein-Ulenbeck is a so-called damped Brownian motion model.
+So in the Brownian motion model, you're just getting deviations that are drawn from a Gaussian distribution and so trace wander over time.
+In Ornstein-Ulenbeck, that happens too, but there's kind of a gravitational attractor that pulls large deviations back towards some mean.
+And so this means you get a different shape that I'm showing you there on the right.
+This so-called L1 norm is what it's called.
+Let me show you what this looks like.
+So here's our multivariate normal version of the basic regression that includes group size and body mass.
+And what we want to do is define the covariance matrix using a Gaussian process, but we're going to use the Ornstein-Ulenbeck kernel.
+To remind you, the Ornstein-Ulenbeck kernel just uses the absolute value of the distance between the two species, but otherwise it looks just like the one we used in the Oceanic societies one.
+There's just no square there on Dij. Dij is the phylogenetic distance between species i and j.
+Adesquared has the same meaning as before, and rho doesn't exactly have the same meaning as before, but it is a parameter that specifies the rate at which covariance declines with increasing distance.
+And again, we have some priors. I've specified some new ones here for Adesquared and rho, and as always, you want to do prior predictive simulation with these Gaussian process models,
+because there's just no way for a mortal to intuit the implications of these things.
+So here's what we get. Here's prior simulations for the covariance kernel from these priors.
+And you'll see these priors expect some phylogenetic covariance for short distances, and by the time you get to the maximum, this is scaled phylogenetic distance here.
+One means the maximum in the tree. By the time you get to the most distant related primates, you don't expect there to be much phylogenetic covariance at all.
+But there's a lot of variation in how strong the covariance is and how quickly it declines.
+You can try other priors here and play around with it and redo the analysis, and that's often a very good thing to do, because who knows what these priors should look like.
+I think this is a very understudied area.
+Okay, so let's start with a model where we don't have predictor variables in the equation for mu sub i.
+So I've replaced mu sub i just with an intercept alpha, which is just like the average brain size across all primates.
+And now we're going to just try to get the Gaussian process to work.
+And when you do your own research, I really encourage you to do it this way, so that you get the hardest part of the model, the machinery working first, and then you put in the easy parts, which are just regression variables and coefficients.
+But the Gaussian process part is trickier. Try to get that functioning first.
+So here's the code. There's nothing too fancy here. It's the same sort of stuff as before.
+Notice that here's our matrix for k. It's 151 by 151 matrix for the species, and there's another convenience function for calculating each covariance from the kernel.
+But at this time, it's covariance underscore GPL1 for the L1 norm.
+That's what, again, applied mathematicians call Ornstein-Ulenbeck.
+Otherwise, it's very similar. No new tricks.
+Okay, so we run this model. You won't have any trouble getting it to work.
+And now we look at the difference between the prior and the posterior in the covariance, and you'll see that this model has learned that there's less phylogenetic covariance than was expected in the prior.
+So the data really had done something in the updating here, right?
+So the blue samples are from the posterior, and the black ones are from the prior.
+I should say from this, it's lower on average, but you'll notice it declines quite slowly.
+So there's lots of covariance, even among quite distantly related species, but we haven't explained brain size at all.
+This is just saying that there's similarity at mid-file genetic range in primates for brain size.
+Okay, now we get back to the estimate. We want to estimate the causal effect of group size, and we're going to simultaneously stratify by body mass.
+And so we just add those back into the equation for mu. No surprises at all.
+And now we have three posterior to compare. Well, one prior and two posterior, but remember priors and posterior are all the same sort of thing.
+The prior is just the posterior when you haven't seen any data yet.
+So the prior and black that we started with, the posterior in blue from the previous model, sort of so-called empty model where we didn't have any predictor variables.
+And now what we expect is when we add predictors is they should explain away some of that covariation among species with other traits, like group size or body mass.
+And you'll see that's exactly what happened.
+And now the red samples from the posterior are very low. There's very little phylogenetic covariance remaining in brain size after accounting for these traits in this particular model with these assumptions.
+It's nice to look at the posterior distributions of their brechen coefficient of interest.
+So there's a coefficient that measures the influence of group size on brain size, having accounted for in some sense the unmeasured confounds u and body mass m.
+And you'll see it declines as a consequence of including the phylogenetic information.
+The black posterior distribution on the right is the so-called ordinary regression.
+If you just do a regression without the Gaussian process in it, you'll get that estimate.
+And then once we put the Gaussian process in, it essentially has the expectation, yeah, and gets lower.
+But it's still mostly positive.
+So that's a crash intro to phylogenetic regression, which is a very common technique.
+And there are lots of packages which essentially automate it.
+And in that automation, they make it very difficult for novices to learn what's actually being assumed.
+And the goal of this has been to give you some idea about what's actually going on there and to demystify it.
+And hopefully bring home to you, too, that there's nothing forcing you to do it.
+It's just another particular causal model.
+It's kind of madly clutching and vapors of information about evolutionary history
+to try to do some kind of modest control for a problem that we know exists.
+There's some additional problems in this area.
+If you stick around with phylogenetic regression that you can find solutions to,
+the first is we don't really know the phylogeny.
+And in the previous model, I just used a single phylogeny.
+But of course, you can have a posterior distribution of phylogenies.
+And you can make it work just as well.
+Now, ideally, you'd want to do phylogenetic inference simultaneous to inferring the causal effect of trace on one another.
+That would be the best option.
+But you don't always have to do the best option.
+You just have to do the better one.
+But there are definitely ways to deal with phylogenetic uncertainty.
+The easiest being you draw phylogeny from the posterior.
+You run the model.
+And then you do this over and over and over again for different phylogenies drawn from the posterior distribution of phylogenies.
+And then you look at the distribution of effects estimated.
+That's not the best thing to do, but it's a good thing to do.
+It's better than using a single phylogeny.
+And then second, we should be a bit bothered by the idea that causal influences are only one direction.
+So in the diagram that I'm repeating on the right of this slide,
+I've drawn it like group size influences brain size, but never the reverse.
+This is exceedingly implausible if you're an evolutionary biologist.
+It's nothing to do specifically with group size and brain size.
+But there are a bunch of problems here.
+Even ones I don't want to talk about too much.
+For example, is group size an inherited trait?
+No, it's some sociological outcome that has to do with lots of ecological circumstances.
+It's not heritable in the ordinary sense, like a physiological trait like leg length.
+But leaving that aside, it's likely that there's lots of reciprocal causation in these systems
+because organisms are complicated machines.
+So let me use an engineering metaphor for a second.
+If you were studying gliders, and gliders can be designed in lots of different ways.
+They have varying wing links and cockpit sizes and overall masses and links of the fin and so on.
+You wanted to understand that variation, you would use engineering principles to do it.
+You wouldn't use regression.
+The reason is because all of these things are co-constraining under the design goals of an engineer.
+Or which gliders crash because they were designed badly and therefore no one builds one like that again.
+If you increase the size of the cockpit, you've got to change the wings.
+Then you've got to counterbalance it with some weight at the back of the plane and so on.
+There's no sense in which any of these things has a purely one directional influence on the others.
+They're all jointly constrained by the optimality criteria, designing the whole glider to make it a good machine.
+It's not that gliders are optimal in any one case, but there's optimization that goes on in their design.
+There's lots of feedback. You change one thing, you've got to change lots of other things.
+Organisms are similar to the extent that organisms are designed by natural selection.
+I think there's lots of evidence that they are, although they're not perfect.
+There's lots of joint constraint and optimization.
+If one thing changes because of some particular selection pressure, other things often need to change to adjust to that.
+A hedgehog is like a glider in the sense that it's a complex machine and it has lots of highly adapted features that are co-adapted to one another.
+It's just not a random assembly.
+Whatever you think about hedgehogs, whether you like them or not, I quite like them.
+They're not just a random assembly of kinds of traits of leg links and so on.
+They're a functional whole.
+When we model machines like this, regression is probably a bad choice just to start.
+It's just not the right idea.
+Instead, you want to think about some continuous optimization problem where the traits are adjusting to one another,
+given some overall objective function.
+In biology, often that would be survival and lineage growth.
+For gliders, I'm not sure what it is.
+There are options.
+I just want to point you to two relatively recent papers which approach this whole thing from a different perspective than ordinary cross-sectional regression.
+The first on the left by Eric Ringen and colleagues came out in 2021,
+used as a continuous-time ODE approach to this, thinking about how traits influence one another through time.
+You can have all kinds of feedbacks and they put file genetic history into this as well.
+Then on the right, this fantastic paper from Mauricio Gonzales Ferrero and Andy Gardner,
+doing an optimal life history approach for human evolution,
+where you think about rates of maturation and different tissues of the body and the size of the brain,
+is all being jointly constrained by some future objective function.
+Then they do statistics with this.
+They fit it to data.
+This is the future, is stuff like this, not file genetic regression, as I have explained it to you in this lecture.
+That's my opinion.
+Okay.
+Let me try to sum up.
+Gaussian processes is a really big area for search and machine learning now.
+Gaussian processes are everywhere and they're used for tons of things.
+They're really fantastic for prediction,
+but we can use them in causal inference situations as well,
+because often we need to infer some kind of smooth function that is partially pooled across some continuous distance variable.
+This is a really fantastic choice.
+They don't overfit and they give you lots of options for modeling complex phenomena.
+Of course, they're really, really general, so it's sometimes hard to put constraints on them in particular ways,
+but there are options for that as well.
+They're very sensitive to their priors and so prior predictive simulation is really essential,
+and this is the case where the quality assurance and testing that we've been doing all along is really pays off.
+Okay.
+There's a big universe of these things too.
+Suppose you had multiple distances, right?
+It wasn't just space, but you also had cultural history in the case of the Oceanic Islands.
+You could use them both in the same model.
+There's this method called automatic relevance determination.
+This is just a Gaussian process where you have multiple distance metrics inside of it,
+and you can also use Gaussian processes when you have vector outcomes.
+That is, say, for each Oceanic Island, for example, there was a vector of cultural features,
+and you know that those features co-veried with one another because they fit together in particular ways.
+They'll say that these are the individual tools on each island,
+and you give them actual names and study their mechanical properties,
+and you don't expect substitutes to occur on the same islands,
+and so you expect a particular pattern of presence and absence to co-vary across societies.
+You can address this with this thing called a multi-output Gaussian process.
+In the biological example, this would be you want to study multiple traits at the same time,
+and you expect them to have some co-variant structure.
+This would be getting closer to a better solution that isn't just a simple linear regression
+that has directional causal effects.
+Instead, you're predicting patterns of association across species
+where their feedbacks have produced those patterns of association.
+Gaussian processes are used constantly every day.
+They're a workhorse piece of your life.
+Your cell phone is probably running on something called a Kalman filter.
+They're used for real-time navigation, for radar, for all kinds of stuff.
+Gaussian processes are used to want to apply any time.
+There's some unknown underlying function.
+It could be a velocity, a movement path of a vehicle, for example,
+and there's measurement on top of it, and they learn incredibly fast the functions underneath.
+So they're just a workhorse thing that's everywhere in our world,
+but they're hidden from you if you're not trained to recognize them.
+Okay, thanks for pushing through this far,
+and we're going to continue into next week by looking at some of the most commonplace problems in applied research.
+I always feel guilty not having done this topic earlier in the course,
+but measurement error and missing data are present in almost all real research problems,
+and now you have the statistical muscle to deal with them.
+So I hope to see you next week, and I'll show you how.

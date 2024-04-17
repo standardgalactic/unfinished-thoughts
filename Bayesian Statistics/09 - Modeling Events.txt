@@ -1,0 +1,968 @@
+Welcome to lecture nine of statistical rethinking 2023 this is the River
+Kelvin in Glasgow Scotland the River Kelvin has given its name to a number
+of things the Kelvin temperature scale zero Kelvin is absolute zero space is
+about three degrees Kelvin rather cold its name is because of the Lord Kelvin
+who also got his name from the river and William Thompson with his actually
+name is a Scottish inventor of the 19th century and he invented a bunch of things
+not just temperature scales but also these sorts of machines this is a tide
+prediction engine the pen and scroll on the left of this image is drawing out a
+prediction of the tides and different times of day and all of the gears and
+pulleys on the right are complex set of machines a fast nonlinear statistical
+prediction engine which produces future predictions of the tides these sorts of
+machines are computers they're analog computers and the reason I'm showing you
+these computers is that well a couple things we're going to start building them
+not tide prediction is exactly but nonlinear statistical prediction engines
+and these machines are actually in their fundamental nature pretty simple but
+they're complicated in the way that the different parts interact and that is
+that the gears inside the machine bear no resemblance to the observable
+predictions that they put out and we're going to have to deal with that
+uncomfortable fact in order to harness the powers that they provide us for
+scientific prediction and modeling so last week in the most recent lecture I
+introduced Hamiltonian Monte Carlo to you this is another kind of horrible
+little machine that lurks inside of our statistical golems but this sort of
+machine the Hamiltonian Monte Carlo is thankfully largely automated for you
+it's black boxed away and you as the scientist well you have other problems
+to confront and those are the problems we're going to deal with today and the
+issues of how to get a Hamiltonian Monte Carlo to the function will receive
+quickly into the background and you'll become quickly comfortable with this and
+I will give you new problems to worry about which brings us to the overarching
+theme of this course which is flow you have to flow and it's hard to flow because
+it seems like the current is against you I want to remind you you don't have to
+understand everything to keep moving forward almost nobody understands
+everything first time through and a lot of understanding comes from practice
+that is there's a kind of embodied knowledge in scientific practice just
+as there is in things like carpentry we're going to keep flowing forward now
+into the second half of the course and I know in courses like this everything
+seems to come all at once and that's because this is essentially a course
+about the scientific method and then the scientific method no part is optional
+you can't not practice one part of it and so that means that model scientific
+modeling and the DAGs and the generative models and research design how you
+would go about collecting the data and doing measurements in the first place
+and statistical modeling building the golems to produce estimates and the
+coding and documentation that comes with it if you want to be ethical about it
+and then the interpretation of the statistical output and then how you
+communicate it to your peers or even the price of eggs during an inflationary
+period all these things are happening to you all at once and I'm right there
+with you and I understand but you don't have to understand it all at once you
+really don't because nobody ever has understood it all at once so be patient
+I will be patient with you and it will it will come and in the design of a course
+like this part of the struggle is I need to give you some resistance so if
+you're feeling at any point that you're not understanding something that just
+means you're paying attention and I have structured the material so that it
+challenges you so that you can solve those problems and you can find some
+way that you're comfortable understanding the points and so you can do
+the scientific practice and because the fact is no matter how hard the homework
+problems I find you real research is much harder and it's my job to prepare you
+for that the topic in this lecture which will serve as a way for me to
+introduce you to generalized linear models and specifically models of
+events is a historical data set from the 1970s of college admissions at the
+University of California at Berkeley starting really starting in the late
+60s especially in the 70s California decided that higher education should
+be available to essentially everybody and California made access to the best
+universities really in the country at essentially free to everybody the
+children of recent immigrants everybody and the University California system
+became an incredible engine of upward mobility for California and a part of
+that mission there was a constant introspection about that availability and
+the concern that there would be intergenerational discrimination or
+class class privilege or gender differences in it in rates of admission
+so here's a somewhat famous example in statistics that I want to teach you I
+think it's a really nice teaching example because it's an extremely small
+data set and it addresses a kind of analytical problem which has a recurrent
+almost reverberating structure in many contexts in human societies this basic
+issue of how to do what's called mediation analysis so what are the data
+these are about four and a half thousand graduate school applications for 1973 UC
+Berkeley and they're stratified by the department that the application was sent
+to these are departments like physics chemistry psychology so on and the gender
+of the applicant these are the things we know about the applications and the
+question that the UC Berkeley admissions officers were concerned with is that
+there is gender discrimination by the referees the members of the admissions
+commissions that are reading these applications and that's what we're going
+to try to address that's the scientific question this is a question that many
+scientific societies grapple with my own scientific society the muck's plunk
+society has takes this gender equity quite seriously so in their headquarters
+they have a division devoted to this and they ask us to use administrative
+records like the ones on the previous slide to make assessments about whether
+there is discrimination and to design interventions and then also to use the
+same sorts of data to decide whether our interventions are succeeding
+unfortunately there's not a lot of statisticians in the headquarters to
+help with those designs and so we're sort of left on our own at the individual
+institutes to decide how could we possibly use such data as observational
+non-experimental data on outcomes to estimate discrimination or its absence
+and there are frequently every year papers about this as the sciences look
+in winner on themselves here are two papers from just last year of 2022
+analyzing gender gaps at the National Academies of Sciences in the United
+States and coming to basically opposite conclusions about somewhat different
+aspects of scientific credit and advancement I'm not going to dig into
+these papers right now I promise you in the next lecture I will in this lecture
+I want to lay the groundwork the causal inference groundwork that'll let us
+understand these papers better and maybe even our own individual institutions
+if you want to jump ahead a bit here's a great paper which is an overview of a
+causal perspective on on these problems and how we could go about using such
+data to estimate discrimination or its absence and this is a rare paper and
+since in most papers that supposedly analyze the presence or absence of
+discrimination have no explicit causal framework at all there's not even a
+clear estimate no DAGs no generative models and so they're very hard to
+understand this is a paper that lays out those problems very clearly and it's
+well worth your time okay we're going to learn some technology in this is not
+just about the topic of discrimination that's kind of a way to transport us
+into the more it's an exciting topic that will an important topic that will
+transport us into the more boring machinery of building new types of
+golems that are powerful and help us understand events events are discrete
+unordered outcomes and this is like the globe tossing model at the very beginning
+of the course it was land or it was water and we modeled those things as
+counts that's what the type of observation is the measurements are
+counts of discrete events but the things that we're estimating the unknowns the
+parameters are not counts their probabilities or odds odds are just
+transform probabilities right the the odds of an event or the probability it
+happens divided by the probability it does not in these kinds of models which
+are essential for doing lots of scientific modeling everything
+necessarily interacts all the time all the different things we might want to
+stratify by will always interact or moderate one another I'll explain why
+as we move forward this happens because it's how nature works in the Gaussian
+models up to this point you could think about the causal effect of any one
+thing independent of the values of the other variables the two heights
+stratified by that will no longer be true and but that's just how nature works
+so I make no apologies I have to I have to teach you machinery that meets the
+problem as it exists and along the way you have to get used to this this beast
+known as log odds the logarithm of the odds now as if odds wasn't weird enough
+we're going to be mainly modeling on the logarithmic odds scale okay we've
+got our usual outline you should you should expect this now for me first
+thing I want to do is talk about the estimate and do some basic scientific
+modeling then we're going to write a generative simulation from that inspired
+by the DAG and then we're going to build some statistical estimators some
+golems and then we're going to analyze the real sample and do some
+interpretation and then interpretation will involve the simulation of causal
+effects okay so the basic question about the usually Berkeley data is was
+there discrimination at the level of the application based upon the gender of
+the applicant so the two key variables were interested in in the passive
+interest is this one gender G does it influence emission admission to graduate
+school there is another obvious path that always arises in these sorts of
+questions and it's this path where department mediates admission and the
+reason is because different departments have different numbers of open slots for
+PhD students or they're pickier than other departments and or they just get
+many many more applicants because they're very popular and therefore their
+admissions rates are lower as a consequence so for example it's typical
+that math departments don't receive that many applications and so they're
+overall if the if the applications they do receive are qualified then their
+overall admissions rate can be quite high departments like social psychology
+in contrast receive many many applications for graduate school and
+therefore they must turn away a larger fraction of applications even if their
+qualified and that's just how it goes so those effects matter a lot in
+determining admissions rate and we cannot possibly estimate the presence or
+absence of gender discrimination without accounting for that mediating effects
+through department okay it's worth also talking about what we mean possibly by
+the causal effect of gender right we don't usually think about an intervention
+on gender is making a lot of sense and certainly not in this context what we
+mean in this strictly bureaucratic context is the perception of gender by
+the referee so I've augmented the stag to make this a little bit more
+transparent it's not the applicant's actual gender that matters it's the
+perception of their gender by the referee and this is an important point I
+hope it doesn't seem silly because it will help us later define an
+intervention we find exactly what we want to do an intervention on right
+because the applicant's gender does more than just influence the perception it
+also influences choice of department right but we can design interventions
+which blind the referee to the applicant's gender which we which means
+that the perceived gender can't have any causal effect on admissions and those
+blinding designs are often attempted in many areas they're not practical and
+graduate school admissions because you need the person's whole transcripts and
+it becomes basically impossible to do this kind of blinding but there are other
+areas like orchestra auditions where this is often attempted it's attempted but
+sometimes it doesn't work and so we often still have questions about whether
+this blinding is possible but we can't understand blinding and why we might
+actually do it unless we recognize that it's the perception of gender this what
+we're talking about it's the discrimination effect the direct
+effective discrimination is coming from that interaction between the referees
+biases and the perception of the applicant's gender this basic mediation
+dag that is there's a direct effect and then there's an indirect effect along a
+pipe has lots of analogs other other contexts of discrimination the basic
+ideas there's some status of an individual X and or some protected
+category and there may this may result in some increased probability of some
+of or decreased probability of some event being an award or a promotion but
+that the probability of that event also depends upon context and those contexts
+are also influenced by the same status so for example make this little less
+opaque try to broaden your interest a little bit in this topic wage
+discrimination has a similar structure that is there could be any status of
+the individual doesn't have to be gender it could be cultural background
+education and that influences the occupation an individual ends up in and
+it also may directly influence their wage through discrimination and so we
+have a very similar statistical problem for lots of issues that involve
+questions about status-based discrimination okay back to Berkeley
+which path is discrimination a lot of the time and these literatures
+discrimination is not very clearly defined and of course it's just a word
+so as long as you define it in your context and in your study very
+specifically don't make any universalist claims about what words have to mean then
+it's all good but we want to be clear that there are important distinctions
+here and all of the different distinctions are interesting in different
+contexts so one kind of discrimination that we will be interested in estimating
+is so-called direct discrimination and often institutionally this is the thing
+that people are worried about this is so-called status-based or taste-based
+discrimination a case where referees are biased for or against individuals of
+particular genders another kind of discrimination is indirect discrimination
+so this would be a for example a case where gender influences the person's
+interests within a certain cultural context that then influences and turns
+a department different genders tend to apply to and then different departments
+because of the economics of higher education can accept fewer or more
+applicants and this affects overall admissions rate this kind of structural
+discrimination be just as important because it does limit access to higher
+education right if a particular gender is interested in a different discipline
+but that discipline is not as well funded then this is discrimination by many
+definitions because it disadvantages people because of their gender but it's
+different than the direct route and then there's the total discrimination which
+is through both routes both the mediated routes through department and the direct
+route and this is what people experience is important to understand each of these
+three types requires different estimators right so if we have a data set
+set of administrative records and we're trying to understand these things then
+we need different estimators for each of these as you've seen so far in every
+example in the course and what I'm going to try to illustrate to you is this
+very important point and often through mediation analysis in general not just a
+topic focused on discrimination is that quite often what we're able to estimate
+is not the thing we want I'll say that again quite often the thing that we're
+able to estimate is not the thing we want to estimate so on the left there's
+the total causal effect of gender and this can be estimated under rather mild
+assumptions in many contexts for many data sets but not everybody agrees that
+the total effect is what matters because the subpass are interesting for equity
+and justice issues but these this decomposition of the total causal
+effect into indirect and direct to the middle and the right of this slide this
+is often much more difficult and always requires quite strong causal
+assumptions about the source of the sample what we're going to ignore for
+the remainder of this lecture but we'll take up again in the next lecture this
+week is the issue of unobserved confounding in most observational data
+sets like this one with mediation they're plausibly unobserved confounding
+between the mediator and the outcome and I said you don't worry about this right
+now I just put this here to say we're gonna not gonna forget about this we're
+gonna come back to it okay let's take those basic tags and let's make some
+scientific models out of them here's the world's simplest generative code at least
+as simple as that I could think of for simulating the UC Berkeley admissions
+scenario we're gonna use this code to generate an example data set which will
+help us understand the phenomenon make sure reassure ourselves that we
+understand it and then when we design statistical models we can verify that
+they work so what does this code do well we generate thousand applicants
+synthetic applicants and we sample genders one and two the genders have
+no names in this code they're just one and two and gender one tends to apply to
+department one and gender two tends to apply to department two and then we give
+the department's different overall acceptance rates that is that one of
+them accepts 30% of applicants than the other accepts only 10% of applicants
+and then we simulate right so let me walk through the code here and show you
+how this works we sample from the vector one to two these are the gender labels
+a thousand times with replacement that's how we generate the gender variables
+synthetically then we have to simulate the department choices before we can
+simulate acceptance right don't know the department we don't know if they're
+accepted and we create this subtle difference in which gender tends to
+apply to which department right and then finally we simulate well I define the
+acceptance rates as this matrix here and where department one is row one and
+department two is row two so department one accepts 10% and department two
+accepts 30% and then we just simulate from those acceptance rates given the
+combinations of department and gender using Bernoulli trials which are coin
+flips and here's some simulated data just give you an example in this example
+there is no gender discrimination through the direct path only through the
+indirect path because the gender one tends to apply to a department that is
+harder to get into and we get some counts these tables at the top show you
+where so the first table is shows you gender by which which applications the
+different departments so the rows or genders and columns or department and
+you'll see that gender one tends to apply to department one and gender two to
+and then in the acceptance rates follow from that department one tends to accept
+fewer and as a consequence overall than the simulation gender one has about 10
+percent lower success in its applications than gender two without any
+indirect discrimination we can modify this simulation so there is direct
+discrimination and that's what I've done with the code here and all I've changed
+in this code is the accept rate line I've changed the matrix so that gender one
+has half the acceptance rate of gender two in department one and it has 10%
+less in department two that's the in the table at the bottom of the slide that's
+what I'm highlighting for you are the acceptance rates for gender one and then
+we run the simulation and overall acceptance rates are lower in the
+simulation but I want to point out is the overall patterns the same as in the
+absence of discrimination I'll say that again the overall pattern that is the
+gender one enjoys not quite half but almost half the overall acceptance
+rate is gender two is the same pattern you can get in the absence of
+discrimination of direct discrimination and this is the fundamental problem in
+trying to identify discrimination in these kinds of mediation scenarios so now
+we have a simulation that illustrates the basic conundrum and now we need to
+try to design a statistical estimator that can confront it and make some sense
+out of it before moving on to that I want to say that this is a very
+unsatisfying simulation because it's nothing like how admissions officers
+really function and so the admissions rate in these simulations are fixed but
+they're not emissions rates are not fixed exogenous factors of the department
+they fluctuate depending on other causes the size of the applicant pool and the
+distribution of their qualifications for example it would be much more
+satisfying to have a simulation where an applicant pool is actually sampled and
+sorted and there are a certain number of available slots and qualification
+thresholds and so on and that that would be much more productive if we were
+going to make a serious study out of a topic like this but this will this will
+serve for the educational purpose of this lecture I hope okay I'd like to
+already go ahead and take a break because this lecture is a lot go ahead and
+review where we come from so far and the generative model and make sure you
+understand what we're doing and how the dag is structured take a little walk
+around have a cup of coffee whenever you come back I will still be here
+the next step in our narrative about modeling the UC Berkeley applications is
+to build estimators statistical models so we have some estimates direct and
+indirect discrimination and for these applications and now we need models and
+this is an excuse now to teach you about generalized linear models and the
+modeling of events I said we are when we toss the globe at the very start of the
+course we sort did this already but it was the simplest possible example I
+could come up with and none of the fancy machinery is necessary going forward
+you're going to need fancier machinery and this is the standard machinery of
+generalized linear modeling and like all generalized linear models count models
+are frustrating partly because the scale of the outcome variable and the scale of
+the unknowns is always different so what that means when when we are modeling
+counts what we've measured our counts they're discrete events and we've counted
+them up so the observation variables are counts like the number of water and land
+for example or in this case the number of applications accepted or rejected but
+the things that we estimate the parameters the unknowns inside the model
+the coefficients these are not on the count scale they're on the probability
+scale or even more frustratingly they're on this weird scale called log odds and
+it just has to be this way I can't really I say I'm sorry but I'm not is
+just the truth is how it is and is my job to teach you how this works but
+there are very good reasons it's like this nobody has made it this way to
+frustrate you this is the best way to do the work so it's important that you
+learn to do it this way so what are generalized linear models there's much
+more about this in the book but here's the basic idea the linear models you
+seen so far just special cases of the generalized linear model if you've got
+a Gaussian outcome variable like y on this slide then we would model as
+expected value mu and some additive sum of coefficients and predictor variables
+this is often called a linear combination of parameters but it's really
+additive is what we're talking about you can't do this with basically any other
+distribution but the normal that there is no other distribution other than the
+normal which behaves this way and the reason is because the normal is
+unbounded on both sides you can go infinitely left or infinitely right on
+the x-axis other kinds of variables are bounded somehow so for example events
+are counts and counts are bounded to be zero or greater if they're integers that
+are zero greater so you think about a discrete event it has some probability
+that it happens and that's what we're going to model and so for example on the
+left of this slide I'm showing you an abstract example say we had some
+continuous predictor x and we wanted to know how x is associated with the
+probability of some discrete event and we're going to model that probability on
+the vertical axis we can't just make it a regression line as before because as
+you see on the left of this slide the regression line will not observe the
+boundaries of zero and one probabilities need to be restricted to the
+interval between zero and one and we can do that in generalize linear models by
+making the probability some function of that additive model of the linear model
+and that's what you see on the right and and the art in generalize when you're
+modeling is choosing those functions so that they work well and allow us to
+express our scientific hypotheses efficiently so generalize linear models
+are the parent category of the ordinary linear models in which the expected
+value of some outcome variable is not the linear model itself but some function
+of the linear model as you see on the bottom part of this slide so we're going
+to spend a little more time as a series of maybe half a dozen slides trying to
+explain this to you again and as I keep saying they're going to be parts of this
+which just seem weird but once you start using it and you do some numerical
+examples with it you'll understand it quite quickly so let's explain the
+structure of this this nonsense on the slide now so why sub i is our zero one
+outcome variable this is our event like for example whether the application is
+accepted or not and this is a Bernoulli random variable because it's like a coin
+flip but the coin probability the coin comes up heads or is a success is p and
+that doesn't have to be fair yes the probability the event p sub i and then
+there's this linear model down here they can take on any real value just like
+all the linear models we've used before but it's constrained as a zero one
+interval by that function f on on the left there and this is a function called
+a link function its job is to take the real number line and constrain it to the
+zero one interval said we call this a link function purely for historical
+reasons because it links the distribution the expected value of the
+distribution to the linear model and we well the software is going to do most of
+this stuff for you but you just have to define it and I'll show you the code in
+a bit just as important as that is the link function is the inverse link
+function because the inverse link function this is often easier for people
+to think about f of the probability equals the linear model this is the
+same as saying that the probability equals the inverse function of the
+linear model that is we apply some transformation to the linear model and we
+get a probability out that's what the inverse link function does for us and
+what is that function here's a toy example which has nothing to do with
+statistics but it'll maybe helps you understand what we're talking about say
+there's some function which just squares something right so if we pass the
+value a into the function f we get we get a squared back out the inverse
+function then is the function that gives us the original back that undoes that
+transformation and so in the case of squaring something the inverse function
+is the square root because if we put the result of the function f into the inverse
+function that is f to the minus one indicates the inverse of the function f
+then we get a back and this is all we need about the relationship between link
+functions and inverse link functions okay you're a scientist and you didn't come
+here to talk about link functions or any other such nonsense and you're not
+going to have to spend a lot of time with that but this link function stuff in
+generalizing your models is not a problem really it causes some issues with
+prediction but you're already in good shape from the first half of the course
+to deal with those problems through sampling and the coding that you've
+done there's just a little bit of cognitive friction involved and luckily
+link functions are really tied very closely to the distributions of the
+outcome variable and so you don't usually have any choices to make it all
+the choices to make are about the distribution of the outcome variable
+instead so it's worth saying something about that and once you've done that the
+link function is basically automatic and so you shouldn't have any
+anxiety about it there are conventional and and good choices for link functions
+that are essentially mated to the distributional choices and how do we
+choose distributions well distributions are matched to the constraints on the
+other variables where probability distributions are just ways of
+counting up the relative number of ways that the data could arise given our
+assumptions and when you when you do that the constraints on the values the
+outcome variable take lead naturally to a small family of probability
+distributions that we use over and over again in statistics so I want to introduce
+you to that a little bit and this this family distribution is called the
+exponential family of distributions and that's because you can build the whole
+thing up by starting with what's called the exponential distribution well
+that's not the reason they're called that I don't think historically but
+that's the way I'm going to explain it we can grow them all from exponentials
+what is an exponential distribution exponential distribution is the
+simplest probability distribution than I know it's the distribution of a time to
+an event that has a constant rate I'll say that again it's the distribution of
+the time to an event that has a constant rate in time and so the values that you
+sample from an exponential distribution are latencies or durations that so
+they're positive real values yeah they're greater than zero continuous
+values and so the exponential distribution always looks like this
+it's a declining exponential curve as a single parameter lambda usually which is
+the rate if you have some process that's producing events in continuous time and
+you count those events you can get you what you get is a binomial distribution
+that is you set some observation window you're going to observe the exponential
+processes say a fish swimming along a river and they're at an exponential rate
+in a constant rate in time you will observe them exponentially distributed
+if you have a bounded observation window like you're only going to do it
+between noon and 1 p.m. on your lunch break and you count the number of fish
+they will have approximately binomial distribution there's a some number of
+trials and some success rate so counting binomial events arises from these
+constant rate processes right you can think of it as a constant probability
+that the coin turns up heads the Poisson distribution which is extremely common
+as well in statistics is actually just a special case of the binomial it's a
+case where we don't know the maximum yeah we don't know the we don't know the
+number of fish or the number of coins that were tossed but it's it's
+fundamentally the same kind of distribution it's a count it's a
+distribution of counted events that have constant rate and so the consequence
+of the Poisson distribution has the same lambda rate parameter as the
+exponential it's just the the count distribution of the exponentially
+distributed events if you sum up exponential processes you get gamma
+distribution I'll talk a little bit about this in the bonus at the very end of
+this lecture but you don't need to worry about it now but the gamma
+distribution occurs very commonly in nature lots of things are approximately
+gamma distributed when they arise from multiple exponential processes that
+sum together and then for large means the gamma distribution converges to our
+friend the normal distribution and the normal distribution is an absorbing
+state you can't you can't get out what you're there okay I know how this
+sounds it sounds like a conspiracy theory all these distributions are
+connected blah blah blah the thing to take away from this though is not that
+you have to understand all the transformations that get you from one
+distribution to the other you don't need to understand how they're all
+connected what you need to understand is the mapping between the constraints on
+an observed variable and why there's an appropriate distribution to use to
+model its probability that's the thing that matters counts are zero or
+positive integers and latencies are positive reels and so on and those are
+the constraints you pay attention to so all you need to really remember is that
+the distribution you want to use to model an observed variable is governed by
+the constraints that you believe about that variable there's some natural
+process generating those observations and it puts constraints on them like you
+can't have negative counts for example as a consequence of this you can't test
+these assumptions there are assumptions about the measurement itself if they
+were violated you wouldn't have made those assumptions in the first place
+right or if they're violated there's something wrong with the record keeping
+right you can't have negative count variables can't have a minus one fish so
+this tradition in introductory statistics classes of teaching students to
+test if their data are normal this is never a good idea you cannot test if
+your data are normal that is not a test that is available to mortals okay let me
+try to sum this up a bit so distributions are just for Bayesian the
+relative number of ways to observe data given assumptions we match distributions
+from their two variables based upon the constraints on those variables are they
+positive reels are they counts so on and then link functions are matched to
+distributions in a much more natural and trivial way the hard problem in
+general is linear modeling is understanding constraints thinking about
+the constraints and matching them to distributions the link functions are not
+the hard part where do link functions come from well in the case of the
+Bernoulli and binomial models which is what we're going to deal with today to
+model discrete events they arise spontaneously and naturally from the
+derivation of the distributions themselves so if you're interested in this
+level of deep nerdery on page 312 of the book there's a little box where I
+derive the binomial distribution for you from the maximum entropy principle
+that is we ask for the flattest and least informative distribution that meets
+only the constraints of a count variable and we get this expression that
+actually has the link function inside of it this weird ugly log thing and this
+is the log odds it turns out and this is where the link function for log odds
+comes from and one of the reasons it has very nice properties log odds is also
+called logit but you can just think of logit as meaning log odds and in
+Bernoulli and binomial models remember Bernoulli distribution is a coin toss
+distribution and a binomial distribution is a sum of coin tosses so they're
+really fundamentally the same thing and both of them we use the logit link because
+they're canonical they appear in the derivation and what this means is that we
+write the logit of the probability of the event is equal is just means the log
+odds of that event where the odds are the probability it happens divided by
+the probability it doesn't so p sub i over 1 minus p sub i or p sub i is the
+probability of the event so this is all log odds means and what this lets us do
+is attach linear models just like before to this and you can use all the same
+machinery of multiple regression to model discrete events and this is very
+convenient the log odds has this property as well that it's symmetric it
+doesn't change shape if you change the identity of which event you're modeling
+so it has this very nice property as well it's not an arbitrary function so
+the p sub i over 1 minus p sub i are called the odds and this the inverse
+function at the bottom right of this slide or the probability is equal to some
+function of the linear model is the logistic function that some of you may
+know if you're an ecologist you know what logistic growth is and it's exactly
+the same function and how would we ever get it well logit of p sub i is equal
+to the log odds as I display here so let's just let q sub i equal to log odds
+what we want for the inverse function is to apply it to q sub i and get the log
+odds back right get get or rather get the probability back and the way to do that
+is after a little bit of algebra this is just an algebra problem to solve
+we get this function here and this is the logistic equation that some of you will know
+okay your computer is going to do all these transformations so for you you could do
+them manually if you need to i'm just trying to demystify it and I know at this point it's
+sort of like again you got into this to do science and now there's a bunch of functions
+and inverse functions how did you end up here deep in the woods with a logit I understand
+I sympathize there's just no way to do this business and you have to do this business
+because this is a very powerful set of tools for doing data analysis there's no way to do it
+without having some passing understanding of what's going on in the machinery of what the
+golem is doing there's just not and that means that when we use when we model count data we get
+tables of coefficients which are on this logit or log odds scale not on the probability scales
+the probability scales are easier to interpret that's what we're thinking about what's the
+probability of the event but all of the little machinery inside the tide engine
+are on the log odds scale and this makes them very difficult to interpret but in time this
+becomes a lot easier so here's one way to think about it there's a graph on the right hand side of
+this slide where I have the logit or log odds scale on the horizontal that is the log odds of the
+event and then the corresponding probability of the event on the vertical and that s shaped curve
+that is the logistic curve that maps the probability scale to the log odds scale
+and you can see how it constrains the probability between zero and one
+it doesn't have to stop at minus six or six on the upper end by the way it goes to infinity but
+I want you to see is by the time you reach minus six or six you're already basically at zero or at
+one so one way you can think about this is that the logit of zero corresponds to a log odds of
+zero corresponds to probability of a half and then as you get increasingly negative
+it the probability gets lower and lower closer to zero and by the time you get to minus four
+that means hardly ever minus six rings really never and on the other end positive four means
+nearly always yeah and after a little while you get quite comfortable with this it comes in time
+okay that aside the rest of works in typical Bayesian fashion Bayesian updating is not changed at all
+by any of this mechanistic nonsense and you you give your you give Bayes theorem
+under your model definition and it will dutifully update things so what I'm showing you here is
+just samples from a prior distribution of an intercept in a slope for a log odds model
+yeah with one predictor and you can see many different curves are possible in the prior
+distribution there's no observation shed and those animating curves on the right they can do
+lots of things but what they cannot do is go below zero or above one and then we can start
+introducing data and updating and here come some points now see there's the first point
+and this updates the posterior distribution and it gets the slopes and intercepts get constrained
+to smaller regions of probability space and the curves start to find the points and typical fashion
+so all the basic machinery of Bayesian updating as always is unchanged remember and the nice thing
+about Bayes is that there's always one way to get an estimate and that is the posterior distribution
+you just define the model and you go
+but we need priors and we're on the log odds scale and log odds are not something that anybody
+lives in and so you may have no intuitions about log odds that just means you're human
+so let me help you out of it when we think about setting an unknown parameter like alpha on the
+log odds scale and then having to assign some prior probability distribution to it you want to
+remember that anything above plus four on the log odds scale means almost always anything below minus
+four means almost never and this generates some very odd scaling issues when you transform between
+them so on the right of this slide I've got three examples of possible prior distributions on the
+parameter alpha on the log odds scale and I want to show you the implications of each of these on
+the probability scale so now I've shifted them over to the middle and I draw the red curves which
+are just applying the the logistic transformation so that we get things constrained to the probability
+scale so the x-axis for the blue curves there is the whole real number line right which I'm just
+showing you minus 30 to 30 but it's the whole real number line and these are just normal distributions
+of different widths and and then each of them on the right and the top row we have a normal
+distribution with a variance of 10 that's the the blue curve at the top row and when you transform
+this the probability scale it ends up being two spikes near zero and one why because this is a very
+wide normal distribution and so most of its probability mass is on the edges of the log odds
+space because remember anything above four means basically always and anything below four means
+basically never and that's where almost all the probability mass is in that distribution at the
+top the narrower distribution in the middle this is normal distribution with a standard deviation
+of 1.5 and now we get something that looks surprisingly uniform ironically that narrow normal
+distribution spreads probably the prior probability out almost evenly between zero and one and then a
+normal distribution a little bit narrower on the bottom row with a standard deviation of one
+is fairly even but is a little bit skeptical of extreme probabilities and you could make this
+narrower yet and make it a little bit more regularizing and so on as always what you want to
+is do prior predictive simulation like this so that you can see the implications
+and that's what we can do here so imagine we had now a linear regression that we had inserted into
+a Bernoulli model and we were going to simulate the implications of some prior distribution on the
+intercepts and slopes that's what I do here just as a provocative example I give you some
+wide default priors that lots of people like to use unfortunately like a normal distribution with
+a mean of zero and a variance of 100 that standard deviation of 10 implies a variance of 100 for
+both the intercepts and slopes if you sample functions from the joint distribution of alpha
+and beta here and plot them that's what I've done on the right you'll see that a prior like this assumes
+very strong associations between the x-axis variable and the probability event a priori
+basically always
+if instead we use something with intercepts being a normal with standard deviation of 1.5
+or 1 and slopes being even milder like a standard deviation of a half then we get much milder prior
+relationships of course if the data requires a strong really strong association between the x
+variable and the probability you know Bayes can learn that but we want to have some scientifically
+regularizing priors at least like this to start out something defensible that you wouldn't be embarrassed
+to show your family
+okay now we're ready to build the Cisco model we've got all the pieces of the golem in place
+here's our generative model from before just to remind you so we've got some synthetic data we can
+feed into a Cisco model we're going to design and Cisco model just takes the observed variable a that
+is a count of accepted applications or or in this case I'm going to do Bernoulli so it's whether
+or not an application was accepted it's a zero one variable and we model the probability of that
+is being some log odds as the logit of pi is alpha of g sub i that is the log odds for each particular
+gender this is the way that I had model categorical variables back in the first half of the course
+there's nothing new here
+that will be the first model and that model is designed to give us the total causal effect
+right so I'll back up we know from the backdoor criterion to get the total causal effect of
+gender assuming this dag we don't stratify by department yeah and so the only thing we're
+stratifying alpha by the intercept alpha by is gender but if we also if we want to get the direct
+effect of gender we must stratify by department so that we essentially block the pipe over the top
+and that means now having a matrix of log odds intercepts alpha stratified on gender and department
+and this this is a new thing I think I don't think I've shown you an example like this before
+but fundamentally it's exactly the same idea as stratified by gender there's just four categories
+now and those four categories are defined by combinations of gender and department
+for an example where there's only two departments to keep it simple when we get to the real data
+set I think there are six departments and then we're going to have a bigger a bigger matrix
+but the machinery works the same way and as I tried to persuade you in the first half of the course
+if you if you define discrete stratified unknowns like this using these index variables
+you can change the number of departments or even the number of genders and the code will just run
+you don't have to change the code at all and that makes it much much simpler
+okay so this gives us two simple generalized linear models on the left the model that's
+going to estimate the total effect and then on the right the model that's going to estimate
+the direct effects
+and the ULAM code for defining Markov chains to run and give us posterior distributions
+for these models looks pretty much as you'd expect at this point in the course no big surprises
+you can bracket by the categorical variable g and ULAM will figure out how long that vector is
+and define the the necessary number of parameters the only new code here is in the lower right
+there's this matrix notation for defining a matrix you find a matrix indexed on g and d there so
+matrix bracket g common d and that gives us a matrix variable a so that we can have every combination
+I think the rest is as you come to expect at this point what's not as you'd expect is that
+the coefficients you get in say the praisy table are on the law god scale and so they're
+they're quite difficult to interpret right so like in this case they're alpha for the first
+gender for gender one is minus 1.8 and for two is minus one what you can tell there is that
+this means that the admissions rates for both are less than a half that's why they're negative
+and one is smaller than the other right that the emissions rates are smaller for gender one
+now this is simulated data right so that's why the genders are just numbers here
+and then the other model uh it's a matrix of parameters now so we get four coefficients out
+the same thing this is quite hard to interpret because it's on the law god scale but you can
+see which things are smaller than other things after a while you get pretty good at reading
+law gods most people do but for now you probably want to just imply apply the inverse link function
+to these coefficients and get them back on the probability scale the inverse link is the inverse
+loges there's a function in in the rethinking package for this at the bottom of this slide here
+and you can just pull out the samples from the posterior distribution and apply this
+transformation and get them on the probability scale now i'm just showing you here for the
+posterior means but in principle you'd want to do it for the whole distribution
+okay it was what we've done so far i encourage you to go back to that simulation code and the
+data analysis code i just showed you maybe change the the data generating simulation so that you add
+more extreme or less extreme discrimination or make the departments more different or whatever
+you like and then verify that statistical models do their job they can actually disentangle the
+direct effect from the indirect effect and then review and then when you come back from this break
+we're going to analyze the real data
+welcome back we're in the home stretch now we're almost done with this long lecture
+so we're deep in the machinery now we've defined all the machinery you've learned almost all of it
+everything from this point out is going to be old tools i promise but it will interact with the new
+machinery but we'll put it together in the scientific example now we're going to analyze
+the actual uc-berkeley admissions data finally to remind you these this is the whole data table
+on the right of the slide there are 12 rows of data there are six departments anonymized to be named
+a b c d e and f and then for each of those each row is a combination of department and
+the indicated gender on the applications and then we know the number of applications that were
+submitted to each department by individuals indicated whether they were male or female
+respectively and then we know whether those applications were admitted or rejected the
+the count of them how many were admitted and how many were rejected so we'd like to use these count
+data to model the uh law gods of an application of any particular gender submitted to any particular
+department being accepted so just as before we'd use the same model and we've got but one thing i
+want to make it clear to you because sometimes this is confusing um the data come to us as
+thumbed counts not a zero one variables and before the break i had done all the generative
+simulation and statistical design thinking about um a sub i being a zero one uh bernoulli variable
+when that's the case we tend to call it logistic regression as your outcome variable is a binary
+zero one variable um what we're going to use now is binomial regression which is fundamentally the
+same thing because binomial variables are sums of bernoulli variables but binomial
+observer variable is is a count between zero and some known maximum of course a bernoulli
+variable is as well it's just a case where the known maximum is one and all you have to do
+to change the code is to swap out the name bernoulli for binomial in fact you can recode
+logistic regression to a binomial regression anytime you like and binomial regression is
+typically faster because there are fewer calculations um r provides an aggregate function
+but whatever scripting language you're using i'm sure there's an equivalent and you can just take
+what's called the long form on the on the left of the slide where each row is an application and
+the variable a is zero or one indicating whether the application was accepted and then g is the
+gender variable one or two and d is the department variable one or two this these are data from our
+simulation uh and this is the so-called long data format and you can change this into an
+aggregated format where we take um all the rows that have the same values of g and d and we sum up
+the a variables i'll say that again we take all the rows that have the same values of g and d
+and we sum up um how many um applications were accepted right for the applications that had that
+combination so in these simulated data uh for g equals one and d equals one there were 30 accepted
+and out of 355 for um those where g is two and d is one there were 10 accepted but
+out of 92 applications and so on the same data all the same information you'll get exactly the same
+estimates so to show you um we use Bernoulli variables before the break uh where we used a
+tilde Bernoulli and then the probability for binomial that's almost exactly the same we used
+the word binomial to binomial distribution but we have to indicate the maximum and that's what
+the capital letter n is and that's the number of applications the number of trials that could have
+succeeded and this is just a matter of convenience it's often more convenient to do binomial
+regressions than logistic regressions because the data is easier to manage
+but you'll get absolutely the same uh posterior distribution okay so
+let's model it so we load the data as ucb admit in the rethinking package make a pruned
+data list to pass in there's nothing fancy going on here except that i'm recoding
+applicant gender to an index variable um one indicating female to indicating male
+and uh and that's it and then we run the law model we have the binomial distribution where n is now
+a variable right it's the number of applications on each row and um a is the number that were
+accepted and we estimate these parameters a one for each gender which are the log odds
+of acceptance and this will give us the total effect of gender on the probability of an application
+being accepted the direct effect quite similarly now we stratify by both gender and department
+simultaneously using the matrix formulation i introduced before the break um a little due
+diligence uh you're still getting used to trace plots uh you should be looking at them so that
+you develop some patterns in your brain about what good trace plots look like these are the trace
+plots for this model uh the fuzzy caddy pillar of healthy hamiltonian money carlo sampling and then
+these are the trunk plots or trace rank plots uh the also nice jumbled pattern that you want to see
+where none of the change is consistently above or below the others
+you look at the precy output even more log odds confusing log odds um values that are hard to
+interpret again uh negative means below a half positive means above a half so you can do a
+little bit um but as the numbers get bigger actually the probabilities get closer to one another so
+you can't really easily interpret these log odds things by themselves that'll especially be true
+once you start having more complicated binomial or logistic models with multiple predictor variables
+but you do get better at it over time uh what i just want to communicate to you is that you don't
+have to uh you don't have to be able to just read the log odds uh and see the probabilities
+but over time it will happen to you uh don't be afraid of it um what we're going to do uh i want
+to teach you do the right thing is just convert everything to the prediction scale we want to
+use the inverse logit to convert things to probability scale and summarize all the effects
+that way because it's much more interpretable so for the total effect we extract samples from
+the posterior distribution then using the inverse logit uh function we convert the entire posterior
+distribution for alpha uh for the first gender which is uh women applicants uh in this sample
+and then for the entire posterior distribution for the log odds for the second gender which is
+men applicants in this sample uh and then we take the difference between those the entire
+distributions right we haven't dropped any of the uncertainty in the posterior distribution
+and then we plot the density of that contrast and that's what you see at the bottom of the
+slide um and it indicates that overall uh men were advantaged or i should say uh applications
+from people who indicated they were men uh were advantaged uh in this particular sample
+about 14 percent uh on average uh overall advantage and remember this ignores department
+this is the total effect uh right so this is consistent with there being some from the total
+experience discrimination perspective uh female applicants who were discriminated against uh in
+that particular year in that particular sample by about 14 percent but we haven't decomposed it yet
+to figure out why so we need to look at the other model the one that decomposes to direct effects
+and same sort of procedure we're going to extract samples from the posterior distribution
+and then we use the inverse loge at length to convert uh the uh whole matrix here of alpha
+parameters to the probability scale and i can do that in just one line there you see it probability
+a is inverse loge at post two dollar sign a and that does it to every entry in the matrix
+and it will still have the same matrix structure and then we can produce um contrasts right where we
+for each department the departments are numbered one to six and s apply is just this function in r
+that does a loop basically you can read s apply as loop loop over the values one to six passing
+them into the function and do the calculation i tell you to that's what s apply means and so here
+it takes each department and it constructs the gender contrast that we had previously on the
+left of the slide but now it does it inside each department because we're stratifying by department
+and then the result is plotted at the bottom in the world's ugliest graphic design choices i could
+manage so ignore the color scheme for a moment and just realize that each color is a different department
+and each of those curves is a posterior distribution contrast between applications
+from women and applications from men and so as before on the left side of zero men were
+advantaged on average and on the right side women on average and you can see the variability across
+departments departments explain a lot of variation in this and women and men tend to apply to different
+departments in this at least in at UC Berkeley in 1973 they did and some departments um men were
+advantaged those are the ones on the left uh and then there are some departments like the yellow
+one where there doesn't seem to be much difference at all and then there's that red department on
+the far right where women are strongly advantaged as well
+so then the question becomes what's the causal effect of gender
+and we have to to address these sorts of questions we have to do a calculation i'm going to show
+you how to do that calculation but we also have to think carefully about what we really mean by
+the causal effect of gender and as i indicated earlier on i think before the first break in this
+lecture um what we mean by the causal effect of gender in this context is the perception of gender
+by the admissions officer and so we imagine a situation where that changes yeah uh and and
+that would be the causal effect of gender um we could also mean uh uh actually changing someone's
+gender at birth and then that would also affect their choice of department yeah uh but you have
+to be very careful about what you mean so let's think about the perception issue too and think
+about calculating the causal effect um for some uh counterfactual range of department choices right
+is what we have not estimated is um uh the influence of gender on choosing a particular
+department and so we're just imagining this perception change right it's the removal of the
+direct effect over some marginalized over some distribution of applications to departments
+and this sort of thing sounds complicated right we're going to simulate a causal effect of the
+perception by the admissions officer of an application gender um given that they've already
+applied to some department um averaging over that distribution of applications to departments and
+this is easy to do with simulations and samples from posterior distributions i'll show you how
+in a moment um but note we're still assuming there are no confounds here and this is important
+because in the next lecture i'm going to show you this isn't so easy actually after all
+but the calculations are uh this way of doing the calculations is valid whatever model you've got you
+just got to think about the model and use it and um you know the model and you you wrote a
+generative simulation of it and so you can generate interventions through simulation as well um so in
+this case what i do is that i'm i'm marginalizing over the empirical distribution of applications
+department the intervention is focused on perceptions it doesn't change the distributions
+the rates at which men and women applied to the particular departments and this is what
+defines the intervention right uh the the applications are still going to the departments
+they went to in the same ratios as that we observed in the sample and the counterfactual
+intervention is that i switch the perceived gender of the applications and that's what
+i'm doing in the code on the left so the very top of this code block i'm just counting up
+how many applications there are and then i count up how many applications there are
+in each department and then i take all the applications in each department and i simulate
+them as if they were male or female all right so we've got the same number of applications to
+departments i'm just flipping i'm just essentially controlling the perception by the admissions
+officers um of what the gender the applicant was so for p underscore g1 this is the simulation
+is if all applications for each department come from women right the intervention is on perception
+not on the decision to apply because the total applications doesn't change and then i use the
+link function which is this convenience function in the rethinking package which looks inside your
+fit model and pulls out the formula it needs to make the to make the posterior predictions and
+that's what it does and then the same thing now we p underscore g2 we simulated as if all applications
+came from gender two which has been same code right except that now the g variable is set to
+and then we compute the contrast and that's what we summarize so across all of these
+simulations these batch simulations where the intervention has been flipping one way or the
+other the gender of the application we get a contrast and you see that this is a pretty
+complicated causal effect because it's inhomogeneous the the the department can have a big effect
+right there's that one department where we're in their advantage most departments are slightly
+disadvantaged and then for some departments there's really no difference at all
+and that's that's easier to see right maybe you can see where that that that weird mountain range
+at the top of the slide the posterior distribution of the the effect of gender perception has two
+that's one little like small peak and then a taller peak that comes from smushing together
+these different department effects that are at the bottom of the slide
+okay what we just did is something called post stratification so if you've got an actual
+population and you're trying to make a prediction from it and there's some heterogeneity in the
+population at the rate at which something happens then you need to think about the population
+you're making a prediction for and do the same kind of marginal causal intervention simulation
+to understand to give the prediction right for the population so this is a simpler way to say this
+is you reweight the estimates for the target target population so for example at a different
+university then you see Berkeley there will be more or fewer applications to the same
+kinds of departments and so to make a prediction using these estimates for a different university
+we would reweight the departments and we would change the numbers of applications in each case
+this post stratification is an extremely important technique that comes up nearly all the time
+most scientific studies that want to be applied in any sense to a human population need to do some
+kind of post stratification it's the way to think about the to predict what the intervention will do
+for a specific target population where you've measured some of the covariance or the demography
+of it ahead of time okay we're almost done at this point you're you're probably asking well
+was there discrimination here and I'm afraid we don't know overall yes there are big structural
+effects as well so let me back that up I mean overall yes on average applications from women
+were about more than 10% disadvantaged in total and that affects to the extent that that women
+had taste that led them to to apply to different departments or experienced prior discrimination
+which discouraged them from applying to specific departments that led to disadvantage in access
+to higher education and I'd be happy to call that discrimination but that's the total causal effect
+and as I hinted before the total causal effect is usually estimable under very mild assumptions
+what you also see here is there big structural effects because men and women tend to have tended
+to apply to different departments and different departments have radically different baseline
+admissions rates so even if there's no difference within departments between the
+fate of applications for men and women as we saw for many of the departments but not all
+there there will still be big differences in the total causal effect because of the different
+choices of departments those are the structural effects so the follow up points to this the
+first one is I put on the slide that the distribution of applications can in themselves
+be a consequence of discrimination we don't have any data to speak to that we need to know more about
+what happened to these people in grade school for example who shaped their interests and so on
+and second and this is what we're going to deal with in the next lecture
+confounds are extremely likely in these situations and it's not just an aspect of this
+topic about discrimination maybe that doesn't interest you but quite often we need to imagine
+the possibility that there are undeserved confounds on the edge of our dag and think about what those
+would do and in the next lecture I want to show you that we can really model that even if we can't
+measure the thing we can think about what its effects might be and that'll let us come back
+to these two papers I mentioned in the beginning neither of these papers has any dag in it or any
+causal framework that I can recognize and to understand papers like this which are frequently
+published you're going to have to bring your own dag and think carefully about it and I hope I can
+equip you to do that I'll see you there
+are you still there okay I had this one lesson I never get to put into lectures
+because the lectures go on too long and it's one of my favorites and it's about modeling events so
+I'll give it to you as a bonus survival analysis is another way of modeling
+events but the outcome variable isn't the count of the events but it's how long it takes
+for the event to happen I'll say that again survival analysis is another way of modeling
+discrete events but our focus is not on the number of times the event happened but how long
+it took for the event to happen and the thing we're trying to estimate is the rate at which
+events happen these are often called time to event models these are tricky because when you study time
+to event what you cannot do under any circumstance is ignore the observed entities for which the
+event never happened these are called censored cases they'll be an example in a moment so hang on
+that'll make more sense there are two kinds of censoring which are going to concern us the first
+is they're called left censoring and this is when we don't know when the time started so we don't
+know for the person or in the example I'm going to use is going to be cat adoptions so for the cat
+we don't know how long the the person or cat has waited for the event that creates an obstacle but
+it's not an impossible one and the other kind is right censoring which is a bit more common I think
+in most most data sets when the observation period the time we spent waiting for the event to happen
+ends before the event happens for the particular person or say cat as the example will be here
+you if you ignore censored cases you get the wrong estimate that just all there is to it to
+understand this imagine you were trying to estimate for some population of phd students
+how long it takes to finish a phd program if you ignore the students who are not yet done
+you will get the wrong estimate right you're essentially dropping the ones who are still
+doing it here's a way to think about it for an individual who's still doing a phd program
+how long they've been in the program so far without dropping out is information about the
+rate of completion yeah and that's true for all kinds of survival or time to event analysis
+okay so this cat adoption poster is on the slide because the example I want to educate you is
+is about cat adoption so this is a large data set that I have downloaded from the Austin
+animal control website and it's about 20,000 cats that they collected and cared for
+and you have when the cat was brought in or or caught and then when the cat was released
+there's all kinds of different events about the cats the data everything that happened
+at the time that the animal control people had the cat
+what we're going to be interested in here is whether black cats i'm quite fond of black cats
+they're my favorite kind of cat whether black cats have a different rate of adoption non-black
+cats my interest in this estimate is there is a stereotype that unfairly applied to cats by
+north americans is that black cats are bad luck and therefore it is harder to adopt them
+and we want to see if in this data set this effect emerges so we're going to be focusing
+on the event whether the cats were adopted how long it took how long they were in animal control
+the animal shelter before they're adopted the other kind of event we have to pay to do is
+something else because some of these cats passed away old age or illness while they were in the
+shelter unfortunately and some of them actually escaped so we don't know what happened to them
+so there are different kinds of something else there can be a death escape or just censored which
+is that the data the data set i downloaded is only up to a certain year and there were still cats
+in the shelter that had not been adopted yet and those are censored cats they could still be
+adopted they may be adopted now already and we need to include them in our analysis as well so
+we need to learn how to deal with censored data so the outcome variable of interest in this data
+set this is this data sets in the rethinking package is days to event and now you need a
+distribution for it and so of course we're going to apply our our maximum entropy thinking here
+and think about now what are the constraints on the variable days to event well it's a positive
+number and it's it's real value it's a latency yeah or displacement these value variables are
+sometimes called and i had mentioned in the main lecture that the basic choices good choices for
+these kinds of variables are either exponential or gamma these both of these would be good choices
+here i'm going to show you the exponential because it's the simplest it assumes the constant rate
+through time which is actually not true for these data but again we've got training wheels on here
+we're going to do the simplest survival analysis i can think of and then you can scaffold your way
+up from there if you're interested so these these distributions exponential game are the
+maximum entropy distributions for waiting times is all you want to assume about some displacement
+or measurement or latency is that it has a constant rate you should choose exponential
+yeah another way to think about these distributions the exponential and the gamma is you can think
+of them generatively what sorts of mechanistic processes in nature produce them for the exponential
+there's a simple generative narrative that will produce it and that is you imagine some machine
+or creature has a bunch of parts and there are any one of those parts would be sufficient for
+the event happening so what i mean by parts well imagine you have some washing machine or something
+like that and has a bunch of parts and if any one of the parts breaks then the machine stops working
+and the event that we're tracking is days until the machine breaks right or for an animal animals
+have a bunch of parts and if there are a bunch of any one of those parts breaks the animal stops
+working and so that's lifespan and this will give you an approximately exponential waiting time on
+the lifespan of the washing machine or the fruit fly as the case may be the gamma arises similarly
+but for more complex machines where you need multiple parts to fail so there's a bunch of parts
+and there's some redundancies so any one of them is not sufficient for the machine to break
+or the animal to die but if enough of them break then the machine will stop working or the fruit
+fly will perish and gamma distributed lifespans are also very common so for example waiting times
+for cells to develop cancer or approximately gamma distributed because cells have a bunch of defense
+mechanisms stop cancer and the cancer has to break through more than one of them to get there
+anyway that's just to give you some some idea but these are these are very useful distributions
+for modeling times two event okay for uncensored observations cases where we observe the cat
+getting adopted in the Austin data set this is pretty easy then all we do is we try ask
+what's the probability of observing of the cat waiting that long desubbised the days until adoption
+from an exponential distribution with some unknown rate lambda i where lambda i is the rate of
+adoption for cat with some particular color we're going to be focused on black versus all the others
+and this is fairly simple so lambda is a funny parameter is a rate but when we can interpret
+this is the inverse rate is the average waiting time so one over lambda is the average time to
+event so when lambda is one the average time to event is one that's the expected waiting time when
+lambda is point five the average waiting time is one over point five which is two so slower rates
+give you longer waiting times you work with these models a little while you get quite fluent with
+flipping that around i appreciate it it's confusing the first time the tricky thing is the sensor
+cat so these are cats in the data set and there are a lot of them where they were still in custody
+and unadopted at the end of the observation window or they died in the shelter and for these events
+the way you want to think about getting a probability for them is we've got a flip the cumulative
+probability and it gets you something that's called the complementary cumulative distribution
+and all the terminology here is just very annoying but i'll i'll try to walk you through it so you
+get the concept of it and then i'll show you the code so on the left of this slide if we were thinking
+about the probability of some event happening before or at some time x on the horizontal distribution
+here you would use the cumulative probability from in this case the exponential and so i'm
+showing you two exponential curves there for lambda equals one that is a fast rate with an
+average waiting time of one say one month to adoption or lambda point five with an average
+waiting time of two would say two months to adoption and those are cumulative distributions
+so those curves mean what proportion of cats have been adopted at each point on the x axis
+according to a certain rate okay so that gives the probability of a cat being adopted by that
+time yeah not at that exact time but up to that time what proportion of cats have been adopted
+when x equals one x equals two and so on that's the cumulative distribution function the cdf
+and that's what's on the left of this slide is the probability the event had happened already
+at time x what we need for censored cats the ones that are still in the shelter waiting to be
+adopted for things is the probability the event did not happen yet and this is the complement
+of the cumulative distribution it's the rest of the probability so it goes the other way the
+probability of not event before at time x which is a very weird thing to say in any language but
+especially in english um here's the way to think about it these curves on the right hand side of
+this slide the ccdf the complementary cumulative distribution what they're showing you is at each
+point on the x axis how many cats have not yet been adopted yeah and that's the thing we want we
+want the probability of a cat having not yet been adopted given that it's weighted a certain amount
+of time yeah hopefully it will eventually be adopted but for any given rate we expect that
+some cats are still waiting okay and then we've got two kinds of events in the data and here's the
+basic statistical model this is a weird looking beast uh even though it's fairly simple because
+this is the first model i've shown in this course where we've got this weird bifurcation and
+conditionality of which kind of distribution we assign an observation but what you really have
+to think about is that there's two kinds of observations in this data they're censored and
+uncensored so let me put some labels on this graph to make some more sense of it so the the two first
+lines in this statistical model are the observations and the top one are the observed adoptions that's
+a sub i indicates an adoption was observed and d sub i is the days until adoption and this just
+has an exponential distribution as i explained before these are uncensored cat adoptions somebody
+walked out with the cat and it was recorded as an adoption the next line are the not yet
+adoptions these are the cats in the data set who either died in the shelter and so they maybe they
+would have been adopted eventually but they didn't live long enough or are still waiting to be
+adopted and these are a sub i equals zeros and these use the ccdf the exponential the complementary
+cumulative distribution function as i explained on the previous slides and then um we just model
+lambda and lambda gets a different rate for each color of cat and that's what's the id here is the
+color id of of each cat and i do this weird trick where i define lambda is one over mu
+because what we really want to get out of this model is the expected waiting time and remember
+that that lambda is is um equal to one over the average waiting time that's the way rates work in
+exponential distributions and then i'll put a log link on mu so that parameter estimation goes smoothly
+because the means can't be negative and i'll estimate uh this log waiting time parameter
+i get a posterior distribution for this for black cats and all the other cats the less impressive
+cats um and then we can compare those posterior distributions this is what the code looked like
+i think the only thing um technical dimension here maybe is interesting is that i use this
+custom uh function uh in oolong which is just a way of inserting arbitrary uh stan code into
+an oolong model and lots of uh uh fancy and dangerous things can be done this way um but
+i use this technique here because i need to refer to the the lccdf that's the log uh complementary
+cumulative distribution function uh but otherwise it hopefully it makes sense it's not so different
+from uh categorical models we've used before and here are the posterior distributions uh for the
+expected waiting time you'll see that black cats indeed uh expect to wait longer um than other cats
+yeah uh sometimes weeks longer and so yes the prejudice exists in austin
+there's another way we can look at this if you look at it on the uh original kind of scale you
+think about it as the survival curves it's sometimes called we can sample from the
+posterior distribution and show um the declining curves of how many cats are still waiting to be
+adopted and you'll see that the um horizontal axis here is still adoption and the vertical axis is the
+fraction of cats um not yet adopted and that the curves for black cats that's a bunch of curves
+from the posterior distribution so the width indicates the uncertainty uh and there are
+fewer black cats than other cats in the sample that's why it's more uncertain but uh you'll see
+everywhere that the curves for the black cats decline slower than the curves for other cats
+okay all i really hope to do here was give you a quick um uh hopefully uh transparent introduction
+to survival analysis which is um needed all the time and the important thing is to understand
+how to deal with tensor variables uh and uh i'll see you in the next lecture

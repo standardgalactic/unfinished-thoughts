@@ -1,0 +1,796 @@
+Welcome to lecture 12 of statistical rethinking, 2023.
+In this lecture I'm going to reveal to you that I've been leaving some information on the table
+for all the lectures previous to this. Let me explain.
+So last lecture I ended with this point that there are a couple of important variables causing a
+lot of variation in the trolley moral judgment data. The stories themselves are 12 different ones
+and participants tend to have different reactions to the details of these stories.
+And there are 331 individuals who participated in the experiment and they each contributed
+only 30 responses and they have very different response tendencies that are unexplained by
+other things we know about them. We could include these variables in the model using the
+categorical index variable trick I showed you very early on in the course. I think it was
+in the second week and that would work. But we could do better and in fact
+basically every example of categorical variables up to this point in the book we could have done better.
+And this is an interesting example of a basic feature of scientific modeling is that for any
+given estimate there may be multiple estimators we could use. They would all work in principle,
+but some are better than others. So let me show you what I mean by a better estimator.
+So here is the stories and the participants from the data and what I want you to appreciate about
+this is the variation in each. So for the stories what I'm showing you are the ranges of responses
+and the averages for each and you'll see that stories vary a lot in the kinds of responses
+they receive. Remember the y-axis on these plots is the judgment of how appropriate the action in
+the story is. And on the right these are just the first 50 participants. There are 331 remember
+in the whole study just the first 50 showing the same basic idea the ranges of their responses and
+then the estimated average in the red circle. People vary a lot in which numbers they use
+in these ranges. There's some people who judge everything one for example. So other people
+who judge everything is four. We could include these index variables just as I mentioned before
+you know how to do this. So for example for the story for each story you just need to give
+it an index from one to 12 or only 12 stories and then you can make a vector of coefficients
+and the example on the screen we just call them beta and then you use the story index
+for each response i to pull out the appropriate coefficient and then this would adjust the average
+response so that some stories are on average more appropriate to people and others less.
+This will work. The information that's being left on the table however is that
+this model forgets everything it knows about how people respond as it moves from one story to the
+next. Let me explain what I mean by that. There's this kind of amnesia called anterograde amnesia
+where people can't form new long-term memories. They learn fine in the short term they can have
+conversations but as soon as they leave the room and come back in they will have forgotten
+the conversation they just had and the coefficients beta in the model on the screen here are like
+this. They come to one story they learn about it they get an estimate for it they move to the next
+it's a brand new beta and they have not they have not updated their expectations at all about
+how appropriate the story should be or not. Now maybe you think that's okay and this is the way
+you want your model to learn but actually it's very inefficient because while the stories are
+different they're also alike and the model starts out with some naive prior about the differences
+between the stories and when it learns about one story it should be updating that prior and that'll
+help it learn about the others faster. I'm going to give you an extended example of this because
+I appreciate it's a little strange so just hang on. We're going to make new kinds of models that
+do not exhibit anterograde amnesia and these models are often called multi-level models
+and they are because they are models within models. So the first thing we do in these models is we
+model the observations that are measured at group or individual levels like the responses
+in the Charlie problem data and at the same time we have a model of the population of those groups
+in it or individuals as well that is their average and their dispersion and that submodel the
+population model creates a kind of memory because it allows us to transfer information from one group
+to another within the model optimally according to the rules of probability theory and all the
+models that don't have this that don't have this population submodel they can learn they can learn
+fine and they'll often end up with similar estimates but they learn slower and they leave
+information on the table and they exhibit more overfitting that's what we're going to talk about
+going forward. So two perspectives on why we want to use multi-level models the first is this thing
+about memory models that do not have anterograde amnesia learn faster because they get to transfer
+what they learn from one context to the other within the data the context's being the subgroups in the
+data and second as a consequence of this they resist overfitting better and both of these are
+valuable things how quick they learn and the reduction of overfitting. So let's talk about
+the memory issue for a second I'm going to have an extended example here where I show you updated
+posterior distributions and we're going to use a maybe a relatable idea it seems like every
+place I go in Europe there are Starbucks coffees now in some countries that's an improvement
+in other countries it's not but regardless they're everywhere and the thing about Starbucks is
+basically the same everywhere well mostly there are some differences but say we had this research
+project where we wanted to learn how long people going to a Starbucks needed to wait for their coffee
+order and we wanted to design a golem a robot to do this for us little coffee robot and was going
+to learn optimally how should we program it to work well obviously it's going to be Bayesian
+because anything else would be silly and the other thing is you want it to
+uh as it explores the different Starbucks in say Berlin when it comes to a new Starbucks it
+shouldn't forget everything it knew about the previous ones it's been to it should have expectations
+about how long the waits will be and then update those with the new data so let me walk you through
+this and in a actual Bayesian updating I'm going to show you some posterior distributions and show
+you how this works and I'll show you how to build models like this to make these graphs later on in
+the lecture but for now just just focus on the narrative and the concepts okay when I'm showing
+you on the slide here the idea that the basic components of a multi-level model we've got in
+blue there a probability distribution for the waiting times in the population of cafes say pick
+your favorite European capital and think of it as that and that is that most of the time it's less
+than five minutes but there's this long tail of possibilities for average waiting times
+and then I'm showing you the posterior distribution for one cafe we're just the first one we'll just
+call it cafe alpha and cafe alpha is is this is a prior we haven't visited it yet but we expect it
+to be pretty fast you can think of cafe alpha as being a draw from that population distribution
+of average waiting times now our robot visits cafe alpha and it gets its coffee in about two
+minutes that's that vertical black line in the plot with the red distribution there and it uses
+that to update and so you'll see that the gray curves are the previous posterior distributions
+they're now prior distributions and now the red posterior distribution has updated to expect
+slightly longer times than it did before on average but it's still quite vague right the robot
+hasn't had had much data it's just one data point and this is a nice time to remind you that for
+basing and updating the minimum sample size is one right there is no magic sample size
+this is logical and and precise for any sample size yeah notice that the blue curve is also
+updated because we learned something about the population and so what we had before it was a
+prior and now we have this idea that waiting times are closer to around five but below it
+but it's still quite vague and you're going to see this is going to get updated more and more
+as we visit more cafes okay so here's another one here's our second cafe cafe beta we have not
+visited it yet but our robot's about to go there and what I want you to see is that the prior for
+cafe beta looks like cafe alpha now this is the memory part of it it can use what it's learned
+about other cafes to have better priors and this will help it learn faster the correct waiting
+time to a greater level of precision as it visits new cafes so now say it goes to cafe beta and it
+ends up waiting 17 minutes because cafe beta is in a very busy place with lots of tourists
+and so the posterior distribution for that cafe is stretched to the right and notice that the other
+two have also updated so the posterior distribution for cafe alpha has also moved which is necessary
+and logical because the order that you visit these cafes cannot logically matter to what you believe
+about them if you're a Bayesian robot I'll say that again the order you visit cannot matter you've
+got to get the same posterior distributions whether you visit cafe beta first or cafe alpha first
+and so necessarily the posterior distribution or cafe alpha also updates and it does because the
+population model has also updated on the far left
+we can visit cafe alpha again and we'll get more updating we get basically the same waiting time
+this time it's like three minutes the robot's going increasingly confident that cafe alpha is pretty
+fast three more visits a third visit to cafe alpha right around at four minutes and you'll see that
+the posterior distribution there is growing taller and narrower now let's add we can add
+more and more cafes down at the bottom and then each of those before the robot has visited gamma
+delta or omega it's just a prior it just looks like the population cafe right just like you're
+drawing an expectation from the population of cafes but that's good because then when it arrives
+that these new cafes has got a more informed prior it's used the data from the other cafes to do it
+but it also thinks that cafes vary right because you'll see that the population distribution of
+cafes in the upper left the blue curve is not concentrated on a single value what the robot
+here is learning is not that all cafes are alike it's learning how different they are
+so we can our robot visits each of these and gets a particular update and every time it does it
+updates mostly for that one but it also updates the others a little bit and as time goes on
+the population model converges around a particular area using data from all of the different cafes
+and the blue posterior distribution in the upper left of the population the population model
+is learning how much variation to expect as well
+and so I'm going to end this narrative here we could go on forever as you know visiting cafes
+but final visit to cafe beta is only the second visit and you'll see cafe beta again is in a
+busy place and gives a long waiting time like 13 minutes and it starts to converge there you'll
+see that there's a big departure from the prior because cafe beta seems to be really different
+than the others yeah it's an extreme sort of cafe sampled from the tail of that distribution in the
+upper left this is the way multi-level models work and the benefit of this is it uses all the
+information by pooling information from the different subunits it doesn't assume all the
+subunits are the same Starbucks coffees are all very similar but they're not all identical
+and so we can do that with all kinds of learning problems is not forgetting about
+all of the units we visited so far when we visit the others and pooling information across them
+and what happens automatically from this is regularization you remember regularization
+from the lecture on overfitting a few weeks ago overfitting is this phenomenon where models
+essentially learn too much from the sample they learn irregular features which do not
+generalize future data and what we're getting from these from a multi-level model is this
+compromise between overfitting and underfitting that we think of as regularization so the
+you want to think about this is that there's three kinds of what statisticians call pooling
+there's complete pooling where we just collapse all the clusters together and treat them as
+identical so this would be like saying all the cafes are the same or all the stories are the
+same and the trolley data and this tends to result in underfitting because the model's not
+complex enough for the variation in the sample in the generative process then there's the no pooling
+approach where we treat all the clusters the clusters here being cafes or different stories
+or different individuals as completely unrelated to one another this is the model with no memory
+and these are the sorts of models we've been using so far in this course no pooling models
+these tend to overfit and they can radically overfit because often for any individual cluster any
+any particular person uh or story you may not have them that much data uh and yet you've got
+an estimated parameter from the data you have the last option the best one in almost all
+circumstances is partial pooling and this is the the model that i demonstrated in the previous
+slides and this is an adaptive compromise that achieves regularization yeah and this is an
+interesting idea to think about getting this adaptive compromise this benefits of navigating
+between overfitting underfitting sort of automatically just from programming the model
+to pool information across units to learn about the population as it goes because the population
+exists so in essence you just tell the model that all these things are different but they come from
+the population that has a mean and some variance and it automatically does this regularization for
+you i have the the rabbit duck famous rabbit duck drawing on here because these two perspectives
+and thinking about multi-level models are really equivalent and they arise from the same structural
+features of the model but they give you really different sensations of watching them just as you
+can you know pivot in your mind's eye between the the duck and the rabbit on the right you can pivot
+in your mind's eye when thinking about multi-level models between they're being efficient at
+learning and having memory and the goal of regularizing but it's really the same thing it's the same drawing
+okay i want to give you an extended data analysis example
+that's simpler than the trolley problem example to develop this in so we don't have to worry about
+awkward outcome variables like order categories and this is a data set that's in the rethinking
+package called retrogs and it's from a set of experiments trying to understand tadpoles the
+tadpoles of retrogs there are 48 groups which i'm going to call tanks i think they were aquariums
+and these are experimental groups who they put in different numbers of tadpoles and vary the
+density and size of the tadpoles and the presence or absence of predators like dragonflies i think
+and what we're going to measure is survival and these experiments give you the citation at the
+bottom of the slide varnish and boker these experiments where we're trying to understand
+anti predator responses and the kinds of trade-offs that are involved in these things
+we're going to dag this this is an experiment so that makes it easier and there are survival
+there in the middle s is a zero one variable it's at the tadpole level yeah this is a tadpole
+survivor not or you can think of it as the number of tadpoles that survived and then we have the
+various treatments along the bottom here density d the size g a large or small density is the number
+of tadpoles and then the presence or absence of predators and then there's this tank variable
+which is just the identity of the tank but it's there because there are multiple tadpoles per
+tank and there are certainly unmeasured things about each tank that may influence average survival
+within it there's variation that is unrelated to the treatment and this is one of those competing
+cause problems just like the stories and individuals in the trolley problem data this occurs in most
+sorts of data analysis situations when you have units within which there are repeated observations
+and we want to learn about the tendencies of those units and we want to use the data most
+efficiently and so we will often prefer multi-level models for estimating those tank level
+unobserved forces so let's do that think about the data this way so arrayed along the horizontal
+axis of this plot we just have the tanks and there are 48 of them and they start on number one on
+the left and go away to number 48 on the right and they're in three groups the low density tanks
+which are smaller have fewer tadpoles the mid-density tanks and the high density tanks
+and then on the vertical I've plotted the proportion survival and this will be between zero and one
+and the black dots are just empirical this is the proportion of the tadpoles that survived
+and you'll see that there's a lot of variation and that horizontal dash by client is the average
+survival across all tanks yeah but you see how much variation there is there's just very few
+tanks that are near that average so let's make a model a multi-level model so the first parts
+of this model will be familiar to you this is just a binomial outcome variable let's think of s as
+the number that survived out of the out of the total that were put in which is the density d
+so this is a binomial outcome variable which is distributed s sub i is distributed binomially
+with number of trials d sub i and then the probability of survival is p sub i and we put a
+logic link on that as we've done in previous lectures and we set that equal to some vector
+of parameters alpha or rather not the whole vector but one component of that vector that is
+pulled out that is appropriate for the tank ti but there'll be 48 of these right so we 48 alpha
+parameters and then the question is what prior do we assign to it and to make this a multi-level
+model the trick we do is we ask ourselves how much do the tanks vary and so in previous lectures
+what we've done when we've put priors on this is you could say that there's some some mean tank
+alpha bar in there and often we would have set that to zero already but the first thing we're
+going to do is actually make a parameter for the average tank alpha bar we're going to give that
+for normals zero 1.5 prior at the bottom and then what do we do for the standard deviations do we
+also set that to 1.5 no because we want to learn it we want to learn how variable the tanks are
+just as we want to learn the average tank alpha bar we'd like to learn the standard deviation
+among tanks as well in the log odds of survival so think about it this way we're going to we're
+going to put a symbol sigma there we don't know sigma we're going to give it a prior and we're
+going to treat it like any other kind of parameter and now we have this weird thing on the screen alpha
+j is distributed as a normal variable with mean alpha bar and sigma this looks like the way we've
+treated outcomes before in a linear regression it looks like the top line of a linear regression
+as your measurements have some mean and some standard deviation sigma and we learn them from
+the data we're doing exactly the same thing here but we're doing it with another parameter
+right we have a bunch of parameters alpha and they're distributed according to this normal model
+that looks like a normal linear regression yeah and but this works just fine right parameters are
+just unobserved variables in base and we can do all the same things with them that we can do with
+observed variables yeah or maybe you would say a data is just an observed parameter okay so let me
+explain the rest of this slide now so at the top part of this I repeated the tank data displays
+before remember the black dots are the empirical averages we just take the number of tadpoles
+that survived and we divide by the number that there were to start that gives you the black dots up
+top and what I've added are all these little red dots and pink bars and these are going to be our
+estimates of the of the alphas and we're going to start with thinking about
+sigma at different fixed values we're not going to estimate it yet we're going to walk our way
+there slowly so I'm going to start sigma at point one very narrow and when you do that and you
+run the Bayesian model you get the posterior distributions in red and pink that I've showed
+you there that is you we made the prior really tight for the alphas so we basically told the
+model that the tanks are all really similar and we're sure of it and so you'll notice what it does
+is it ends up collapsing all those estimates towards the mean yeah where the the red dash
+line you can barely see it is alpha bar and and and what I'm showing you on the bottom
+is this prior yeah is it's very tight yeah there's a it's centered on alpha bar which is the average
+is somewhere around point seven five or the log odds a little under one but it's very narrow
+and that's what creates this collapsing but we can vary that and let sigma increase all the way up to
+five and then they spread apart and then we have this prior that you see at the bottom now what I've
+done here is I've done a really quick sweep from point one all the way to five but we can focus
+on five and then we'll all animate it again so you can you can appreciate the motion but imagine
+instead we said sigma equals five a fixed value in the prior so we're sure our priority that the
+tanks vary a lot this allows the model to learn all the differences in the tanks and now you see
+that the posterior distributions for each of the individual alphas that's what's shown at the top
+of the slide are laying on top of the black points yeah because that's where they end up going because
+the prior doesn't create any constraints it doesn't create any regularization at least not much here
+it just lets the posterior distributions for alpha follow whatever happened in each tank
+as if the model had amnesia because the sigma equals five tells it you're not going to the
+the tanks are all really different so there's no point in in transferring information among them
+then at the bottom I'm showing you the post the population model here that's learned right that's
+us that's the normal distribution with mean alpha bar which is where the red dash line is up top
+and the standard deviation five right it's a very wide distribution and the vertical red bars are
+the individual tanks that are represented up top as well so the what you'll want you to get from
+this is that if we were to just put sigma in as a number whether it's point one or five we're
+choosing a width of this prior distribution for the population and the consequence of that
+is it allows the individual estimates to be more or less different from one another okay and this
+results in more and less overfitting just have you seen before and there will be an optimal sigma
+for learning and we know how to learn that because I taught you how to do cross validation
+so we could find the optimal sigma through cross validation yeah
+those are the alpha tanks yeah so I was going to animate this again for you to show you as we
+sweep from point one to five and then back again how the individual alpha estimates up top spread
+to find the data and then shrink back down towards the mean again because they can't move because the
+prior is so tight and our job is to optimize sigma so that we get the optimal estimates
+and what is that value and it's going to be somewhere between point one and five
+because point one is radically under fit it's the total pooling response it says that all the
+tanks are the same and we that's not right and five is overfit because it basically does it
+doesn't do any pooling between the tanks yeah it lets whatever empirically happened in each tank
+completely determine the posterior distribution for that tank so somewhere in between we could
+do better than that but where is it well as I said we're going to find it through cross validation
+we can just take all the values of sigma between point one and five and do the fitting and loop
+over it over and over again and plot the important sampling score the cross validation score for
+each model with a different sigma plugged into it so let's do that I'm going to start at point one
+there and so the model that has point one on the bottom graph has a psis score this is the
+Pareto smooths important sampling score getting up towards 600 there I was like 560 or something
+and remember bigger numbers are bad in cross validation because they're they're deviances
+and then we can do all the other values on this graph rather the computer can we can just set it
+up in a loop to take each value of sigma and fit a model so this is what I've done here and you can
+see that it starts to improve right away as we loosen up the prior but then eventually right
+around 1.2 we get the best fit and then it very slightly starts to crawl back up again
+as it goes out towards five and so the in this example through cross validation the optimal
+prior has a has a sigma around 1.2 yeah or 1.5 right around there
+but there's a range in that area where they're all basically the same yeah
+so right about here in this case for yeah 1.8 about in this example is the optimum
+but by the time you get to 1.2 you're basically in the same place
+so this is one of these features I've often been telling people is that often the best prior is
+often narrower than you think it is yeah and this illustrates this thing that often that
+disturbs some people were choosing a prior by fitting the model to data but what I want you
+to notice is we didn't choose this prior by the fit of the model we choose it by its cross
+validation score yeah this is the idea is that we've we want a prior so that the model trains
+well and doesn't overfit we're not evaluating the model on how well it fits the sample yeah
+we're evaluating on the model how well it fits the out of sample I'll say that again we have not
+chosen a prior and evaluated the model on the basis of how it fits the sample but on how well
+it fits the out of sample and that's perfectly legitimate this is done all the time in machine
+learning it's a very common thing for hyper parameter optimization like this okay yeah so if you zoom
+in here we set sigma to 1.79 and look at the estimate so I want you to see as since we're
+zoomed in is now the posterior distribution so the red portion that's the posterior mean and I
+think the 89 percent interval and then the pink part is like the 95 percent interval and I want
+you to see is that in many cases the center of the posterior distribution is not on the empirical
+data is not on the black dot instead and when it's not it's deviates in a particular direction
+which is towards the global mean towards the average of the population of tanks and this is
+the result of regularization of partial pooling it's a phenomenon that's known as shrinkage because
+the the means of the posterior distributions for each of these alpha parameters has been shrunk
+towards the global mean now in many cases we don't want to do this through cross validation
+although it's perfectly fine to do so wouldn't it be nice if we could find sigma some other way
+and we can and I've already told you we're going to do this we're just going to make it a parameter
+and stick it in the model and learn it directly from the data without any cross validation at all
+but I'm going to show you that after the break I know conceptually this has been a bit of a
+sprint I encourage you to review the first half of this lecture before you continue you can you
+can play it back on double speed if you like and then take a break and take care of yourself
+and when you come back I will still be here
+welcome back now I want to show you as I promised before the break
+how to learn the optimal sigma well the posterior distribution for it from the data directly without
+the cross validation exercise so just to remind you here's our tank model the empirical data
+represented in the upper left of this slide the simple experimental dag on the bottom left
+and the model we're going to use and this is like baby's first multi-level model is shown on the
+right this is a binomial outcome variable and we're using a logic link as before we've got a
+vector of alphas and the prediction for each tadpole comes from taking the alpha that's specific
+to that tadpole's tank ti and the prior we apply to every element of that alpha vector for each alpha
+sub j where j is some tank has two parameters inside of it it's a normal distribution with some mean
+alpha bar that we don't know yet and some standard deviation sigma that we don't know yet
+and this is the sigma from that we tuned during cross validation before the break
+and we give priors to these a good prior for alpha bar is our kind of default
+logit space prior right remember are you you don't want these priors and logit space to be too wide
+because that piles up all the probability mass on zero and one but 1.5 gives you something that
+looks approximately flat in the probability space and then for sigma i'm going to use this default
+exponential one not a particular choice for doing that but in the homework i'm going to encourage
+you to do a prior predictive simulation to explore what sort of average you would like this exponential
+distribution to have for sigma but for now let's just see what happens when we fit this model
+so here's the priors and what they mean i should have put this up so the sigma exponential
+with a rate of one looks like that yeah that means that the average is one and that's really the
+only information in such a prior in an exponential distribution is its average and that it's a positive
+real and then prior distribution for alpha bar shown up top there is just a plain old
+vanilla normal distribution with a standard deviation of 1.5 but notice that the prior
+distribution for alpha j uses both of these parameters and so it's averaged over them
+and it's uncertain and it isn't a normal distribution actually it's got thicker tails than that
+and that's what i show you at the bottom there for alpha j yeah it's like a it's a mixture of
+normal distributions with different means and different variances
+fit this data there's really no new technology involved we load the data set up our trim data
+list as usual i make a tank index variable there there's one tank on each row in this data frame
+and then we can use a new model to run it it's binomial and there's no surprises i think in
+in the notation i want you to notice i've i've turned on log like equals true here so that we
+can do some model comparison in a moment okay if you run this model you won't encounter any
+problems it's sampled very efficiently and if you look at the precy output it's terrifying
+but i just do this not because i want to encourage you to do this well you should look at these things
+to see the r hats and nf values but you're not going to interpret all of these things i just
+want to show you that you really do get you get 50 parameters in this model
+and 48 of them are these alpha values yeah one for each tank and then the mean alpha bar and sigma
+at the very bottom what i do want you to do is look at the values for alpha bar and sigma because
+these tell you the the posterior distribution of the population remember these are posterior
+distributions they're not just the mean there's no point estimates in bay is ever
+but you can so you the minimum is to look at the mean and the standard deviation
+but you can look at the range and see what's going on here the high what matters is the high
+density region of each of these things and for for a bar it's it's right around 1.35 and for sigma
+it's around 1.6 but it ranges from 1.3 to 2
+and so let's put that posterior distribution of sigma over what we got before from the cross
+validation exercise and you'll see that it's the high density region of that posterior distribution
+for sigma is right over the range of sigmas that give us good cross validation scores
+and this is the thing about multi-level models they essentially regularize for free
+they learn the population variation from the sample they learn the prior from the sample
+as they're as they're learning about the sample and this has lots of great features
+learned sufficiently so you need less data to get good estimates and achieve regularization
+let's do a quick comparison so i can draw out another point here that i think is important
+especially when you're starting out in this business um let's fit a model that uh isn't
+multi-level yeah the no memory model so on the top of this slide i'm just showing you the multi-level
+model for the tadpole data again there's no changes there it's the model we just fit and
+visualized and then on the bottom half of the slide we modify this so that sigma is fixed at 1
+you can see there in the in the prior for the tanks it's a normal distribution with me a bar
+let's enter deviation one now so we removed a parameter yeah so the model up top has 50 parameters
+and the model at the bottom has 49 and we can fit both these models and we can compare them
+using waic or important sampling they'll get you'll get the same answer and here's what you get
+the multi-level model um is does better in in cross validation that's not going to surprise you
+that's that was the whole point of tuning sigma um but what might surprise you is that the estimated
+number of parameters or the penalty is actually uh substantially smaller uh for the multi-level
+model even though it has fewer parameters i'll say that again the effective number of parameters
+the pwaic for the multi-level model is actually smaller than than the model that has
+one fewer parameter and the reason is because in these sorts of models it's not the parameter count
+to determine how the model behaves it's how the parameters are related to one another
+and when parameters are hierarchically embedded in one another and that's that's why these models
+are sometimes called hierarchical models or multi-level models you have priors that have
+parameters in them and so priors depend upon priors when that's true uh your intuition is
+essentially useless about how these models are going to behave and you just got to let go of
+thinking that they should be intuitive over time you'll get used to their behavior and you'll come
+to explain it as if it were intuitive but don't fool yourself the way these machines work is not
+intuitive uh to hardly anybody at all but what you should expect is normal in this case since
+the multi-level model learns a better range of values for sigma it does less overfitting
+that means it's actually uh less has less overfitting risk than the model was a fixed sigma
+which is weird right now maybe in some intro uh statistics course you were taught every time
+you add a parameter the model will overfit more but that's just not true anymore for models for
+multi-level models it's not true at all you can actually add parameters sometimes hundreds or
+thousands of them and get less overfitting that's why we add them that's the whole point of of doing
+partial pooling right so what matters is structure okay let's look at what happened in the estimates
+that we got now because you can see this pattern that the um regularization that results depends
+upon how much evidence there is in each tank so on the far left here again in this graph what
+i'm showing you the the dark point that's the empirical outcomes from each tank how what proportion
+survived in each tank and then the um pink bars i think that's the 95 percent percentile intervals
+for the posterior distribution for each alpha and the red circles are the posterior means
+and uh you'll see on the far left there's there uh the bars are quite long or tall i guess in this
+case and um the the red circles are further away uh uh often sometimes substantially far away from
+the black dots yeah but they're all shrunk towards the mean it's like they're they're trying to get
+close to one another right um and then in the middle uh it's a similar phenomenon but uh red
+circles are closer now to the to the black points they're still like exactly on them but they're
+closer and that's because the tanks in the middle or the medium sized tanks they had more tadpoles
+and so there's more evidence about what exactly happened in that tank yeah uh and then on the
+far right these are the largest tanks for the most tadpoles and we see uh an even smaller
+discrepancy between what happened empirically the empirical average in each tank um and uh
+and the Bayesian estimate the the regularized estimates but also notice that the tanks that are
+most different from the mean the ones that are furthest towards the bottom um in those tanks
+the center of the posterior distribution is furthest uh is further from the empirical average
+all right and this is because those are extreme events that are really far out in the tail of
+the distribution so the model is more skeptical that that is the long run behavior of that tank
+it thinks it's a fluke uh because it's out in the tail
+there's a lot of this is an experiment and a lot of the variation among tanks here is a rising
+from the experimental treatments which we have not added yet right but that's that's fine we
+we weren't trying to estimate that we were just trying to estimate um if we were going to have
+more tadpoles in exactly these tanks which were not uh what should we predict um but one of the
+uh experimental treatment is the presence or absence of predators and I've added some coloring
+here to show you that the the blue are tanks where predators are absent and the red are tanks
+where predators are present and unsurprisingly there's less survival when predators are present
+and then some of the variation among tanks some of that sigma uh that was learned
+for the width of the population of tanks is due to this experimental treatment
+so when you start working with multi-level models and you put in treatment variables
+that you want to measure things from what's going to happen is that that standard deviation
+among the unit is going to shrink so I wanted to show you an example of that
+so now we take that same model and we stratify the log odds by whether predators are absent
+or not and I just create a variable p sub i which is the presence or absence of predators
+and give it a coefficient beta sub p with this normal 0.5 prior remember this is on the log odds
+and we can run the same model and uh here's what it looks like in code form there's nothing
+really new here yeah it's basically copy and paste the previous thing and add a couple of one line
+and here's the posterior distribution for beta sub p predators have a negative effect on survival
+you're not surprised right this was not the point of the experiment by the way they knew that
+tadpoles would would die um let me show you what happens though in this sort of model the predictions
+of the model are essentially the same between this model and the previous one that is the model
+that ignores predators the first one we did um and the model that has predators in it
+they make very similar predictions and that's because the um the the alphas for each tank can
+learn the behavior of each tank without it needing to be explained at all so on the
+graph you see on the screen each point is a tank and the blue tanks are the ones that had um
+no predators and the red tanks are ones that had predators and the horizontal axis is the
+posterior mean probability of survival um in the model that ignored predators just the original
+multi-level model and the vertical axis is the posterior mean probability of survival in the
+model that we just did on the previous slide the model with predators in it and the horizontal line
+I mean the diagonal line shows where they would agree and you'll see they almost entirely agree
+these models make extremely similar predictions because the multi-level model can learn the
+different behavior in the tanks without needing it to explain it with treatment at all that's
+what you asked it to do and it did okay but the what the models learned about the variation
+among tanks is quite different so the variation is not quite halved here yeah almost by adding
+predators which is to say that the predator variable has explained away about half of the
+variation on the law god scale among the tanks yeah so you get very different sigma values
+where the the red posterior distribution on the right is the posterior distribution of sigma
+when the predator variable is added and the blue when it's not so the models make very similar
+predictions but you need to interpret the sigma parameter depending upon what else is in the
+model because it's not it's not the variation among the units among the tanks it's the variation
+among the parameters net all the other effects in the model yeah you get used to this after a while
+excuse me okay let me try to summarize a bit so this is the multi-level tadpoles example and
+this is also done in the book a lot and there's a simulation and i encourage you to deal with
+to work with that and spend some time on this example make sure you understand the basic concepts
+because as we move forward we're going to add extra stuff yeah but the types of models are
+workhorse models in all branches of science now because multi-level models use the data more
+efficiently and and they reduce overfitting at the same time these alpha parameters um are i call
+them i tend to call them varying effects they're effects that vary among units they're partially
+pooled estimates but different people call them different things and it can be quite confusing
+sometimes they'll be called random effects and what does that even mean for an effect to be random
+right and what you have to do is just get a definition of the model see the code see the
+math stats definition of the model to understand what's been done there's different disciplines
+even use the word random effect in different ways it doesn't even always mean the same thing
+and it's just unfortunately true so you just have to ask for the model definition in detail
+you might ask what happens if we add the other treatment variables uh examine their effects
+the effect of density and the effect of size density is already in the model but we could
+also put it in linear model because right now it's only in the model as the number of tadpoles
+but it could have effects above and beyond that because of crowding
+and and then the size of the tadpoles gee as well and you're going to work on that in the homework
+to model that out okay i want to round this lecture out by by dealing with a few things
+that i think of are basically superstitions about multi-level models or varying effects
+there's a lot of this kind of just bad wrong heuristics that people use about these models
+so when should we use partial pooling and my default answer is it should be your default
+there are good reasons not to use it but they're rare relative to the number of reasons to use it
+and so your default should be to use a multi-level structure and use partial pooling but you'll get
+the opposite advice from many people and so i want to push back against that because i think
+that opposite advice comes from a place of superstition one of the things we'll hear
+is that the units in order to justify using varying effects or partial pooling the different units
+that is different tanks or stories or individuals must be sampled at random from some population
+and this is just wrong it has nothing to do with that and think about the cafe example
+there's no sense in which these the Starbucks were randomly sampled it doesn't matter the whole
+justification for doing partial pooling is that you learn faster yeah it has nothing to do with
+any metaphysical beliefs you have about the nature of the units or how they got into your dataset
+it just doesn't matter yeah the second thing that people say is that the number of units
+must be large that you need lots of cafes or lots of individuals or lots of stories or
+lots of classrooms or whatever just your modeling and again this is just not true it's some
+arbitrary imposed metaphysical beliefs it has nothing to do with the updating benefits of
+using partial pooling at all again it could just be two cafes and you should already want to do it
+yeah and there's also no sample size constraint or anything like that it's the best way to learn
+at any sample size for any number of units third thing is people will say ah but these models
+assume that the variation among units is normally distributed and you probably at this point are
+getting to know me and so you know what i'm going to say this is just completely wrong it's a deep
+misunderstanding about what probability theory is so the distributions in statistical models are not
+claims about the frequency distributions of the objects in the real world they're priors
+they're prior expectations before we see the data yeah and so a Gaussian prior is not a claim that
+the data look normal yeah it's a prior expectation for the well only for the residuals even after
+net the other effects for the error variance but the posterior distribution doesn't have to be
+Gaussian Bayesian models with a with a Gaussian prior can learn non-Gaussian variation so i just
+showing you a cooked up example on the right here's a multi-level model i ran that had i think
+literally thousands of individual units in it clustered units and the real underlying data
+is only zeros and ones but but the prior was normally distributed and but look the the model
+the posterior distributions for each individual in in the model are always clustered around zero
+and one they're not on it exactly because the prior was Gaussian it so it allows them to vary but
+notice it makes two clusters it doesn't put all the individuals on the mean because the prior
+is just a prior and the individual posterior distributions for each of the clusters is free
+to move away from that prior and learn its own thing just as the posterior distributions for
+each cafe could deviate from the distribution for the population of cafes
+that said if you want to use a non-Gaussian prior in a multi-level model nothing's stopping you
+yeah you can do it and you can do partial pooling with other kinds of distributions as well
+you just need to make them functions of parameters and then learn those parameters
+while the model is fitting okay there are technological issues with using these models
+as they get more complicated this is one of the reasons we're using Markov chain Monte Carlo
+is because it's the most practical way for scientists on the desktop to fit these models
+and then there are issues about learning how to use them to model your studies so the first thing
+is for example how do we use more than one cluster at the same time say like in the
+Charlie problem data we want to put both stories and participants in there the example I've shown
+you so far is just tanks can we add more and the answer is yes we can but there's some things you
+need to think about when you do that second is how to get the Markov chains to sample efficiently
+and now we're entering this fun territory I use fun ironically where for any given
+estimator there'll be different ways to code it and some of those ways are much better than others
+like the bad ones just won't run but mathematically they're the same model the same estimator but
+in the code there's just different choices we can make the change how the changes how the
+math works in the computer and it can make a big difference and then what about all the other
+kinds of parameters inside these models can't we use partial pooling on those two what about
+slopes and the answer is of course we can if you you can you can partially pool any batch of
+parameters that have the the same basic meaning across units and in future lectures I'll show
+you how to deal with all three of these things all right thanks for your attention the whole point
+of this lecture was to prepare you for next week where we're going to learn more about multi-level
+models and then we're going to start doing cool things with them like social networks and phylogenies
+and such so I hope to see you there
+oh okay I'm going to muster the energy to do a bonus this is the longest requested bonus content
+since I started teaching the course I think more than a decade ago and the topic the topic has had
+a deal with confounding and the estimation under partial pooling I'm going to need some background
+here understand what's going on so it's often plausible that there are unmeasured confounds
+at the group level that is some aspect of the group that is a confound because it influences
+the outcome variable of interest and the treatment of interest so if you look at the dag on the right
+of this slide you'll see that we're thinking about the tadpoles I'll explain this in some detail in a
+second g is our unobserved group feature or probably more than one feature and there are
+arrows going both to the outcome s and to the treatment x so it's a confound it creates a
+backdoor path and we we know that we want to close backdoor paths but we haven't measured g
+well there's some tricks up our sleeves when we have repeat observations this literature is very
+confusing which is why I'm often asked to talk about it because every field and even every subfield
+uses different terminologies and seems to have a different modeling preference so it's incredibly
+confusing things are often sometimes called group level confounding the word indigeneity is
+thrown around as if that the resolve these ambiguity correlated errors people talk about
+and then there's a field called econometrics where all of their terminology is different
+the basic issue is the group level variables can have direct and indirect influences and we need
+to think about that when we when we draw our generative models so let's build this up one
+step at a time and then I'll show you some of the models that are used in this area and explain
+the options and the sorts of problems that each addresses so again think about the tadpoles
+keep things simple we've got unobserved features of the tank that will affect survival and that's
+something that we need to be worried about to estimate other parts of the experiment
+treatment of interest that's coming there are also measured features of the group or tank
+if you're i'm going to call them z these are things that are features of the tank so every
+tadpole in the tank experiences the same z now this is what you call this a group level variable or
+group trait and then there's the thing of interest which varies at the individual level these are
+things we might measure about each individual tadpole and we're interested in the causal effects of
+those individual level traits on survival and then the problem can arise that it's it's often very
+plausible that unmeasured features of the cluster of the group of the tank in this case that can
+influence survival directly may also influence it indirectly mediated through the traits of
+individuals yeah let me give you wait so here's the idea our estimate is the distribution of survival
+intervening on x and the problem is there's a backdoor path through g so what can we do about
+that you want to think about some examples maybe tadpoles aren't your favorite thing and you can't
+think about how this would work but you know it could be that there's some feature of the tank
+like temperature that affects individual growth and also immediately survival and so it has two
+routes towards affecting survival both through long-term effects on individuals and immediate
+effects on individuals at the time of death often this literature talks about classrooms
+because these sorts of models are used a lot in measuring student progress and doing teacher
+evaluations and so you can think about the clusters now as being classrooms and classrooms have
+lots of things about them that make them different from one another and many of them are unmeasured
+or even unimagined and we're interested in the effect of student preparation which is kind of
+subscript ii because it applies to each individual student and test course f sub i which again is a
+feature of the individual student and then there are measured things about the classrooms like
+temperature z at the bottom what could be unmeasured by classroom it could be noisy classrooms that
+directly reduce test scores because it's hard to take the test in the noisy classroom but noisy
+classrooms could also reduce student preparation and so there could be a direct and indirect effect
+political scientists are interested in time varying versions of this problem where the
+the individuals are individual time points and they're clustered by country or nation and so for
+example people might ask how which party is ruling a country at any point in time t how that
+influences the economy at t or sometime after t and there are things we measured about the
+resources or infrastructure of these of these countries that we think might influence the
+economy as well be a competing cause but there are lots of unmeasured things possibly that we
+haven't even imagined and those things might influence both who is who becomes a ruling party
+and the economy directly for example when the economy takes a certain state through these
+influences those influences might simultaneously result in certain styles of politics becoming popular
+okay so what do we do we've got our estimate we want to influence we want to measure the
+influence of x on y we know there's a confound g we are we believe there's a confound g it's often
+a good assumption and so what we can what can we do and this is one of those cases where
+there are multiple estimators and they all have trade-offs and i want to walk you through the
+issues involved the first one is the so-called fixed effects model this is very popular in
+well lots of fields actually and it's it's a reasonable choice i'm not going to tell you
+not to use it but it's got some drawbacks and i want to explain those to you i also want to
+explain to you why it can work um the second is a multi-level model and i'm going to show you
+what the sort of naive multi-level model which is not doesn't take the confounds into account what it
+does um how it behaves in this circumstance and then we're going to fix the naive multi-level
+model well fix it it wasn't broken in the first place the naive multi-level model just didn't
+account for the confounding so we're going to use a multi-level model that does and and i like to
+call these mundlek machines mundlek was a man he was an agricultural economist who was interested
+in these problems okay so to do this we want to simulate some data so we know the right answer
+so that's what i'm doing on this slide the code at the top i've got 30 groups um and you can think
+about these as tadpoles if you like uh where y will be survival and x will be some feature
+of the tadpole like its health uh and z is something else we measure about it or you can think about it
+as students in classrooms where y is test scores and x is how much they study and the unmeasured g
+things are unmeasured things about the classrooms uh and z is uh you know the teacher or something like
+that um and uh so i have we have 30 groups uh tanks or classrooms uh 200 tadpoles or students
+and i create some regression parameters there at the top uh the minus two is the
+overall rate of the outcomes is the binary outcome so it happens less than half the time
+across all the units and then i create an effect for z on y and i have it be slightly negative
+minus point five and then uh that lowercase g vector i just sample tadpoles in the tanks
+or students into groups at random this means that some groups have more tadpoles slash students
+than others and you can see the table of that on the bottom right so there there are some groups
+like uh group number one has 11 but group number two only has five students and then the u sub g's
+are our unobserved confounds the u for unobserved and the the g subscript that there's one for each
+group and i just sample those and they vary quite a bit across groups the standard deviation of one
+point five um then uh sample the x's uh these are individual level variables there's one for
+each individual uh tadpole slash student uh but their meaning is the unobserved confounds in each
+group i'll say that again we sample the individual x's there's 200 of them but the mean uh in each
+group is that unobserved use of g yeah and that's where the confounding comes in is that the individual
+level traits are caused partly by those that unobserved group confound one of her group variable
+um then simulate disease and then finally uh the master equation at the bottom there this is just
+a random Bernoulli variable where the probability of of each y sub i is the sum of all those things
+where there's some global intercept alpha zero which which again is i set to minus two so that the
+event usually doesn't happen um net the other effects and then x notice i just add x here which
+means it's coefficient is one and we're going to want to keep that in mind as we look through the
+following slides and then the confound and again i make it just as strong as x um just for the sake
+of the example so the confounding is is obvious you can make the confounding weak and then you
+could ignore the whole problem right so i want to give you a case where it's strong and then we add
+the z yeah and the z uh is uh it made its coefficient slightly negative minus 0.5 okay let's make some
+models first the fixed effects model and the fixed effect model um what you do is you do what we've
+been doing since the beginning of the course you have all these units uh groups and you're going
+to treat their index to the create a categorical index for the groups and you're going to make a
+big vector of of intercept parameters of alphas uh we've been doing this for a long time i didn't
+that those models are often called fixed effects models and the idea is you have repeat observations
+within each of those clusters and you estimate a unique alpha for each but you do it without pooling
+this is the no pooling so it's a fixed prior um and in non-basin approaches the prior has an
+infinite variance even right we're not going to do something that's silly but um it's a fixed prior
+and so you don't get any pooling uh so the alphas only are only learned from the data within each
+group um at the prior and uh these models can work i'm going to show you in a second that this can
+be confound and the reason is actually pretty weird um but they're inefficient because uh there's no
+pooling uh but uh but that inefficiency actually allows them to soak up the the confounding effect
+right and the reason is because um the intercepts essentially uh fit the the average confounding
+effect because there's one intercept for all of the individuals in the group and remember the
+confound was just added in the generative simulation i'll go back to the previous slide and show it to
+you so you look at the line that generates y you see that the the unobserved u g is just added in
+there and so when we estimate alpha we're estimating that value and that's that's why it works clever
+huh um the problem here well there's multiple problems uh the first problem uh is as i said
+it's inefficient uh we'd like some pooling on these alphas but uh we'll get to that in the in
+in a few slides the second problem excuse me my voice is is going here um the second problem is
+when we do this when we use fixed effects we can't include z i'll say that again when we use fixed
+effects we can't include z and that's because it becomes unidentifiable to separate the effective
+from the global intercept because they're both just added to every prediction within each group you
+look at the the model on the right for prediction of every case i there's alpha g i and there's um
+z g i times some coefficient and so the values of those two parameters alpha g and the alpha for
+each group and uh beta z times the z of each group there's just an infinite number in principle
+of combinations of parameter values that'll that'll fit and so only the prior ends up
+mattering uh in this case and i'll show you the consequences of that and so what you'll read in
+in like econometric textbooks is that you just can't include group level predictors the group
+level predictors are sometimes the whole research question yeah like teacher effects or something
+like that and um in that case you're sunk and the fixed effect strategy actually blocks you
+from being able to progress here's what it looks like a new long code i don't think there'll be
+any surprises here um because these are just a categorical model like we did in the second
+week of the course and then at the bottom of the slide i show you the posterior distribution
+samples from the posterior distributions um for the fixed model in the dark black line that's the
+model we're looking at the fixed effects model and the gray density is a model that i'm going to
+call the naive model and i haven't shown you code for that but that's just the model if you took the
+model the fixed effects model and you took the sub setting off of alpha so that there's the same alpha
+for every group that's naive model it's the model that ignores the group differences completely
+yeah and just uses x and z for each group as ordinary predictors and unsurprisingly that model
+is confounded so if you look at the lower left densities the vertical dash line is the true effect
+we know from the generative model now we don't expect any particular sample to exactly get that
+but we'd like the high density regions of the posterior distributions to cover the true value
+i'll say that again you should never expect any particular sample to exactly and precisely give
+you the true data generating value but it'd be nice if most to the time the posterior distributions
+the high density regions of the posterior distributions are over the true values yeah
+and we see that's true for the fixed effect model in the lower left but it's not for the naive model
+and that's just the expected effect of the confounding it's the effect is overestimated
+because it's getting like a double dose right it's getting it from the xi's and it's getting it from
+the ug's and the naive model ignores the group differences but the fixed effect model nets out
+that constant effect by putting it into the intercepts and then in the lower left we look
+at the coefficient estimates for z and this is the flip side naive model gets it right on the money
+it does a fantastic job estimating the group level of cause z but the fixed effect model is hopeless
+here right just knows nothing absolutely nothing and that's because that's what i told you this
+effect that it can't separate the intercepts from the coefficient on z and it's a completely
+undetermined sort of modeling problem this is well known by the way and fixed effect models just
+don't allow you to insert to include group level predictors okay multi-level model multi-level
+model's got a different problem and that is that it ignores the confound well it doesn't ignore it
+uh it it often does better than the naive model but it's still subject to more confounding
+because of the partial pooling right which is a good thing remember i keep telling you we like
+partial pooling and we do what we really do um but the partial pooling uh pulls the intercepts
+towards one another remember especially for groups that don't have a lot of individuals and a lot of
+tadpoles or students and as a consequence it compromises on identifying the confound
+um so that it can get better estimates of the average tendencies of the group and there's lots
+of things not just the confound that that vary by group and some of them are just pure direct
+effects so the the intercept is a mix of a lot of things in principle and so maybe we want a good
+estimate of it but the multi-level model is essentially designed ignoring the confound in a
+way and even though on average it does better than the naive model it won't do as well as the fixed
+effects model on average but it often does pretty well surprisingly you can try some simulations
+and and see but i'm going to show you a case where it does worse um because that's the expectation
+so you get better estimates uh uh uh for the groups uh the average tendencies of the groups the
+unmeasured features of groups and a worse estimate for x which is weird right um but you can include
+group level predictors uh which you know again may be the whole point of your research would be
+things that apply to the group so let me show you what the code looks like and show you how it does
+so again upper left here's the code there's a little bit of weird machinery in this
+model that i'm going to teach you next week and i apologize for for breaking up the timeline here
+but getting this model to run appropriately requires this technique called non-centered
+priors and that's all that's going on there but if you just ignore that transparse line you can
+read the model normally um and this is just a plain multi-level model there's an alpha for each
+group and we use partial pooling there's an alpha bar and uh i call it tau instead of sigma but it's
+just a scale parameter just like sigma uh this is the standard deviation across groups and we
+include x and z and we run this and you see at the bottom the updated posterior distributions
+in the lower left the effect of x on y and you can see it's a little better than the naive model
+by by distinguishing the groups um but it's not as good as the fixed effects model it's been
+only it's a compromise between the two just as partial pooling is a compromise between the fixed
+effects model and the naive model so in some sense this is obvious in hindsight in the lower right
+the multi-level model identifies z yeah and just like the naive model does there's been no change
+there okay so people have known about this uh uh kind of problem in this trade-off for a long time
+about the fixed effects models um being better at um removing group level confounding but
+multi-level models being better at estimation and therefore prediction so if you were purely
+interested in prediction there'd be no reason to use the fixed effects model right but if you're
+interested in inference on du x right the causal inference for the effect of x um or some other
+variable then you might want to use the fixed effects model and just not care about predictive
+accuracy at the group level um but you can have your cake and eat it too uh and uh i'm going to
+introduce you two more models and then i'm done here uh the first i call this the munlack machine
+and munlack was a man that said he's an agricultural economist um and this gives you the citation to
+the paper on the bottom this is a very difficult paper to read if you're not trained in in statistics
+i'm afraid but there's lots of other papers that cite it that explain it very well and so if i'm if
+you're interested in this literature i would do a citation search on munlack and and find another
+paper uh that explains his paper but that said i'm going to try to explain the key insight to you right
+here um so what the munlack machine does you look at the dag on the right of this slide
+is it notes that we have something else we have an average x within each group so you take up all
+the x i's that are in any particular group little g and you average them you've got this thing uh x
+barge the average and that's also a descendant of the unobserved confound and so it gives us
+information about it so if we condition on that descendant on x bar for each group and treat it
+like a group level variable that will partly de confound yeah look at inference of the influence
+of x of i on y sub i yeah because remember conditioning on a descendant is is like conditioning
+on the parents uh taught you this and i think it was week two or week three um it was week three uh
+but is not as effective yeah because uh x bar is not a copy of the unmeasured aspects in the
+circle with g there so this this worked uh it's got some inefficiencies but you get to have partial
+pooling so you get good group effects you get a more de confounded a better de confounded
+treatment effective x uh x sub i that is uh but there's a new in a new problem here is that
+this is not very efficient because this is not a proper way to respect the uncertainty in x bar
+we don't actually know x bar i mean you think you know x bar you just average the data but
+look at the uncertainty and it varies by groups some groups have a dozen individuals in them
+in the simulation i showed you and some have three uh we're ignoring the variation in the
+quality of the measurement of x bar cross groups when we include it like a known variable like this
+so we're going to fix that too but hang on all right so you get this big uh
+logic prediction equation at the bottom there and on the far right you'll see that i've had
+a new beta coefficient for x bar and we just include x bar as the data point and this is
+the mud-lack machine and it's genius actually it's genius um and there's a code for it uh up top
+i construct x bar just by uh looping over groups and using the mean function and you just drop it
+in his data uh and then we update the posterior distributions at the bottom and i've drawn mud
+lack in blue and you'll see mud-lack is in this particular example very de-confounded he's flowing
+over to the other side a little bit but there's a lot of probability density over the true value
+this is this is not a terrible job and uh and mud-lack still can model group level effects
+you'll see on the right it's it's piling up with all the others it's only the fixed effects model
+that sucks at estimating z okay one more and then i'm done let's fix the problem of improperly
+respecting the uncertainty in x bar uh this is an example of this full luxury base thing that
+i've shown you in multiple bonus rounds i think so far um this is my joking uh language is meant
+to be ironic but the idea is we take the generative model to dag and we express all of its relationships
+in a single markup chain that's the idea um you could call this the latent mud-lack machine
+because we don't include x bar as data but we estimate x bar using the observed x size
+yeah and then we get a posterior distribution for it and we can include that as a predictor
+so in principle what this means is we run two simultaneous regressions yeah so let me let me
+split up this dag and show you what i mean we're going to have a model for y and in the uh
+it says it at the top of the screen and says that the code in the upper left this is the Bernoulli
+outcome y and it is influenced by unmeasured um uh group things alpha for each group and also uh
+then the xi and then z and then on the end of this line i've added this uh u for each g this is the
+unobserved confound that we'd like to estimate and this is just a parameter yeah but don't panic
+we're going to estimate and then i have this transparse line again which i said uh don't
+look i'll explain that to you next week and then the x model um and the x model in the middle
+x is only influenced by the confound right that was the generative model that's the assumption
+and so this is an ordinary linear regression x is a metric variable um and it's just this
+just a linear regression with some intercept ax and then we modeled the um influence of this
+unobserved uh group level variable u for each g and those are defined as just a vector there right
+i see the vector of length ng which is the number of groups and i assigned each of those u values
+in normal zero one prior now since it's a latent variable you can assign it almost any prior you
+like yeah because it has no metric that you can measure and then there's a bunch of priors at the
+bottom and those are standard uh this seems weird i know but again it's perfectly legitimate models
+like this are used all the time this is basically a latent measurement error model the idea is
+we have some measurements the each of the x of i's which gives us information about the group
+mean for those x's but we haven't observed the group mean and so we're estimating it and that
+group mean is u for each group g yeah so really this is uh like a measurement error model
+yeah so oh i should have highlighted this already so you see yes there's uh the u for each g appears
+in both of the equations yeah and it's in both of the decks and we can estimate it and you'll see
+here now the latent mudlack machine i've drawn in green i appreciate that this is one of the
+ugliest figures from the course so far but don't worry i'll i'll i'll start to do something even
+worse future lectures but just focus on the green one for now and you'll see that's the mudlack machine
+high density region is over the truth effect for x and for z this is your best option by far
+if you've got the basing horsepower to do it all right let me summarize should you use fixed effects
+if i mean sure there are times when it's fine i mean if you're not if you don't if you're not
+interested in group level predictors and you're not interested in prediction um no problem yeah go ahead
+and do it should you include average x that is the mudlack machine often that works fine if you
+don't have the basing horsepower it'll work quite well it's better than ignoring the group level
+confounding for sure but these days you might as well do the latent model everybody's got the
+horsepower to do this and you know if you know how to do it and go ahead and do it i don't see any
+major obstacle anymore a decade ago i might have said something different because a lot of people
+didn't have convenient software to do these latent measurement error models but now it's really
+standard in lots of fields and i'd advise you just to do that but in any case there's other kinds of
+confounding but the individual level time varying confounding all kinds of stuff and you shouldn't
+assume that any of the things i showed you in this bonus round apply to all kinds of group
+level confounding what you need to do is draw your assumptions make a generative model develop a
+solution if one is possible that way for your bespoke purpose yeah okay thank you

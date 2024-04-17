@@ -1,0 +1,1293 @@
+Welcome to the fourth lecture of Cystical Rethinking 2023.
+We're going to continue on full steam ahead with the theme
+from the previous lecture where we started learning
+about linear regression as a way to estimate the associations we
+need to address the scientific estimates we have.
+Just to remind you a little bit, I
+introduced the geocentric model as a metaphor
+for linear regression in the sense
+that it is fantastically wrong in its structure.
+It doesn't represent the solar system at all,
+but it's fantastically successful and accurate
+in doing its job, which is to predict
+where Mars is in the night sky.
+This strategy of using epicycles to produce high-quality
+approximations of natural phenomena
+can be extended arbitrarily.
+So here's a nice video from 3Blue1Brown
+where this same strategy of using epicycles
+can be used to draw any kind of cyclical path, any kind
+of orbit, no matter how weird and wiggly.
+If you have enough little circles embedded
+on enough little circles, you can draw anything.
+And as such, linear models, linear regressions
+can be used to estimate lots of complicated processes,
+even if they're not linear.
+They're scaffolds, statistical scaffolds.
+And we use them to get at scientific estimates,
+but we need to design them with the scientific model,
+the background model in mind that is external
+to the linear regression.
+And this is because, just to say it again,
+the linear regression can approximate anything.
+And so we need to design it with that knowledge in mind
+that it will accommodate any kind of epicycle we ask it to.
+The new element in this lecture is that we will now,
+for a single generative model, have multiple estimates.
+And this will imply multiple estimators,
+which means multiple statistical models
+that are structurally different.
+And their structural differences are justified
+by the estimate in each case,
+reflected through the generative model.
+I'll show you how this goes.
+The second thing that will be new is quite often,
+the estimate we want is not something
+that's gonna show up in a summary table,
+and that's because it will depend upon multiple unknowns
+in the posterior distribution,
+or upon making some particular assumptions
+about the population as well.
+And so when we develop our estimates,
+in most cases, we need to do some post-processing
+of the posterior distribution.
+The new statistical tools in this lecture are categories,
+categorical variables, and curves.
+Linear models can handle both,
+even though neither of these things is linear.
+Categories are discrete.
+Categories can usually be show up in data tables
+as indicator or index variables.
+And there are lots of ways to draw curves with linear models,
+so I'm gonna talk about the splines.
+But there are many, many other kinds of other additive structures,
+which are fundamentally built up of little lines,
+like the scaffold on the right of the slide,
+but they can make nonlinear structures.
+And we really need tools like this
+because they give us the conditioning,
+the stratification that we need
+to get at the estimates we desire.
+Okay, categories.
+So there are lots of things in the natural world
+which are not continuous.
+They are discrete unordered types,
+like the C-shells on the right.
+Each of those types of shell is different.
+There's not a continuum in them,
+and none of them is more shell than the others.
+They're all shells.
+Individual people and nations are also examples of categories
+that may be more familiar to you.
+And we will want to stratify by categories in our data
+because we will need to get at the proper estimates we'd like.
+And in the context of a linear model,
+this usually means when we stratify by a category
+that we fit a separate regression line
+for each of the categories.
+So an example.
+Think again of the Howell, Nancy Howell's height and weight data
+that we worked with in the previous lecture.
+If you look at that data frame,
+you'll see that there's also a column for age
+and a column for sex.
+It's labeled male, and this is an indicator variable.
+It's one if that individual is male, zero if they're female.
+And I've re-plotted the height and weight data just for the results
+on the right of this slide, and I've colored each point by blue
+if the point is male and red if the point is female.
+And you'll see that there's differences.
+How would we develop a statistical model
+to estimate the influence of sex on a height and weight?
+Well, the first thing we need to do,
+you won't be surprised, is add it to the DAG.
+We add it to the DAG first to get some assumptions on paper,
+and then we're going to develop a generative model that also includes sex.
+So we want to address the question,
+how are height-length sex causally related,
+and we're going to focus on the causal influence of sex on height and weight.
+But simultaneously, we know that height influences weight.
+So we can't ignore height now when asking these questions.
+So how do we justify the expansion of the DAG and think about it?
+Let me emphasize this point again.
+I know I said it before, but it bears saying probably in every lecture,
+the causes aren't in the data.
+You can't just look at the scatter plot,
+even with the color distinction,
+and know which direction the arrows are supposed to go.
+So think about, even in the previous lecture,
+which direction should the arrow go that relates height to weight?
+And I say something about this in the book.
+You have to think about the kinds of interventions
+you're willing to consider to determine which direction the arrow goes.
+And so if you prefer, in all of the examples we're doing here,
+to think about height-influencing weight,
+because for most interventions you can think of on height,
+they will necessarily influence weight.
+But there are fewer interventions on weight that would modify height.
+People can exercise and lose weight, but they don't get shorter.
+But if people grow taller for some reason,
+they must get heavier because they're more person.
+And the geometry of the human body requires it.
+This isn't to say there are no interventions on weight
+that won't also influence height.
+It's just we're not considering those.
+And part of this is that we're confining ourselves to adults.
+Likewise, we're thinking about the causal influence of biological sex
+on height or weight, which directly to the arrow go.
+Because of human biology, it goes from sex to height.
+Right? Height doesn't influence sex, at least not in humans.
+In some fish it does, but not in humans.
+And so this gives us a directionality to the arrows
+and the same logic for weight.
+And so we'll consider arrows going from sex to height and sex to weight.
+But already this makes a graph which has lots more connections in it.
+So one of these little triangles,
+this is one of the most common structures in causal modeling.
+It's called a mediation graph.
+And what you want to think about this as a graph is saying
+is that it says that height influences weight,
+and this is what we had from the previous lecture.
+And that sex influences both height and weight at the same time.
+And therefore weight is influenced by both height and sex.
+But those influences, the influence of height is direct,
+but the influence of sex is both direct and indirect.
+There are two ways that sex causally influences weight,
+and there's this path over the top that passes through H,
+and that is a different kind of influence.
+It's still an influence, but it's a different kind of influence
+than the direct influence.
+So you know that one of the things we do when we translate these DAGs
+into generative models is you read them as implied functions.
+That height is a function of sex,
+and weight is a function of both height and sex.
+So you can see, just sort of read off once you translate it
+into this function notation, you can read off what's going on
+in terms of direct causes, but not indirect causes.
+Indirect causes don't show up in these function declarations.
+To make a generative model, though, we're going to write these functions.
+It might help you understand what I mean by indirect cause
+and causal animation.
+So here I've drawn the DAG again,
+and I'm going to set this in motion in a moment.
+I just want you to understand what's going to happen.
+Little particles of causation are going to move from sex
+to both height and weight, and then height will have
+its causal influence on W as well, but it'll be colored.
+Its little particles will be in a different color.
+They'll be in red for height.
+And what I want you to see is that when the particles arrive
+at the train station of body weight over there on the upper right,
+the sex effect will be transmitted in two kinds of bundles.
+And this is what happens in generative models as well,
+but this is just a heuristic cartoon way of saying it.
+So you'll see that the sex particle arrives at height
+and it packages the red particle, which moves on the weight.
+And so the causal effects that are influencing weight
+are both direct sex and indirectly through height,
+and sex and height cooperate in a way to influence weight.
+We could draw, as I did in the previous lecture,
+these unobserved other causes on each of the variables,
+and every DAG, these things are implied.
+You don't have to draw them every time,
+but maybe this will be the last time I draw them.
+But it's good to remember that they're there.
+When you write the generative function, typically these variables
+will be stochastic because we're imagining there are unmodeled
+and unobserved and often unmeasurable other influences
+which generate variation in each of the measured variables.
+These are the unobserved causes.
+Luckily, these unobserved causes are ignorable
+unless they're shared among the measured variables.
+I want to give you an example of that and what I mean.
+So not in humans, but humans have really boring biology,
+especially when it comes to sex determination.
+Most vertebrates are much more interesting, so fish and reptiles.
+There are lots of vertebrates that determine sex by temperature,
+by ambient temperature, when they're gestating in the egg.
+For example, turtles and lizards and alligators
+have temperature-based sex determination.
+For example, for turtles, when it's warmer, more females are hatched,
+and when it's cooler, more males are hatched,
+and the opposite for most types of lizards, interestingly.
+If we were going to try to draw a DAG that had temperature
+as an unmeasured influence on sex,
+well, temperature also influences other things,
+like body weight directly because it changes the ambient ecology
+and the availability of food and how much of a struggle
+it is to gestate and hatch and so on.
+So in this case, we've got it's an unmeasured temperature there.
+The red T on the left is an unmeasured common cause
+of both sex for turtles and their body weight,
+and now it's not safe to ignore temperature because it's a confound.
+We'll talk more about confounds and what to do with them in future lectures,
+but I just want to warn you now about this,
+that when you decide to ignore something,
+you're making strong assumptions that it's not about how many arrows
+it's inserting into your graph and where.
+So we'll proceed in humans at least temperature,
+as far as we know, does not influence first sex,
+and so we can ignore that.
+As far as we know, there's no common causes here that are unmodeled.
+There are almost certainly common causes of height and weight,
+like nutrition, that we're not modeling.
+Maybe we'll take that up in a future lecture.
+So we have our generative model, and we need to write it.
+Here's a very simple version,
+continuing on with the non-biological spirit of the previous lecture,
+just to keep things simple.
+This is not a course in human physiology.
+We have a function that simulates height and weight,
+and it takes as input a vector of sexes, sex data,
+where one indicates female and two indicates male.
+And then we need B, which is this is beta,
+our proportionality of height that is weight from the previous lecture,
+and a new variable, A, which is going to represent the direct effect of sex.
+And the way I've set this up, the simulation, you can read the code there.
+If S equals 1, indicating that the synthetic person is female,
+then on average, height is 150 centimeters.
+Otherwise, their male on average is 160,
+and then adds to that some Gaussian noise with R norm,
+with a standard deviation of 5, or a variance of 25 centimeters.
+And then weight is simulated.
+This is just like the previous lecture.
+If you go back and look at the code, it's the same approaches from height.
+There's a proportionality using B, but now there are going to be two values of B.
+That bracket S that's on B there on the line that starts with W on the left,
+that indicates that for each value of S, there's possibly a different B value.
+And so men and women can have different proportionalities of weight to height.
+And then the A thing that's added to it is just a constant change in average body weight
+that, again, can be different for each value of S.
+And then all the data returns in a data frame.
+This will make a lot more sense if we just run it,
+and you see what the output looks like.
+So here, make an S vector that's 100 individuals with random male or female drawn at random.
+Simulate their heights and weights.
+And as input, I make both A0 so that there's no direct effect at all of sex on body weight in this simulation.
+And there are slightly different slopes.
+That is slightly different proportionalities, 0.5 for women in this simulation and 0.6 for men.
+And then you get a data frame, which has a column for sex.
+That was what you input, and then a column for height and weight.
+And why are we doing this?
+This helps us think through what we believe about the system and the relationships among the variables.
+This helps us develop an estimator in a little bit, and it will help us test that estimator as we go.
+Okay.
+So we're going to think scientifically and define our questions.
+What are the questions we're going to ask of this system?
+First question we're going to ask is what's the causal effect of height on weight?
+We already asked that in the previous lecture, and we don't need to revisit that in any detailed sense.
+But it turns out this is still going to be in these models because of the indirect effect of sex through height.
+New questions we're going to spend most of the time on today.
+What is the causal effect of sex on weight?
+And if you think about this question for a second, one thing you realize is that it involves two kinds of subcauses,
+the direct and the indirect.
+And I tried to highlight the paths on the right that are relevant now.
+All the arrows in this graph are relevant for addressing this particular causal question.
+And finally, what's the direct causal effect of sex on weight?
+If we want to partial out just one arrow there, the one I've highlighted on the right,
+we're going to need a different statistical model than the one we need to address the previous estimate,
+this one about the causal effect of sex on weight,
+or you might call this the total causal effect of sex on weight.
+And we're going to develop two models, one for each of those questions.
+Okay, so let's get started.
+For both of these, what we need to do is stratify by S, stratify by the sex variable,
+so that we can get a different estimate, a different association between sex and weight and sex and height for each sex in the data set.
+How do we do this mechanistically in a linear model, given that it's composed of lines?
+Well, I have a preferred way to do it, and that's what I'm going to teach you.
+There are a number of ways to do this, because linear models are very flexible,
+and if you're clever with how you code the variables you input that you use as data,
+you can do this lots of different ways.
+One of the most common ways, a default for lots of software, is to use indicator variables.
+These are sometimes called dummy variables, but that's not very nice to say.
+Variables didn't do anything to you.
+Let's call them indicator variables, and there's zero one variables that indicate turning on some parameter,
+some unknown that you add to the model.
+We said most software, a lot of software, linear modeling software, constructs indicator variables for you,
+invisibly in the background when you pass it a factor variable.
+We're not going to do that here, because in this course we build everything ourselves.
+We don't rest on automation, and that's not because I'm against automation.
+It's because when you're learning, automation is poisonous.
+It prevents you from learning what's actually going on in understanding the model.
+We're going to build it all ourselves.
+When we build it ourselves, there's another strategy we want to use, and that's strategy of index variables.
+Index variables are numbers 1, 2, 3, 4, 5, 6, 7.
+They're like ID numbers, and all they do is they let us access particular parameters in the model,
+their addresses, if you will, postal addresses.
+We're going to use index variables because they have a lot of advantages over indicator variables.
+First of all, if you code up a model using index variables, you can change the number of categories,
+and the code doesn't have to change.
+You can run it wide away, so the model, the same code will work with three categories as with a thousand,
+and that's a huge advantage.
+With the indicator variable strategy, you would need 999 indicator variables for a thousand categories,
+and that's no fun.
+With index variables, you just need one.
+You just need the index variable.
+It's better in most cases for specifying priors as well.
+If you have scientific information you want to put in the prior, with index variables,
+it's easier, and I'll show you why when we get to the example a little bit later.
+In the second half of the course, when we learn multi-level models,
+multi-level models very naturally use index variables to talk about clusters in the data,
+like locations or batches or things like that.
+How do they work mechanistically, and how are they going to get coded up?
+Let's think about a toy example.
+Imagine where our categories are colors, the cyan, magenta, yellow, black,
+these primary pigments I think these are called, and what we do is for each category,
+we just give it an index in this case 1, 2, 3, and 4.
+The ordering of this index doesn't mean anything.
+These are unordered categories, and the 1, 2, 3, 4 are labels,
+but they're labels that let us look better positions inside a vector.
+We're going to have now a set of vector parameters.
+The vector just means a list, casually speaking,
+and we're going to have a vector of parameters alpha here, which is of links 4,
+because there are four different colors,
+and when we want to look up the estimate, the unknown for the corresponds to each color,
+we look it up by its index value, which is an address,
+a location on Alpha Street, if it were.
+The cyan lives at address 1, and magenta lives at address 2,
+and yellow lives at address 3, and black lives at address 4.
+And so, mechanistically inside the code, we use this index to look up the particular alpha.
+So, for example, here, if this was a linear regression,
+in a linear regression, all the action goes on in defining the mean,
+which is usually indicated as mu sub i, or i is the i-th observation,
+or the i-th row in your data frame, and we have Alpha Street here,
+and there's a variable called color in your data frame, which is the index variable,
+and we end up looking it up that way.
+So, let me show you how this works in a bit more detailed sense.
+Again, alpha in these linear models is usually the intercept, right?
+It tells you what the average is,
+and in this case, it will be the average for that category.
+So, in the context of weight, body weight, we develop a linear regression
+to estimate the effect of sex on body weight.
+We're going to have Alpha, which is our intercept,
+and in the model on your screen, all this model will do is estimate the average weight,
+because that's what Alpha will be.
+It will be the average weight in the sample.
+But if we subscript Alpha by sex, which is a column in our data frame,
+which has ones and twos in it, I'll show you this on the left,
+then you think of it as the sex of the i-th person, where i is a row,
+and then there's actually in the model, again, there's Alpha Street,
+it only has two addresses on it this time,
+so there's only two sexes in this data set,
+and so what happens is you think about being on row one,
+when the model runs i equals one in this case,
+because it's the first row in the data frame, and s equals two,
+that is, s on row one equals two,
+and so what the code does when it looks up Alpha,
+and the subscript is now two, so it pulls out the second value,
+which is the second unknown, and that's parameter Alpha sub two,
+will get estimated, but it will only get estimated using observations
+where the value of the s column is two.
+Likewise for rows for the value of the s column is one,
+Alpha sub one will only be estimated using information from those rows
+where the value of the s column is one, and this does our job.
+There's nothing fancy or mathematical or really interesting going on here,
+this is just a mechanism for getting the machine to run correctly,
+and do the stratification that we need to address our scientific goal.
+Okay, well we need to specify priors,
+and now we have this vector of unknowns of parameters on Alpha Street,
+Alpha sub one and Alpha sub two,
+and very often we want to assign them all the same prior, like in this case.
+We're going to start out with the idea that we're completely ignorant of human biology,
+and we're going to give both sexes the same prior distribution
+for body weight, which is a normal distribution with mean of 60
+and a standard deviation of 10.
+And then we're going to let the sample update those priors
+and show us if there's any difference at all.
+Now you don't have to assume they're the same,
+but this is often a situation we find ourselves in.
+This is easy if you use index variables because you have this list,
+and you can just give every element of the list the same prior.
+If you use indicator variables to do this modeling,
+this becomes much harder because now there's not the symmetry, right?
+That you have in this model where the sexes are modeled the same way.
+If you use indicator variables, one of the sexes becomes the default,
+and the other is an adjustment.
+I'll say that again.
+If you use indicator variables, one of the sexes becomes the default,
+and the other becomes an adjustment,
+and then there's an adjustment parameter that gets a prior,
+and it can't have the same prior as the default effect because one of them is an average
+and the other is an adjustment to an average.
+Now, I'm not against that in all cases.
+Sometimes that's more natural.
+You want to put a prior in the adjustment because you have information about it,
+but usually what I show you on the screen here is much more natural,
+and it's easier to express scientific knowledge this way.
+Okay, let's test our code.
+This is what we always do.
+What is the total causal effect of sex?
+The causal effect of sex is something we need to measure from simulation in this, right?
+Because there's two influences.
+There's the direct and the indirect.
+In this case, it's simple enough that you can even compute it mathematically,
+but this is not a math stats course, so I'm not going to teach you that.
+I want to teach you something that works even for the complicated cases
+where it can't be computed analytically.
+You can just simulate it.
+You've got a generative model, and you can do experiments with it,
+and because you can do experiments, because you are God of your simulation,
+you can measure any causal effect you want through experiments,
+and experiment here means intervening on a variable and only one.
+So what we do to find the total causal effect of sex through both paths
+is to construct two samples, one where everyone's female and the other where everyone's male,
+and then we look at the average difference in body weight,
+and that's the total causal effect of sex, of changing sex and only sex,
+on the generative process that produces weight.
+And I do it here for two samples, each of size 100 individuals,
+and we get the mean difference between the male sample and the female sample
+for these particular parameter values is about 20, 21.
+And so when we test our estimator, this is what we want to be able to find
+for these parameter values, and then you can come back here and change these parameter values,
+do your simulation experiment again, compute what we're looking for,
+test it on your estimator, and so on, and that's the cycle of testing.
+And here's the estimator.
+The estimator is the model that we developed that has the indicator variable.
+So I'm going to simulate a sample now,
+and now we're using the same simulation code as on the previous slide,
+but we're not doing the experiment.
+We're getting an observational study where sex is a random brule variable there
+from 100 individuals, so there's a mix of men and women in the population in our sample,
+and we observe their height and weight now,
+and now we try to estimate the causal effect of sex through both paths,
+the total effect using the estimator redeveloped.
+And so you run this model, you look at the previously output at the bottom,
+you'll see that there are two A variables there because there's one for category one,
+which is women, and one for category two, which is men,
+and each of these is the average weight in that sub-sample.
+And then the difference between these two is the estimate we're looking for,
+the total causal effect, both direct and indirect through height on weight,
+and you'll see that it's a good estimator.
+It's getting at the right area.
+You can back up to the previous slide, change the parameter values,
+and then rerun the estimator and assure yourself that it tracks.
+As the causal effect changes, as you change the input to the simulation,
+the estimator will track and get the right answer.
+Now let's analyze the real sample where we don't know the right answer,
+but now we feel confident that this is the proper estimator
+if the sample is generated according to the assumptions we've sketched out
+in the DAG and programmed into the generative model.
+So the code is identical as before.
+We set up the sample.
+I construct the S variable by adding one to the male variable,
+and we're only looking at adults here, and we get our estimate.
+Now let's do some post-processing.
+As I keep saying, usually with these models, the unknowns themselves are not what we want.
+So the A1 and A2 in this model is not what we're after.
+We have to do comparisons of those posterior distributions in order to get what we want.
+So let's consider, for example, thinking about the difference in mean weight.
+The difference in mean weight is not in the posterior.
+The mean weight of each category is, but we'd like to look at the contrast.
+This is the difference between category one and category two.
+So let's compute that.
+And when you do such calculations, you have to use the whole posterior distribution.
+So what I'm showing you here are just the posterior distributions of A1 and A2.
+That is women in red and men in blue.
+These are the means.
+These are not the distributions of weights in the sample.
+We'll look at that next.
+That looks like this.
+In order to simulate the posterior distribution of weights, you've got to use sigma.
+You have to simulate normally distributed people and their body weights.
+And that's what I'm doing here.
+We use our norm and we use the posterior distribution of sigma as well.
+The whole posterior distribution of sigma as well.
+And then you see that there's scatter and there's a lot of overlapping body weight.
+This is not new information to you between men and women in human populations.
+Also this population.
+Men are on average heavier and the difference in those means is quite reliable.
+But we haven't showed you that yet.
+But the difference in the means is quite reliable, but there's still lots of overlap and actual real-life weights.
+But the overlap you see between the blue and the red is not an indication of its difference.
+We still have to compute the contrast in both of these cases.
+The contrast on top and the contrast on bottom to say what the posterior distribution of the differences
+between category one and category two.
+And that's usually the estimate we're after is that contrast.
+And nearly always you have to compute it by taking a difference in posterior distributions or doing some simulation.
+So here's how that works.
+You must always be contrasting.
+Compute the contrast because it is not legitimate statistically to decide if two things are different or the same
+just because their distributions overlap.
+There's a particular important reason for this and that's because, well, it simply doesn't work.
+Let me show you an example, a toy example.
+Imagine you had two unknowns for a model, that is two parameters, and their posterior distribution looks like this.
+As you run the model, you draw samples, you plot the scatter plot of those samples, and it looks like the plot on your screen.
+These two parameters are very strongly related to one another.
+They have a strong positive correlation.
+I'm sure you can see that by looking at the screen.
+If we plot their densities, I plot parameter one, which is on the horizontal axis in blue, and parameter two on the vertical axis in red,
+and you see the densities on the right, they overlap a lot.
+They span the same ranges quite a lot.
+One is on average between the other, but they overlap quite a lot.
+Nevertheless, their difference is reliably below zero.
+I'll say that again.
+The distribution of each of these parameters, or the individual distributions of each parameter overlap a lot,
+and that's what you see in the blue and the red.
+That overlap doesn't tell you that these things aren't reliably different,
+because you take the difference of each pair of parameter one and parameter two,
+and take all those differences, and then stack them up in a distribution and plot it,
+and that's the black density on the right.
+The difference is reliably negative in a narrow range,
+and that's because I computed it to be that way.
+What's the take-home message here?
+Overlap of distributions doesn't indicate that they're the same.
+It doesn't indicate that they're different either, but it doesn't indicate that they're the same.
+You have to compute the difference, the contrast.
+That's what we do.
+We get a causal contrast here.
+Let's talk about the difference in means.
+The differenties of the means on the top there don't overlap at all.
+That is a pretty reliable indication that they're reliably different,
+but we still have to compute the contrast, because that's the estimate we want.
+You compute the contrast just by taking the difference in the two variables in the posterior distribution,
+and that's what the code on this slide does.
+You subtract A1 from A2, and you get a distribution of differences,
+and that's what we plot on the bottom here, and that's the posterior distribution of difference.
+That's our knowledge about the average difference between women and men in this sample in body weight,
+and it's between 5 and 9, but centered around a little bit less than 7 kilograms.
+What about real-life individual people, not just the averages?
+There's a lot of variation within each category in body weight,
+and so the lived experience of people, as it were, is not governed by those means,
+but by people they actually encounter.
+I showed you that these distributions overlap a lot.
+What's the contrast between these distributions?
+Same kind of calculations.
+We simulate individuals in category one and individuals in category two using the whole posterior distribution,
+and then we take the difference between those two groups, and that's the contrast.
+Then we plot that, and that's what I show you at the bottom of this slide.
+I've added some coloring, focused on zero there, because you might ask,
+okay, but what proportion, according to this sample and this model,
+and the posterior distribution that we've gotten derived from them,
+what proportion of men are heavier or can expect to be heavier than women,
+and the answer is 82 percent?
+Or another way to say that if you randomly select an adult man from this population
+and an adult woman from this population, how often will the man be heavier than the woman,
+and the answer is 82 percent of the time?
+There's a lot of overlap, but still, most of the time,
+around 80 percent of the time men are heavier than women in this population.
+Okay, so we've addressed the first estimate, the causal effect,
+the total causal effect of sex on weight, and that's on the left,
+and updated it, and we've got these two contrasts, which answer this question.
+One just about the means, and the other about the whole weight distributions,
+and this is the causal effect because it lets you address the hypothetical intervention
+of changing someone's birth sex on their weight.
+Yeah, and it's a distributional answer, notice.
+Both of these plots are distributions, and that is the estimate.
+There is no point that you want to use as a summary because points are not estimates.
+Points are decisions that you might take action with.
+The statistical estimate that contains all the scientific information are these distributions,
+and that's what you want to communicate to your colleagues.
+Now we're going to address the second estimate, what's the direct causal effect of sex on weight?
+And now we need another model because we've got to somehow partial out that indirect effect of height.
+Or sometimes people say, block it or control for it.
+I don't like the word control because control is something you do in experiments,
+not something that you do with statistics,
+but we can stratify by height to statistically block the association between sex and weight that is transmitted through height.
+And that's our statistical goal, the estimate we want, partials out that particular pathway.
+So what does that mean?
+Well, if you think about our generative model, there are parameters for the indirect effect and the direct effect.
+Those parameters aren't the direct and indirect effects, but they change it.
+They govern it and they create it.
+So B is the slopes, and there's one for each category for each sex.
+And then there's A, which is the direct effect.
+So here's a simulation where I make the slopes the same,
+and so the causal effect of height on weight is the same for men and women.
+This is a synthetic example.
+And then the direct effects are different.
+And the way I make this is that men are on average 10 kilograms heavier, regardless of their height.
+And then I simulate a sample and then I plot it here.
+Yeah, and you can see that there's a difference.
+So height influences weight the same way in both of these,
+both men and women in the simulation, and men are heavier on average.
+If we fit regression lines independently to men and women, you'll see that they have the same slope,
+but the blue points are still higher.
+And that's that effect of giving them the 10 kilogram boost, as it were,
+that they're 10 kilograms heavier on average than expected for their height.
+Yeah, and that's what we mean by a direct effect.
+So how would we then develop a statistical model that can estimate that bonus
+as it were beyond what we'd expect for their height?
+Well, we use a linear model.
+And we're going to augment the previous one.
+Remember, we just had a model that has to make the total causal effect of sex on weight,
+where we just had an intercept that was unique to each sex.
+And we're going to update that model to include now the height effect,
+because we've got the stratified by height.
+And that means including height as a variable in the regression.
+And this allows the model to then say, for individuals of the same height,
+what are the differences by category?
+And so imagine we were ignoring sex for a second,
+and we were doing the regression of weight on height from the previous lecture.
+We're going to start with that, and we're going to add sex to it.
+And that's what I'm showing you on this slide.
+We have alpha, the intercept, and we have beta, the slope.
+But I've changed one thing.
+And I've changed this now because this is going to make the test a little easier.
+And there's no trick here.
+There's nothing illegal that's been done.
+What I've done is called centering.
+So if you look at this weird term that's multiplying beta, the proportionality constant,
+we have h sub i, which remember is the individual's height, individual i's height.
+And I'm subtracting h bar, that line over the h is pronounced bar in mathematics.
+It's like a flat hat on top of the h.
+And that indicates almost always an average.
+And so h bar is just the average height in the population.
+So what this does is called centering.
+It's extremely common.
+I would say it's the default in linear regression for most variables.
+You don't have to do it, but it makes a lot of things easier.
+It makes the software run better, first of all.
+And it usually makes it easier to think about the priors as well.
+Because what it does is it then means that alpha is the average weight,
+the expected weight when an individual's height is average.
+I'll say that again.
+It makes the meaning of alpha the expected weight at the expected height.
+Because when h sub i is equal to h hat, then that difference is zero,
+and beta doesn't have any effect on the prediction, and alpha is all that's activated.
+And this is a very convenient way to think about the alpha,
+because then, first of all, it's in the data, right?
+It's easy to think about.
+It's not off your screen when you plot the data as it was before.
+So when we develop the priors, for example,
+we can use the priors that we used just a little bit earlier for alpha at the average weight,
+which is, as a prior, we used 60.
+So one way to think about this is if you take any scatter plot of two variables
+and you're going to fit a line through them,
+you could draw a vertical line at the average on the x-axis,
+the average h there is that vertical dash line,
+and the average weight is that horizontal dash line,
+and there's a point where they meet that's right in the middle,
+sort of the center of gravity of all the points.
+And it's a fact about linear regression that the progression line,
+the best hit line, will pass through that point.
+Now, we're doing posterior distributions of lines,
+and they'll jiggle around,
+but their center of mass is also going to be pivoting around that point.
+So again, here's to show you if you just drew one line using Lee-Square's regression,
+it would pass right through the grand mean, as I tend to call it.
+And why is that?
+Well, because it has to be true.
+We're just modeling linear regressions, just model expectations.
+And if all I told you about a person from the sample is that they're of average height,
+and I ask you to predict their weight,
+there's no better guess than the average weight.
+I'll say that again.
+If all I told you about a person from the sample is that they're of average height,
+the best guess of their weight is the average weight, right?
+It's an average person of average height.
+They should have average weight.
+Yeah.
+It doesn't matter what the relationship is between these two variables.
+There could be no relationship between the two.
+If there's no relationship between height and weight,
+you should still guess that they're of average weight,
+because that's the best guess.
+Yeah, I hope that makes some sense.
+And so regression lines pivot through this grand mean point.
+And so if alpha has the meaning of the location of that horizontal line,
+this makes a lot of tasks in modeling easier.
+Now we can just put S subscripts on everything,
+and that's really all there is to it in stratifying by categorical variables.
+And we're going to stratify both effects here, right?
+We're going to allow the slope to differ by sex,
+and we're going to allow the direct effect of the so-called intercept alpha to vary by sex as well.
+And this is no problem in the code.
+Now we have a street called alpha, and we have a street called beta,
+and they have addresses 1 and 2.
+And all of the indexing and addressing were exactly as before.
+For the first row, this individual is male.
+They have address 2 in both of the vectors,
+in both the alpha vector and the beta vector.
+And the second individual is female.
+It has S equals 1.
+And they have address 1 in both vectors.
+Now we can analyze the sample.
+Now you want to test that as well,
+and I encourage you to do that with the synthetic data simulation
+in the comfort of your own home.
+You can imagine how that works.
+And now we're going to jump ahead to analyzing the sample and show you what we get.
+The model programmed into Kraft is showing you there on this slide.
+I hope it has no surprises.
+We just bracket by S and Kraft interprets that to mean that you want a vector
+and it constructs it and does it all for you.
+I just want you to see that I've constructed H bar there,
+which is the average height as well.
+You just need to compute H bar and pass it in as data.
+And I do that on this slide as well.
+It's just the mean height.
+And the results, I've plot them on the right for the posterior means,
+which is something I don't encourage you usually to do,
+but just for the sake of easy illustration on this slide,
+show you that the regression lines for men and women in this sample
+have almost exactly the same slope.
+Yeah, almost exactly the same slope.
+Very, very similar.
+But this doesn't address our estimate yet.
+Remember, we want the direct effect.
+We have to compute the difference in expected weight at each height,
+because that's the direct effect that we want.
+Above and beyond the weight,
+any differences on average that are due to differences in height
+for men and women of the same height, are they still different weights?
+Now, there aren't a lot of men and women of the same height,
+but the regression line will let us imagine they were for any arbitrary height.
+And so we can compute the contrast.
+For each height, we're going to simulate individuals, men and women of that height,
+and then look at the difference in the simulated weight from the posterior distribution.
+So here's what the code looks like.
+I know there's a lot of code here, but actually it's fairly simple.
+I'm using the link function from the rethinking package,
+which makes this kind of simulation a little easier.
+You pass it data that you want simulated from.
+So in this case, you're passing it an S-vector of 1s first,
+and then it simulates expected weights, because that's what the model is set up to do.
+And then, again, for men.
+And then we just take the difference between these two sets of simulations,
+and we get a posterior distribution of differences and an expected weight at each height.
+I'll say that again.
+We get a posterior distribution of the difference in expected weight at each height
+between men and women according to the model.
+And I plot this on the right, and I highlight with the horizontal dash line zero there,
+and you'll see that the gravity is right around zero.
+There's not much difference at any height between men and women of the same height.
+There's just a little bit for really tall heights.
+Women tend to be a little bit heavier, and for shorter individuals, men tend to be a little bit heavier.
+And that's due to the difference in slope to the lines.
+But the fact is that this weird gray bow tie is sort of straddling right on zero,
+which is the conclusion we get from this is nearly all of the causal effect of sex on weight
+acts through height differences.
+I'll say that again.
+Nearly all of the causal effect of sex on weight acts through height.
+And so we observe big mean differences in weight in this population by sex,
+but that's because men are taller.
+Okay.
+So that we've got our second estimate now,
+and we've partialed out the direct effect there,
+and we've learned something extra.
+We've got the total causal effect estimated on the left,
+and we've got the direct causal effect estimated on the right, which is almost nothing.
+There's almost no direct effect.
+Not that there's none, but there's almost no direct effect of sex on weight in this population.
+So just to summarize a bit, categorical variables show up a lot in modeling,
+and you want to get used to them.
+If nothing else, you're experimental units or categories,
+and you usually want to include those in your modeling as well.
+I think it's nearly always better to use index coding with categorical variables,
+and we care about them because we want to stratify our estimates by the relevant categories.
+And then once the model is run, you're going to need to extract the samples from the cluster
+distribution to compute the relevant contrasts, which are the actual estimates of interest.
+The parameters are rarely the estimate itself.
+They're little latent things that you use to compute the estimate after the model runs.
+And remember to use the whole posterior distribution, not a point from it.
+Don't take the posterior mean and compute the difference between the mean of two different parameters.
+Instead, compute the difference between the distributions and then take the average.
+Always any kind of summary, whether it's a mean or an interval or a standard deviation,
+should be the last thing you do in your calculations, just to summarize in reporting
+that you have to take the difference between the whole distributions
+because you get different answers, and the right way to do it is to summarize last.
+The wrong way to do it is to summarize first and then take a difference.
+Okay, that was a lot. Let's take a break.
+You should review the material up to this point, see where you're confused,
+try to work through that confusion, go for a walk, have a cup of coffee, listen to the music,
+and whenever you come back, we'll pick up again and talk about curves, and I'll be waiting.
+Welcome back.
+In the remainder of this lecture, I want to talk about some ways that linear models can produce nonlinear shapes.
+This part of the lecture is not going to be as detailed and code heavy as the first part.
+I'm sure you've had enough of that for today, but there's more details in the book
+and lots of details in the code examples online if you want to implement these curves for yourself.
+First of all, many natural processes over any reasonably large scale are nonlinear in a strict sense.
+For example, if we plot height and weight for the whole human lifespan in this sample,
+not just the adults, that includes kids, we see that this is not a line.
+The relationship between height and weight for adults is approximately linear,
+but for all ages it's not.
+So how could we model something like this if we want to correctly stratify by height
+when we examine weight, for example, the effect of sex on weight?
+Well, we don't need new technology really.
+We can use linear models to do this because lines are like epicycles,
+and we can cobble them together in big additive functions that can bend in any way we like.
+This strategy is not mechanistic in the same sense that the geocentric model was not mechanistic,
+but you knew linear regression was like that already, right?
+It's geocentric.
+As long as we use it wisely, that's fine.
+There are two popular strategies for these non-mechanistic generalized ways to make linear models bend.
+The first is to use functions like polynomials.
+This is probably the most common strategy, and it's bad.
+You should never do it.
+I've done it.
+I feel bad about it.
+I will try never to do it again, and I'll explain why.
+I'll explain what polynomials are, and I'll explain why you shouldn't use them.
+The second big family of strategies is to use additive functions called splines,
+and they're relatives to generalized additive models.
+There are related methods like Gaussian processes that do essentially the same thing.
+We'll talk about the second half of the course.
+These are a lot less awful.
+They're quite useful, in fact.
+If your goal is to have some flexible curve that passes through the center of gravity of the points,
+you should go this route absent some more mechanistic model.
+What are polynomials?
+Polynomials are these functions you met in secondary school, probably,
+where we multiply a variable, the observed variable, the x-axis variable,
+by itself multiple times to make curves of various shapes.
+A polynomial is a series like this where you have some intercept,
+and then the so-called linear term, beta sub 1 times x sub i,
+where x is some x-axis variable that we're using.
+Then in the simplest polynomial, then we have a parabola that we achieve by adding a squared term,
+where it's b sub 2 times x sub i 2.
+Beta sub 1 and beta sub 2 are just parameters.
+They're part of the posterior distribution, and x sub i is just a single column of data,
+but we construct multiple terms for it inside the linear model.
+This model is still linear, technically, because it's an additive function of the parameters.
+I'll say that again.
+This model is still linear, technically, because it's an additive function of the parameters.
+The parameters aren't exponentiating anything.
+They're just factors in front of each term, and the terms are added together.
+Polynomials can make lots of shapes.
+You can add a cube term and x to the fourth and x to the fifth, and so on.
+Sky's the limit, and you can fit all kinds of data this way.
+I'll have a particularly shocking example in a future lecture,
+but the curves on the right of this slide give you an idea of what polynomial shapes can do.
+You can fit data with these things.
+You can.
+They're very limited, though, and they're hardly ever a good idea.
+The reason is because they have lots of symmetries that are undesirable from a scientific standpoint.
+For example, the parabolas I'll show you on the next slide is always perfectly symmetric,
+but often we don't want the curve to be symmetric.
+That's not a scientifically reasonable assumption.
+The major issue is the way uncertainties are represented in these things.
+You get explosive uncertainty at the edges of the data where you wouldn't with a more scientifically reasonable model.
+The fundamental reason for all of these problems is that polynomials don't smooth locally.
+They don't determine the shape of the curve by only looking in regions of the x-axis,
+but they determine the shape of the curve by looking at the whole x-axis at once.
+Maybe that sounds good because it sounds a bit megalomaniacal,
+but actually it's really bad because it means the data point in any part of the x-axis
+can change the shape of the curve arbitrarily far away from itself.
+I'll say that again.
+It means that any data point in any region of the x-axis can change the shape of the curve arbitrarily far from where it is,
+and that's bad news.
+Instead, we want local smoothing, and that's what splines will provide, which I'll get to in a minute.
+Let me show you how polynomials behave in Bayesian update.
+They behave the same way in non-Bayesian physical paradigms as well, of course.
+Here's the posterior distribution updating animation, like the one I showed you earlier in the previous lecture for linear regression.
+On the left, we have a prior distribution for the beta sub 1 and beta sub 2
+to determine the shape of a parabola.
+The equation for that parabola is shown above the plot on the right,
+and the curves there are just three randomly sampled parabolas from the prior distribution.
+You'll notice that one of them looks like a line because it bends much, much further away off the slide.
+Now I'm going to introduce a few points and let it update.
+You'll see from the prior that we go all over, we see one data point.
+Already they've been down.
+Why is that?
+Just because parabolas must bend.
+As you'll see, as the data piles in, most of the data will be on the left.
+There's just this one point on the right.
+From a completely general perspective, there's basically no evidence that this relationship is really parabolic or symmetrical for that matter,
+and yet that's what the parabolas must do.
+You'll notice that the uncertainty, the width of the gray region, flares out at the ends of the data there.
+All these things make parabolas and higher order polynomials quite undesirable from a modeling perspective
+because they make a bunch of assumptions that you don't really regard as useful,
+and they learn too much from the data in regions far away from where the data lie.
+What if we model height and weight this way?
+Well, you can fit the relationship between height and weight with a parabola.
+I do it here.
+I want you to notice what happens on the far left on this graph after fitting this parabola to the height and weight data.
+It thinks that babies get heavier for some reason as they get shorter.
+Below about 50 centimeters, the model predicts to get heavier.
+Now, obviously, this is ridiculous and you don't believe this,
+but if it were true that you could use a curve that didn't do this, wouldn't you prefer to do that?
+Yeah, so don't use parabolas, please.
+This enforced symmetry is quite bad news.
+It means that you can't make predictions outside of the range of the data with any kind of credibility.
+You can fit higher order stuff too.
+So here's a fourth order polynomial with a term that is height to the fourth there on the end,
+and this curve bends three times, right?
+And this one makes lots of certain predictions as well,
+especially for the taller individuals that they will go cataclysmically thinner.
+But notice that there's a lot of uncertainty too.
+The predictions are quite weird on both ends here.
+You could do a lot better in this particular case by thinking scientifically,
+which is probably unsurprising.
+And much later in the course, I'm going to revisit these exact data,
+and we're going to use a more biologically inspired model of growth
+to redo all the modeling of the causal influence of height on weight.
+And I'll show you how extremely powerful that can be,
+because we're going to get a really good curve that explains the shape of these data
+with a very small number of assumptions and essentially no unknowns.
+That is, no parameters are needed to fit these two variables together.
+But that comes in lecture 19, so that's just a promise I'll deliver on later.
+Let's talk about spines.
+Spines are really, really useful.
+If you don't have good scientific background information and you just want a good locally inferred function
+that lets you stratify by some continuously varying prediction variable,
+splines are really nice.
+And the simplest ones to explain are called basis splines,
+but they're lots of different kinds of splines,
+and they all work basically the same way,
+and that's by adding together a bunch of locally trained terms.
+That is that there are parameters that are trained only on local regions of the data,
+and then those local regions are smoothed together to make a continuous function.
+The word spline comes from drafting.
+The tradition of doing this, a lot of people still do this.
+You do this in carpentry too.
+If you want to saw a line in the right place,
+you'd have a flexible metal or wood bar and you attach to it these weights,
+and then you can, by adjusting the position of the weights,
+you can bend this bar to make a smooth curve that you can then draw repeatedly and accurately on a surface.
+So this is what a spline is and where the term comes from.
+So we're using metaphorical splines in the sense that they're flexible,
+but also that there are anchor points where the weights are that are the control points for the spline,
+and the algorithm uses those anchor points and learns their places,
+but only in the local region where the anchor point is.
+So just to give you an intuition, all the code for fittings splines is in the book,
+and you can find lots of fantastic tutorials,
+and even whole books online about how to work with splines and generalized additive models.
+They're a major branch of applied statistics.
+What I want to show you here is just some animations to primary intuition about how they work.
+So the example that is featured on the cover of my textbook is a historical record of Terry Blossom Blooms
+in a region of Japan where the day of the first bloom has been recorded for a long time,
+about a thousand years with some gaps.
+And we also have other records from these things,
+but I'm just going to plot by the year on the horizontal, the day of the first bloom on the vertical,
+and we're going to be interested in getting some local approximation of that so we can visualize the trend.
+This is one of the things that splines are really nice for.
+And then you could stratify by the trend and look at other associations,
+but we're just going to try to characterize the trend and get a flexible spline.
+And what the dancing lines on here are what exist in the prior distribution of the spline
+before the data populate the graph.
+So in the absence of the data, basically almost any kind of wiggly curve is possible.
+And this is the thing about splines.
+They can take an infinite number of shapes.
+So the posterior distribution for the spline contains an infinite number of wiggly functions.
+It really does, and I'm just sampling a few of them for you here.
+And the blue and the black are just different samples from the posterior
+so that I can show you more functions simultaneously.
+Now we're going to populate the data.
+And if you train the spline on the data and then we sample splines from the posterior distribution,
+that's what the blue and the black are now.
+They're just two samples from the posterior distribution that I showed at the same time to show you the variation.
+So this is a wiggly function that you know there's still some uncertainty
+about where the mean is at any particular time,
+but you can see how it's locally trained.
+So you get these reliable sort of little hills and valleys, periods of history
+when the blooms were earlier or later in the year.
+And this is the power of splines.
+There's no scientific information that goes into the spline,
+but it's a flexible curve that can find trends,
+and that helps you do stratification by continuous variables when you need it.
+How are they built?
+Just a little bit about mechanism.
+Again, I'm not going to get too much into the details.
+There's a lot in the book.
+B splines or basis splines are just linear models with a bunch of additive terms
+with little synthetic variables, and this is what they look like.
+So it's a linear regression, literally, where the mu line, mu sub i,
+that is the expected value of the outcome for case i,
+is this long, in fact, arbitrarily long series of additive terms.
+There's an intercept, and then you have these w parameters,
+which are parameters to be estimated.
+There's the w for weight, like the weight is on a spline on the right,
+and then these b sub i's, which enter the model like data,
+but they're actually, they're artificial data, they're just a spline shape,
+and then the weight determines how important that particular spline shape is
+in the particular region.
+You can think about the b sub i's as coordinates on the x-axis that allow curves to form.
+An animation might make this a little easier.
+The weights w are like slopes, and the basis functions are synthetic variables
+that are local positions.
+And so the particular weight parameters get turned on in different regions of the x-axis,
+and this is what allows you to make a very large number of different flexible curves.
+So here's an example.
+I know this is super weird.
+What you're looking at here is maybe the world's simplest spline,
+and there's an x-axis variable.
+I haven't drawn the axis, but you can imagine the x-axis is some variable,
+like here, that ranges or weights, or heights, or something like that.
+And the vertical axis is, well, it's the vertical axis,
+but here it's the weighted basis function as the way the spline sees it.
+And what is a basis function?
+Well, on this plot, there are four basis functions.
+They're the colored curves.
+And the B variables in the spline are just the value of those basis functions
+at any particular point.
+And what the weights are going to do is adjust the height of that.
+They multiply the whole basis function, and they make it stronger or weaker.
+And then the black curve is the spline, and it's the vertical sum at each point
+on the horizontal axis of all the basis functions.
+Let me show you what that ends up meaning.
+So red is basis function one, green is basis function two,
+blue is basis function three, and cyan is basis function four.
+And black is the spline.
+So there's one, there are four weight functions,
+which is the importance of each of these basis functions.
+And you can imagine, and for this example, I have them set to one minus one.
+And that makes this particular shape of spline by turning them up and down.
+So to appreciate what the weights are doing, I can change their values,
+and you can play around with this thing experimentally and see what happens.
+So imagine I take the first weight variable and I flip its value to minus one.
+What that does is it, on the far left, where the first weight function matters,
+it devalues basis function one.
+It makes it negative, and this pulls the whole spline down.
+But nothing else happens in the other areas of the curve
+because weight one applies to basis function one.
+I'll say again, weight one only applies to basis function one.
+And basis function one is zero everywhere else.
+It only has non-zero value on the left side in that region of the x-axis.
+Now let's think about basis function two, the green one,
+and say we split its value to one instead of negative one.
+You notice, again, basis function one.
+Now, if non-zero internally, it's zero on the far left, it's zero on the far right,
+and it has its maximum non-zero value sort of in the middle left there.
+So when we change its weight, make it really negative or really positive,
+it either pulls that only that region of the curve really far down or really far up.
+So by flipping it to one here, we pulled the spline up,
+but the far right has remained the same and the far left has remained the same
+because basis function two can't affect those regions.
+Same for the blue curve three, let's flip its value to minus one.
+Again, basis function three only in this particular region,
+so changing that weight only pulls us down in that region.
+And finally, basis function four on the far right,
+if I flip its value to one instead of negative one,
+it pulls up only that region of the curve up.
+And now we've essentially inverted the spline from where we started.
+So adjusting these weights, they don't have to be ones or minus ones,
+they can be any number, you can make a bunch of curves,
+and the more of these anchor points you have,
+the more basis functions you have,
+and the more wiggly of a curve you can get.
+Okay, so just as a toy example,
+we could fit its spline to height as a function of age.
+We haven't looked at a plot of height against age for the Nancy Hall state yet,
+but this is what it looks like.
+And these are humans, they're born, they grow rapidly.
+They have a long adolescence, and then as adults,
+we mainly stay the same stature,
+although we do get a bit shorter in old age.
+This is obviously not a linear relationship.
+At best, it's piecewise linear,
+which means some lines stuck together at their ends.
+We want a function to approximate it,
+so that if we needed to, we could stratify by age.
+And I'm fitting this line just as an example,
+but I would never do this,
+because we know a lot about the biology of height
+and how humans grow, and we'd rather build models that way.
+But as an example of how splines can fit arbitrary curves quite well,
+I'll give you an example.
+Just as a comment, what we're implying here is that age is a causal influence on height,
+so we could add it to our gag.
+It's a little bit weird to say that age is a cause,
+because you can't imagine an intervention, right?
+You can't experimentally adjust someone's age, right?
+Not in the absence of time travel, yeah?
+But that adjusts everybody's age.
+And some people think if you can't find an intervention,
+you can't talk about it being a cause.
+I think it's fine to talk about things being causes
+when you can't intervene on them.
+There are lots of things like that, and that's fine.
+But age is important to think carefully about what you really mean
+when you say age is a causal effect.
+Most of the time what we mean is that age is just a marker for time past,
+and other things, causes accumulate during that time,
+but those are the real causes.
+And if we could measure those accumulated causes and add them to the model,
+age would have no association afterwards.
+But we can't measure those things.
+In this case, all the accumulated growth instances,
+and so age is the proxy, and it can be extremely useful to think of it as a cause.
+Okay, so now I'm going to train a Bayesian spline on the height and age data.
+I'm going to start with 10 individuals,
+and here's a sample from the posture distribution train of 10 individuals.
+I'm going to start animating, and the animation will layer in data as it goes,
+and you can see what happens.
+First, it's extremely wiggly.
+We add some more points.
+It's still a bit wiggly.
+You'll notice it's very, very wiggly outside the range of the data and do anything it wants.
+And one of the real things here is the spline knows nothing about biology,
+so it's happy to let individuals get shorter by an arbitrary amount at any age,
+which is something you would not let a biological model do, right?
+Any particular individual is expected to grow until older age
+when they might get slightly shorter.
+But you'll notice that the spline learns the path through the expectation at each age very well.
+And it has no problem having that little bend there, and it's locally smoothed, right?
+And this is what lets it do it.
+Unlike a polynomial, which would go crazy with data like this,
+because in order to have that sharp bend around age 20,
+it's got to bend in other places too.
+Here are the basis functions.
+I'm going to show that animation again, this time with the basis function.
+So you can get an idea of what's going on to remind you.
+So the basis functions are these hills that are under the blue spline,
+and what the weight parameters that are getting learned do is they make these hills shorter or smaller,
+and then the spline is the sum of the hills at any vertical slice,
+at any vertical point on the x-axis.
+And you can see that a little better here.
+So you can see how the basis functions are learning from the data and adjust their height,
+and then if you add together the black hills at any particular vertical point,
+you get the blue curve, and this is what the splines are.
+So this is how they're fundamentally additive or linear underneath,
+because there are some of these curves.
+Okay, splines are great.
+We often need curves, and if you don't have a strong generative model with which to constrain the function,
+splines are great, and this makes them a very common tool in applied statistics.
+Gaussian processes likewise, very much like splines, but a more Bayesian flavored spline.
+In the case of height, we do a lot better by thinking biologically,
+and the scientific literature on height does not use splines, and well, it shouldn't.
+If we thought about human height, what we probably want to do,
+or one strategy that I'm a fan of, is to think about growth phases.
+We know that humans have distinct biologically controlled growth phases.
+There's infancy, where there's very rapid growth, and there's childhood,
+where there's slower growth and, well, there's rapid growth of the head during childhood
+and slower growth of the body, and then there's puberty, where the brain is stopped growing,
+essentially by the onset of puberty.
+You get all the brain you're going to get by the age of 12, and it still reorganizes,
+and you still learn things, of course, but it's not going to get any bigger.
+And then the body, you grow into your head, as it were, during puberty.
+And then there's adulthood, in which you level off,
+but there tends to be a slight decline in stature in the long run during adulthood
+because gravity wears us down.
+Modeling each of these phases is a much more productive strategy,
+because you can put in the right constraints.
+Individuals get taller, they don't get shorter during the first three growth phases,
+and there would be parameters unknowns in each phase, which would have biological meaning,
+and you could do meaningful comparisons between them, and so on.
+Okay, thank you for your attention.
+I hope some of that was clear at least.
+I encourage you to review these two lectures, at least the slides, before the lectures next week,
+because there's been a lot in these.
+I probably don't have to tell you that.
+And these are foundational in terms of tools we've used.
+You've learned how to fit lines, and you've learned how to use categorical variables,
+and we're going to, starting next week, take those foundational tools and add no more for a while.
+We're going to keep using linear models with categorical variables,
+and we're going to examine new estimates and new problems in developing estimators,
+but all of the statistical tools we're going to need for a couple weeks are in place now,
+and so I emphasize that so that you know you should review a bit and make sure you've got these,
+and also to relax you a bit.
+From here on out, we're going to be focusing on more examples,
+but not so much on statistical machinery that's in place.
+Okay, I'll see you next week.
+Music
+Oh, I didn't see you there.
+Are you still here?
+Well, as long as you're here, would you like some more?
+How about some bonus content?
+All right, just a little bit.
+So one of the things I left out of the main lecture, because it honestly just got too long,
+is this style of causal modeling that I call full luxury base.
+This is just my joke term for it.
+It's meant to be a bit ironic.
+It's equivalent to what I showed you in lecture, which is to say the typical approach
+when using linear models to do causal, to satisfy causal estimates,
+is for each estimate, we need a different statistical model,
+and that's what I did in the main lecture when I analyzed the causal influence of sex on weight.
+Each estimate may need its own statistical model because it needs to stratify on different things.
+But there's an alternative and equivalent approach that only needs one model,
+and it's a model that represents the generative model,
+and then you can run simulations from that model after you fit it to get each estimate that you require.
+These approaches are perfectly equivalent, and they require similar amounts of work.
+It all depends upon which style you prefer.
+This is the style that I tend to use in my own work,
+but it doesn't really necessarily have advantages or disadvantages from the other.
+There are just fewer models to write, but it requires more simulation typically than the other approach.
+The other approach requires defining more models,
+and this approach requires more simulations to write.
+So what would this look like in the case of what we did in the main lecture?
+Same generative model, and we're just going to express the generative model,
+shown in schematic by the DAG on the right of the slide,
+as a single statistical model that has multiple relationships, all the relationships inside of it.
+So one way to think about this is that we've got a weight submodel.
+That is our weight as a function of stuff.
+Remember the DAG implies that weight is a function of height and sex.
+So we write a linear model to express that inside the quap model here,
+and that's the part of the formula that's commented as weight,
+and you'll see that that's the weight model we used in the main part of the lecture.
+It's the same.
+It's stratified by sex, and it's a regression of weight on height stratified by sex,
+that's all it is.
+But we also have a model for height, and how height is influenced by sex.
+And this is something we did not do in the main lecture at all,
+but when you do full luxury bays, you will do this because you will program
+the whole DAG and whole generative model inside one big Bayesian network model like this.
+And the height model is super simple.
+It just stratifies height by sex, so we get a mean height by each sex.
+Why would we do this?
+Well, the answer is because if we estimate both of these models simultaneously,
+we're using the sample to estimate the whole generative model,
+all the features of the generative model,
+and then we can run simulations out of that estimated generative model
+to get the causal estimates we want in exactly the same way that we can run simulations
+from our generative model counterfactually to explore what causal effects would be
+in any particular scenario.
+But now we've got estimates, so it's like getting estimates of the parameters
+and then plugging them back into the generative simulation.
+So think of it like this, the submodels, the top part, the weight model,
+is those two arrows, those two red arrows, H and S pointing in the W,
+and then the bottom model, the height model, is just the one arrow from S to H.
+But these are both submodels of the full deck.
+When we run the simulations, we run the whole deck,
+but you'll get a posterior distribution that contains a bunch of stuff.
+Don't worry, your computer won't complain.
+It'll do this very fast.
+And now you want to think about causal effects as interventions,
+and you're going to simulate those interventions and look at the effects that way,
+and that's how you get your causal estimates in this approach.
+So let me show you how to do what we did in the main lecture, but from this approach.
+So we've run the full luxury Bayes model that was on the previous slide.
+We extract the posterior distribution.
+That's what the code on the left does first.
+Then there's some bookkeeping.
+I define H bar as the average height in the population,
+and N is the number of simulations, number of simulated people I'm going to run,
+and 1E4 is 10,000.
+And now with the posterior distribution, the with command in R
+lets you define a chunk of code that's in a particular scope is what it's called.
+It's a weird word to use, but scope.
+And so what this means is post.
+Now the posterior distribution is going to be in scope for all of the code that's in that block,
+and that means you don't have to put post dollar sign in front of all the parts of it now.
+You can just name the parts of it, and R will find them.
+This is very convenient and makes code easier to write and to debug and for other people to read.
+The first thing we do inside the width block is we simulate weight for women, artificial women,
+and we simulate 10,000 of them, and we simulate their heights using the symbol H of the posterior distribution,
+which I can back up and show you if you see the little H in the height model at the bottom there.
+That's just the average height for women or men depending on what S equals, so that's just the mean.
+And tau is the standard deviation of height.
+And then we simulate weight for women using, again, the same formulas in the generative model,
+and now we have those simulations.
+And then we do the intervention.
+We define a sample where we've intervened on sex counterfactually,
+and we get a population where everyone is male instead, and we use the right parameters for that.
+And then the contrast is the causal effect we want, and we calculate it directly.
+And so we can get all the same curves this way that we got in the main text, and we fit one model,
+but we have to do simulations like this at the end, and we get the total causal effect of sex on weight from this calculation.
+You could also get the partial one just as before.
+Remember, the partial causal effect would be a contrast of the difference in weight between men and women at each height,
+so we could do simulations to look at that as well.
+So sometimes these causal effects are written like I have this notation on the slide here.
+P of w conditional on du S, what does this du mean?
+I'll talk more about this later, but this du represents an intervention.
+This is a way to one form of notation for causal inference.
+And the little p represents a distribution.
+It's like a probability, but it's continuous, so it represents, you read it as,
+the distribution of weight conditional on intervening on S,
+and that's our statistical definition of the causal effect of sex on weight.
+You can automate the simulation.
+Luckily, the sim function and the rethinking package, as long as you're using quap,
+will, it knows the model formula, and so it can do the simulation for you,
+and here's an equivalent way that gives you the same estimate of causal effect.
+Okay, that's all I wanted to say about full luxury based.
+I think there'll be an example around just after the middle part of the course, another example of doing this.
+It's equivalent to the idea of defining multiple models.
+You have to do the same amount of work.
+It's just where it is.
+In the full luxury based approach, the work is at the end of doing more simulations,
+but you define only one step model, and it looks like the generative model,
+so it makes it easier to develop the estimate, because the estimate is always the generative model.
+You pack it all in there.
+And the other approach, like I showed in the main lecture, you state each estimate,
+and then you figure out, using those separate logic, what variables you need to stratify by,
+and so you get different statistical models.
+And many of the examples in the course are going to use this approach,
+because it's valuable to know that logic for other reasons,
+and this is the logic we're going to focus on a lot more starting in the next week.

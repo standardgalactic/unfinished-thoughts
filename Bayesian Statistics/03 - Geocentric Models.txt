@@ -1,0 +1,1031 @@
+Welcome to the third lecture of statistical rethinking, 2023.
+In the previous lecture, last week, I introduced the basic logic of Bayesian inference,
+and more important than that, the workflow for moving from a clear scientific question to the development of a constant model,
+and then from there to development of a Bayesian estimator.
+We're going to stick with that framework for this lecture and all the future lectures,
+and hopefully that'll make the material easier to grasp.
+I'm going to start today's lecture with two stories from astronomy, the history of astronomy.
+What you're looking at here is a time-lapse set of photographs of the night sky,
+and the red object that seems to be wandering across your screen is Mars.
+Mars is one of the planets. Planet in Latin means wanderer.
+It appears to wander across the sky against the fixed background of stars.
+All the planets do this zigzag motion that you're seeing here,
+but incomprehensible given your knowledge of the solar system as a bunch of the lips is around the sun,
+but this is what it looks like from our perspective on the Earth.
+All the other planets do this as well, Jupiter, Uranus, and so on,
+but Mars is most shocking in this because its zigzag is the most obvious.
+What explains this odd, wandering motion?
+Not just that the planets move, but they reverse course at some point in their motion.
+The puzzle is made a bit more acute with some modern knowledge.
+Now, of course, that exactly the same phenomenon happens from the perspective of an observer on Mars.
+We know that because we have put observers on Mars, our robots.
+The Curiosity rover, represented on the right of this slide,
+sees the Earth as a zigzag wanderer from its perspective.
+What is the scientific explanation for this perception that the planets reverse course in their orbits
+from the perspective of an observer on any of the other planets?
+A very successful model for predicting this is also wrong, and it is the geocentric model.
+For more than a thousand years, this model was capable of predicting this path,
+the wandering of Mars and the other planets from the perspective of an observer on Earth.
+The way it made those successful predictions was by imagining that the solar system
+was structured something like this, with the Earth at the center, that's why it's called geocentric,
+and then the other planets are on orbits around the Earth, but they're on orbits on orbits.
+I'll say that again, they're on orbits around the Earth, but they're on orbits on orbits.
+The first dashed orbit around the Earth there is the orbit of Mars,
+but Mars is actually on a smaller sub-orbit called an epicycle.
+I'm going to set this little simulated solar system in motion here,
+and you'll see what happens to the path of Mars as it goes around.
+It will zigzag.
+As it comes to the point where it's closest to the Earth, it will reverse course,
+and so from the perspective of an observer on Earth, Mars will make that path
+that we actually see in the empirical data.
+With this device, the epicycle, people like Ptolemy and other ancient astronomers
+are able to make extremely accurate models of the solar system as we observe it from Earth.
+But of course, the structure of this is completely bonkers.
+The solar system is not structured with epicycles.
+The orbits of the planets are elliptical, and they're around the Sun, not around the Earth.
+This is a great example from the history of science
+for how statistical models can achieve arbitrarily accurate predictions,
+but not explain the structure of the system that they study.
+This is a fundamental paradox and problem that we face when we do statistical modeling.
+The real explanation for this, just by way of mention, is that the orbits are embedded within one another.
+As you see here on the right of this slide, Earth's orbit is closer to the Sun,
+which I have failed to draw, just for clarity, than Mars is.
+This means that there's a point in the orbits of these planets when they're close to one another
+and there's a point where they're further apart, and this creates the appearance of a zig-zag.
+I've drawn this white bar, which is just the observer on Earth, their perspective on Mars.
+If I start this system in motion, you'll see that there's this projection line.
+The apparent position of Mars against the night sky, against the stars,
+is represented on the far left there. That far dashed line is not another orbit.
+It's our perception of the still night sky where the stars are.
+It's the curtain, the celestial background.
+As Earth and Mars continue orbiting, that position on the celestial background is going to zig-zag.
+I'll start the animation again, and you can appreciate what happens as Earth gets close,
+and then we zig-zag, and it goes around.
+I'll let it go around one more time so you can see the phenomenon again.
+We now know this is why this happens, and we know why it happens to every planet,
+and we can predict exactly this exact position from the contemporary solar system model.
+The Ptolemaic model, the geocentric model, works just fine for predicting the same phenomenon.
+What it doesn't do very well is predict other things about the structure of the solar system.
+Let's fast forward a bit to another moment in the history of astronomy.
+January 1st, 1801. That was when this fellow, Giuseppe Piazzi,
+who was an astronomer in Sicily at Palermo,
+observed for the first time a new comet.
+He used very modern equipment for the time.
+For example, this thing that was famous at the time of the Palermo Circle,
+which allowed very accurate observations and recording and tracking of celestial objects.
+Giuseppe tracked this new object, this new comet, for a little while,
+and then he became ill and he lost track of it.
+When he recovered from his illness, he could not find it again.
+A hunt was on to find this object.
+The hunt was on because just a couple of decades earlier, I think it was,
+Herschel had found Uranus, which was the first planet ever identified by the use of a telescope.
+Everybody wanted to find more planets now using telescopes.
+Giuseppe thought maybe he had found a new planet, maybe it was a comet, he wasn't sure,
+but now everybody, all of the astronomers in Europe, wanted to find this object again
+because then they could be famous.
+The object he actually saw was this.
+Of course, he didn't see it like this.
+His telescope was not this good.
+This is a modern NASA image.
+What he saw looked more like this.
+A bunch of some blurs because, of course, the objects are moving
+and the machinery is not perfectly accurate.
+There's this bright spot that's reflecting the sun's light back into his telescope.
+This is Ceres, which is a dwarf planet that orbits between Mars and Jupiter,
+or it's a big asteroid, basically, but it qualifies as a dwarf planet.
+It's large enough.
+It's about a quarter of the diameter of the Earth's moon, I think,
+or about the size of the state of Texas for Americans by comparison.
+Ceres has a weird orbit because it's not in the same elliptical,
+the same plane as the other planets, the major planets.
+The first person to figure out this orbit, just a few years later
+and publish the results in 1809 was this fellow, Carl Friedrich Gauss,
+who's famous for doing lots of stuff,
+probably the greatest mathematician to have ever lived.
+He was in his 20s at the time and he had just finished basically
+defining the field of number theory,
+but he was looking for something else to do
+and he wanted to have an astronomy,
+so he thought he could find this comet again.
+He would figure out its orbit using mathematics,
+and then he would predict where it would be able to be seen again,
+and then he would send his notes to Geosephy and Geosephy would check.
+And this is what he did,
+and he developed a bunch of mathematics and ways to use
+the few observations of Ceres positions at the time
+to figure out its orbit,
+and then you could use that mathematical model of the orbit
+to make a prediction about where it would appear in the sky next.
+And he published it in 1809,
+and what's interesting from our perspective is that
+his argument was essentially Bayesian for how to do the data analysis
+to use the few observations that were available,
+and he invented, in order to do this,
+what we would now call a linear regression of a sort.
+It's that he used a normal error model and least squares estimation,
+which is one of the most common ways that we fit models to data these days.
+But it was a Bayesian argument.
+The frequentist approach hadn't really been invented yet.
+That's a later British thing.
+But he didn't call it Bayesian because, of course,
+people weren't reading the Thomas Bayes at the time.
+This distribution, the error model that underlies least squares estimation,
+is quite famous now.
+The Gaussian distribution, and in the old German money,
+before the Euro replaced it, the 10-mark note had Gaussian space on it
+and a little Gaussian distribution that you see there in the inset.
+This made it handy for cheating on exams
+if you happen to have a 10-mark note in your billfold.
+Why am I telling you these two astronomy stories?
+Well, I hope they're interesting in and of themselves
+because the history of science is worth studying.
+But they set the stage for teaching you about linear regression,
+which is a big and extremely powerful family of statistical golems
+that we're going to develop as Bayesian estimators this week
+and in the next couple of weeks as well.
+And linear regression represents both of these stories in very important ways.
+First, it's essentially geocentric in a metaphorical sense.
+But what I mean by that is it describes associations among variables,
+and it makes excellent predictions, at least it can,
+but it's mechanistically nearly always wrong.
+The universe is not comprised of perfectly linear relationships,
+additive relationships among variables.
+You'll understand why I think that as we move through some examples.
+Nevertheless, it's often an extremely unreasonably good approximation
+of those associations.
+And moreover, the meaning of those associations doesn't depend upon the model itself.
+It depends upon some external causal model that we project onto it.
+And so we have to keep this distinction clear.
+The problem with geocentric models is not the model itself.
+Geocentric models are extremely useful.
+We still build planetariums with them, right?
+Because in a planetarium, you're projecting life onto a ceiling.
+And the geocentric model is extremely useful in that context.
+What's wrong in the geocentric model is believing it's a generative structural model of the solar system.
+If you keep that distinction clear, there's nothing wrong with it.
+Likewise, there's nothing wrong with linear regression,
+unless you believe it's an accurate mechanistic model of the system you're studying.
+But if you can keep the distinction between the causal model and the statistical model clear,
+these are extremely powerful golems, and we will make good use of them.
+The second way that linear regression ties to these stories is that it's inherently Gaussian.
+We're going to build posterior distributions for our estimator and not use Lee-Square's estimation directly,
+but we are going to use the Gaussian error model.
+What you want to understand about this error model is it really abstracts away from the details of any kind of generative error model.
+So when Gauss derived it, he defined very general conditions for how error creeps into observations,
+so that he could derive the Gaussian distribution.
+That's to be distinguished from the idea that, for example, the hand of the astronomer is trembling when they operate the objects,
+there's rounding error, there's light aberration through the atmosphere,
+and all those little errors add up, and you can derive the Gaussian distribution that way as well.
+But Gauss used a much more general argument about symmetry of errors,
+and we're going to rely upon those general arguments as well.
+And so this error model is not generative in the same detailed way that we were thinking about generative models last week,
+but it's going to do very good work for us.
+There are lots of special cases of linear regression, procedures like ANOVA and ANCOVA,
+and the key tests are built upon the same basic structural statistical model.
+There are just different summary procedures that are done with them.
+Okay, let's talk a little bit more about Gaussian distributions and where they come from.
+I hinted that there are a bunch of little errors to get added together.
+So let's do a thought experiment.
+Imagine you and a thousand of your closest friends go out to a football pitch, a soccer field,
+and you line up on the halfway line, and each of you has a coin,
+and you're going to start flipping this coin, and every time the coin comes up tails,
+you're going to take a step to the left, and every time the coin comes up heads,
+you're going to take a step to the right, and so we can start you and your friends going,
+and you're represented by the little dots on the screen,
+and the blue just indicates that you're to the right of the halfway line and the red that you're to the left.
+And you'll see that all the individuals are jiggling around here.
+Sometimes they move back to the halfway lines, unless they cross over it.
+Most individuals, they remain relatively close to the halfway line,
+but some drift further and further away, a very small number.
+If you take the positions of all these individuals, they're distances from the halfway line,
+and represent that as a distribution.
+What distribution does this population of you and your friends attract to?
+So let's run the animation again, and let's track that distribution.
+On the left, I'm going to repeat the animation from before, and on the right,
+I'm going to show a histogram of the distances from the halfway line.
+And you'll see as the individuals wander, the distribution gets wider,
+but then at some point, it's width kind of stabilizes,
+and it has some thin tails at the extreme left and right.
+The most individuals staying in the middle,
+and you can probably see that this is a normal distribution,
+the familiar bell curve of the normal or Gaussian distribution.
+Why does this happen spontaneously?
+Well, it happens spontaneously for the same reason.
+Many natural forces processes attract to Gaussian distributions, normal distributions.
+It's because the process is adding together small fluctuations.
+So there are many, many more ways for a sequence of coin tosses to put you on or close to the halfway line
+than there are for a sequence of coin tosses to move you far from it.
+I'll say that again.
+There are many, many more ways for a sequence of coin tosses to get you on or close to the halfway line.
+That's because the heads and tails will balance in many, many different sequences
+than there are for sequences to move you extremely far to the left or to the right
+because that would require a run of tails or a run of heads.
+So this leads to this idea that there are two arguments for where Gaussian distributions come from
+that are so common in nature and in our data.
+The first is generative, the argument that I just gave, represented by the scenario I just simulated.
+If we sum processes that add together fluctuations, tend towards the normal distribution.
+And there are lots of processes in nature that add or approximately add fluctuations together.
+Growth is a very common one, right?
+If there's a certain amount of attitude to your height or your body mass every year,
+those are fluctuations, they will be added together over time.
+And so when we look at the size of animals in a population of the same age,
+they tend to have a Gaussian distribution.
+The second argument is not generative.
+It's inferential or statistical.
+If our goal is to estimate the mean and variance of some variable,
+the normal distribution is in a real information theoretical sense,
+the best one to use because it is least informative.
+I know these words put together like this sound weird.
+How is it best to use if it's least informative?
+What least informative means here is that it contains no other information than a mean and a variance.
+And so if you know more about the shape of the distribution of the errors,
+then you can use something other than a normal distribution.
+But if all you're willing to say is there's a mean and a variance and I'd like to know them,
+the normal distribution is the most spread out distribution.
+It covers the greatest number of possibilities because it contains no other information except those two things,
+the mean and the variance.
+Later on in the course, in the second half of the course,
+I'll talk about a perspective called maximum entropy where this is justified in a stronger sense.
+But the important lesson to get now is a variable does not have to be empirically normally distributed
+in order for the normal error model to be useful statistically
+because it's just a machine, a golem for estimating a mean and a variance,
+and it's a very good one because it's the most conservative or least informative distribution.
+It contains the fewest assumptions.
+That doesn't mean you can't do better sometimes if you know more about the process,
+but there's nothing wrong with using a normal error variance in a statistical model
+for something that is not normally distributed empirically.
+You will still estimate the correct mean and variance of that variable.
+Guarantee it.
+And today I will teach you how to build a golem and you can prove that to yourself.
+Okay, I want to do three things in the remainder of this lecture.
+Let's have some modest goals today.
+We're going to try to build some geocentric models.
+Again, the skills I want you to begin to develop in this lecture are first,
+to learn a language representing models, a standardized statistical notational language
+we can use to represent both generative models and statistical models.
+Second, I'll teach you how to calculate posterior distributions when there's more than one unknown.
+These unknowns sometimes call parameters.
+In the previous lecture, last week, there was only one unknown.
+It was the proportion of water on the globe.
+Now there will be multiple unknowns because there are typically multiple parameters
+used in a linear regression simultaneously.
+And finally, I want to show you procedurally how to construct and understand linear models,
+how to produce posterior predictions from them.
+And we'll get to practice all of these skills in the lectures to come
+so you don't have to understand everything right now.
+So let me pause on that point.
+This sort of material is pretty difficult, I think.
+And one of the reasons it's so difficult is because everything comes at you at once.
+You're dealing with new concepts and they seem fairly fantastical.
+And then there's a bunch of code and you're fighting with software installation on your machine.
+And unfortunately, there's no way to put any of it aside.
+You have to do all of that at once.
+And so this makes this sort of material a bit overwhelming.
+I sympathize with that.
+The good news is you don't have to understand it all at once.
+What you do need to be able to do is just have some flow.
+And what I mean by flow is that you feel some challenge,
+but you're moving forward.
+You feel the resistance of the water or the air if you prefer a flying metaphor,
+but you're moving forward and that's why you feel the resistance.
+You're not stuck.
+If you get stuck, that's okay.
+You can back up and watch the previous lectures
+and find out what you were stuck on and then start moving forward again.
+But you don't have to understand everything to keep moving forward.
+And as you move forward, you will find challenges that help you understand
+or realize that you didn't understand something from previous lectures.
+So flow is the goal.
+Part of flow is that things shouldn't be too hard as well
+because if it's too hard, then you stop moving.
+Then they also shouldn't be too easy because if it's too easy, you don't feel any resistance.
+You want to feel the water on your fins as it works.
+So don't stress if you feel resistance.
+That just means you're thinking.
+Or as I often say, if you're feeling confused at any time,
+it's only because you're paying attention.
+So what are we going to pay attention to today?
+Before I get into the details of the explanation,
+I want to remind you of the general structure of the workflow.
+We're going to emphasize in this course our owl drawing workflow.
+The first part of this stylized workflow is to state a clear question.
+This question can be descriptive.
+It can be causal.
+But we should have a clear question as we move forward
+because otherwise we won't be able to design a statistical model to answer it.
+The second thing you need to do is sketch your causal assumptions.
+And I'm encouraging people to use DAGs for this,
+at least for the examples in the first part of this course
+because this is a good way for non-theorists to realize
+that they actually have a lot of causal knowledge about their scientific systems
+and get them down on paper where you can interrogate them.
+From there, you can take your sketch and you can define a generative model.
+It's generative because it's code and it generates synthetic observations.
+And then we can use the generative model to build an estimator.
+That last week, remember, the garden of forking data provides our estimator
+and the garden of forking data is planted with causal assumptions, generative assumptions.
+And then we can also test.
+Once we have that estimator, we test it with synthetic data for the generative assumption.
+And then finally, we analyze the real data and possibly we profit.
+And that profit may be that we realize our model was terrible and we go back to step two.
+What we're going to do today is begin with a simple data analysis problem
+that is focused on human growth.
+And we're going to move through the same drawing-the-owl progression.
+And we're going to use some data when we eventually get to the data in step five
+from this great book by anthropologist Nancy Howell.
+It's a bunch of life history and demography data of the W. Krum.
+This data is contained in the retention package.
+You can load it with data howl one.
+We're going to be focusing on height and weight today.
+There's other variables in the data set that we'll take a look at in the next lecture this week.
+And our basic question is to describe the association between weight and height.
+This is important for lots of reasons in human biology and it's actually a great theoretical interest
+because many aspects of human life history are not well explained right now from an evolutionary perspective.
+So maybe this seems like boring kind of data and in some sense it is,
+but the questions that underlie it are quite exciting.
+Another way to say this, or I'd say we're going to restrict ourselves for this lecture to adult weight and height
+because adult weight and height are approximately linear related to one another.
+And so we can start with a simple linear regression.
+In the next lecture we can deal with more complexities.
+And for the scientific model we're going to make it causal.
+Any association between weight and height arises causally because height causally influences weight.
+Taller people have more person in them and so they weigh more.
+And so here's a little dag, H influences.
+W, weight, which means to remind you, this arrow means that weight is some function F of height.
+So there's a big literature on modeling human growth and you've got a bunch of different models and options
+in terms of generative models of this relationship of how height influences weight.
+The first would be the dynamic models, very detailed biological models of incremental growth in an organism,
+how the mass of the organism is a product of its length,
+and how this derives from a particular growth pattern, life history pattern.
+And the Gaussian variation that we observe in adult weight and height arises from some fluctuations of individual increments of growth.
+We're not going to do this, but this is the background of what you could do if you wanted a really detailed model.
+You would make it dynamic, you would birth synthetic individuals,
+and you would grow them up to particular ages,
+and then you would look at the distributions of weights and heights at those particular ages.
+There's also static models, which is what we're going to do.
+We're going to imagine the association between these variables, weight and height, at particular age ranges,
+and we're going to still have Gaussian variation,
+and we imagine it's a result of this growth history, the accumulated fluctuations in growth,
+but we're not going to model it in a dynamic sense.
+This is all just to make it easier.
+If you really want to get into human biology and model this stuff,
+you can go into the details as deep as you want.
+Okay, so here's our scientific model.
+I'm going to add one more thing to it before we build the generative model,
+and that is I'm going to add another variable, this u with a circle around it, the circle.
+It indicates that in this class that the variable is unobserved.
+We have not measured this variable u.
+It's some unobserved influence or set of influences on body weight,
+because, of course, it would be very naive to think that the only thing influencing body weight is height or stature.
+Lots of other things matter as well.
+This is going to turn out to be conceptually useful for us if it seems silly right now.
+This will be conceptually useful both in this lecture and in future lectures.
+Now, what we need is a function that simulates body weight,
+and it takes us to input height and these unobserved things.
+In our simulation, we get to observe it.
+It's only in our real data that we have to observe these things.
+So weight is some function of height and other unobserved stuff.
+So let's build the generative model.
+For the generative model, I'm going to start real simple, as I said, so there's some flow.
+For adults at least, we can imagine weight is a proportion of height
+plus the influence of the other unobserved causes.
+And so here's our equation for this.
+W is equal to some proportion beta of height h plus u.
+And we have an observed u, so it's essentially a source of observational noise,
+a variation around some expected value of weight for each height
+that is proportional and has a proportion beta.
+We can write a simple little function for this in the spirit of what we did in the previous lecture.
+Sim-weight is a function of height, our parameter b for beta, and a standard deviation.
+And where's this standard deviation coming from?
+It's the standard deviation of u of the unobserved stuff.
+It's the amount of noise or the width of the error distribution.
+So we simulate the u in this function using r-norm, which is a random normal.
+And we simulate one for each individual in the vector h.
+That's the length of h with a mean of zero and some standard deviation that we input.
+And then we just determine w using the equation that we defined earlier.
+This is the world's simplest generative model of weight using height,
+but that's where we want to start and we can get pretty far with this.
+So our goal is going to be to estimate beta when we eventually get to the estimator.
+For right now, we're just simulating what data looks like for any given value of beta.
+So if we're going to do such a simulation, the first thing you need is you need heights.
+So I'm just going to generate 200 random individuals, uniformly distributed heights between 130 and 170 centimeters.
+Just for the sake of the example, real data may be different.
+And then we simulate weights using those heights with a proportionality of 0.5 and a standard deviation of 5.
+So the weight is going to be in kilograms here.
+So this gives you an idea of what the standard deviation is.
+That's a variance of 25.
+Yeah.
+And then we plot them.
+And these are our synthetic people.
+This is not a real population, but the idea is that you want the simulation to be able
+to produce something that fits what you know scientifically about the constraints on human height and weight.
+So you shouldn't be getting individuals who are impossibly light for their height
+and are impossibly heavy for their height.
+But you can adjust this simulation to produce biologically unrealistic relationships.
+You just make B large, for example, or make B too small.
+Okay.
+Before we move on to develop an estimator, or actually we still need to, and then test it using the synthetic data,
+we need a little bit of language about how statisticians typically describe, conventionally describe these sorts of models.
+And this is going to be very useful because you're going to use this same kind of model description to program the estimator.
+You'll see in this way you're learning the notation as you go.
+And this notation is very conventional, so it's a good communication medium.
+Conventional statistical notation first lists all the variables that are in the model,
+whether the model is generative or statistical.
+And then for each of those variables, we need to define where it gets its value.
+And each variable can either be a deterministic function of some of the other variables,
+or it can be a distributional function of the other variables.
+And I'm going to show you what this means.
+So let's go back to the simulation we just did, where we simulate weight.
+This is a function of unobserved u, which has normal error,
+and w is a deterministic function of h and u together.
+So we can rewrite this in standard statistical notation.
+I've done that on the bottom of this slide.
+I'm going to explain each of these lines as we go.
+Each of them is mirrored by a line of code when we do this in the computer.
+So in this, on the left, we have all the variables, not all of them.
+There's also beta and sigma.
+We have variables on the left that have their values determined through relationships that are stated on the right or definitions.
+And there are these little subscripts i, which are new to this course.
+And these indicate individuals in this case, but they're individual observations.
+i is an index, and it would take on a value from one to however many individuals are in the sample.
+And then an equal sign indicates a deterministic relationship.
+And this tilde represents a distributional relationship.
+You can read it as distributed s.
+So the first line of this statistical model notation for our generative model is the equation for expected weight.
+Once we know the values of the variables on the right of this, we can assign values to w.
+But some, one of these variables on the right, u sub i, is actually has a different kind of relationship.
+It has a distributional relationship, a stochastic relationship.
+It's not perfectly determined by sigma.
+It, rather, sigma determines the distribution that each u sub i is drawn from.
+So this is the Gaussian error with standard deviation sigma.
+And then h sub i, we also simulated that.
+And the way we simulated that, the way i simulated that, was to use a uniform distribution from 130 to 170.
+And so we can look at the code again, and you can see how these things can form.
+One thing to note about this is the statistical notation is sort of written in the opposite order of the way you write the code.
+When you write code, you have to write the lines in order of execution,
+because all the variables have to be populated with values by the time you use them in a function.
+But these statistical, conventional statistical notation is not like that.
+In some sense, the order is arbitrary because they're all just simultaneous definitions.
+These definitions are not executed like code.
+And so you can make the order anything you want in principle,
+but it's conventional and quite useful to state it in the opposite direction from the way we write the code,
+because then as you read from top to bottom, you're reading the dependencies below.
+So you start with the most general definition.
+W sub i depends upon the most variables.
+And then you see how those variables, it depends upon or defined below it.
+So there's a hierarchy that makes sense, and most people prefer to state these conventional models in the opposite order that we write the code.
+I know that can be confusing. I just wanted to point this out.
+Okay, that's already a lot of work, a lot of conceptual work, a bit of history of science.
+I think this would be a great place to take a break, review the slide so far,
+mark down anything that's confusing to you, and then when you come back, I will still be here.
+Okay, welcome back.
+We're going to pick up where we left off.
+We had to find our generative scientific model, and now we're ready to develop an estimator for the height influencing weights example.
+When we build an estimator now, this is going to be a case where the estimator has some things in it which are not exactly like the generative model,
+and I'm doing this because this is a general feature of linear regression, is that it's usually not exactly like the generative model itself
+because there's some things we do with the linear model estimator to make estimation work better and to allow it to show us problems with the generative model.
+And I'm going to try to unfold those points to you beginning with this lecture, but also in the next one.
+So you just have to be patient with me.
+There's a method to my madness.
+We want to estimate how the average weight changes with height, and what that means mathematically is the average weight conditional on height,
+and so I write this down, e of w sub i conditional on h sub i.
+So for any given individual height, or rather each individual height has a different average weight where the e means average here, expectation.
+So we say the average weight is conditional on height, and we're going to write a linear equation for this conditionality,
+that there's some intercept alpha, some slope beta, our proportionality, constant from the generative model, times the height.
+The alpha is usually called an intercept because this is an equation for a line, and it's the intercept, the intercept meaning when h is zero,
+alpha is the value of the weight for an individual with zero height.
+Now, of course, you know scientifically an individual who is zero centimeters tall also weighs zero kilograms, and so alpha should be zero.
+But we're going to put it in the model here because that lets us estimate it and it's a way of testing for model violations, right?
+Is our linear model adequate?
+And then the slope determines the slope of the line, connecting weight and height.
+We're going to build a posterior distribution because we're good Bayesians, and that's all good Bayesians do.
+There's only one kind of estimator in Bayesian inference.
+It's always a posterior distribution, but it's driven by different generative models.
+So in this case, this looks a bit more complicated, but hang on, I'm going to highlight each of the pieces of this and explain them.
+This is the same kind of entity we had in the previous lecture when we tossed the globe.
+It just has more unknowns now.
+So on the left, we have the posterior probability of a specific regression line, because the regression line is defined by alpha, beta, and sigma.
+These are our three unknowns.
+Alpha and beta define the line, which is the expected weight for each height.
+And sigma defines the error around it, how much variation there is in individual people around the expectation.
+And these are conditional on the data, h sub i and w sub i, the observed variables.
+So alpha, beta, and sigma are unobserved variables.
+We need to develop a posterior distribution for them.
+And h sub i and w sub i are observed variables.
+We don't need a posterior distribution for them because they're known.
+Then on the right, the posterior distribution, as you know, is proportional to the product of the number of ways we could see the observations conditional on an exact line in this case.
+So for specific values of alpha, beta, and sigma, given h sub i, how many ways could the generative process produce w sub i?
+And this is going to be a Gaussian error distribution, right?
+So the Gaussian model is going to populate our garden of forking data in this case.
+And then it's, as I said, the posterior probability is always proportional to the product of that, the number of ways the observations could arise according to our assumptions.
+Times the previous posterior distribution, which is often called the prior.
+And remember that is the normalized number of ways that the previous data could have been produced given a specific set of unknowns, alpha, beta, and sigma.
+And then there's this normalizing constant I keep calling it z, which is just a convention in lots of mathematical statistics.
+And we're not going to pay much attention to this.
+This is not a math stats course, so we're not going to spend time doing integrals and figuring out what z is.
+But it's there just to normalize so that the left-hand side of this is a proper probability.
+Okay, so in the conventional statistical model notation, w sub i is normal with some mean u sub i and some standard deviation sigma.
+And that mean u sub i is our linear model alpha plus beta h sub i.
+And this is the way you'll tend to see statistical models written.
+You won't see them with the posterior distribution written out like on the top part of this slide.
+Instead, you'll see what's at the bottom part of the slide.
+And this is also how we're going to program statistical models in this course.
+It's using notation that mimics the lower half of this slide.
+And you can read this as w is distributed normally with mean that is a linear function of height h.
+So we need to do it.
+So in the notes, I show you how to code this stuff and we can do a quick grid approximation of it.
+There's nothing fancy about the code or interesting about it, but it's all in the book.
+And for just 11 different possible values of the slope and fixing alpha at zero and sigma at five, I think in this example,
+we can figure out for one simulated observation, the posterior distribution.
+All posterior distributions begin with a first observation, right?
+Remember, there's no minimum sample size in Bayesian inference.
+And it looks like this for some particular simulated observation where the true generating value is 0.5.
+And remember from last time, if we make this grid finer and finer, we can get more and more possibilities.
+So as I also show you in the notes, continuing with the grid and considering many, many more slopes and sampling now three points on the right,
+we're looking at the relationship between height and weight and letting alpha and beta vary.
+There are two unknowns we need to estimate them simultaneously.
+What this model really represents in the posterior distribution is lines.
+And so for models like this, inspecting the posterior distribution of individual parameters is often not very useful.
+It's usually much more useful to look at the functional implications of those parameters together,
+because those parameters are joint inputs into some function, in this case a line.
+And so to know what they mean together, you need to plot the lines.
+You could say the posterior distribution is full of lines.
+And so on the right of this slide, I'm showing you the implications of the posterior distributions of beta and alpha,
+given these three observations here, where the width of the line is proportional to its posterior probability.
+And you'll see that the lines that sort of lie between the points are the more plausible ones,
+but there's still a lot of spread of probability mass everywhere because there's only three observations.
+As we add more and more observations, the probability mass masses up on fewer lines.
+You can see one, two, and three, for some reason backwards on this slide.
+Sorry about that.
+And 10, 20, and 89 in the bottom row, and you can see that the probability mass masses up.
+And then we're up to 89 individuals in the bottom right.
+Almost all of the posterior probability is on a couple of lines there in the middle.
+This is still a discrete grid approximation just to help you understand it conceptually,
+but when we work with models like this linear regressions, of course we're going to have an infinite grid,
+a smooth grid, a smooth posterior distribution, but I haven't showed you how to do that yet.
+When we do that, you want to think about what these linear regressions are really doing.
+And so bear with me a moment, I got a couple of animation slides here that I want to draw your attention to
+so you can get some sort of organic feel for what these things are doing.
+On the left of this slide, what I'm showing you is a posterior distribution.
+Or you could say it's a prior because there's no data yet.
+It's what the model believes before it's seen any individuals.
+And on the horizontal, I have the intercept, alpha, and on the vertical slope.
+And I zero centered these just to make this a conceptually easy thing to think about.
+This is not about height and weight necessarily.
+It's just an anonymous linear regression where the lines are defined by intercepts and slopes.
+Okay, and so those concentric rings, it's like you're looking down on the top of the distribution.
+This is a hill.
+And in the middle are the most plausible values in the prior and out towards the edge.
+They get increasingly implausible.
+And now the little colored balls that are bouncing around, rolling around on this hill,
+they tend to spend most of their time near the middle with the high probability,
+but sometimes they wander out to the far edge before coming back in.
+They explore this distribution in proportion to the posterior probabilities of each combination of intercept and slope.
+Okay.
+And then on the right, we're looking in the outcomes phase.
+Some x-axis value on the bottom.
+This is the conditioning variable, the predictor variable.
+Some people call it.
+And on the vertical, we have the outcome variable, y, which is conditional on x.
+And then I'm showing the lines that are implied by the positions of the same colored balls on the left.
+And this stands this around here.
+And this is n equals zero.
+There's no data yet to constrain these lines.
+And they can do just about anything, including completely ridiculous stuff like be almost perfectly vertical.
+Yeah?
+Maybe there are samples where vertical is the right thing, but it's not too common in science.
+Now I'm going to let this thing go forward.
+We're going to introduce one data point at a time.
+And you'll see the posterior distribution contracts around increasingly plausible values determined by which observations are made.
+And this then constrains the dance of the lines on the right.
+And they start to settle down.
+But they keep moving.
+And this is the sense that the posterior distribution is full of lines.
+And it has to consider an infinite number of them.
+But this is no problem for calculus.
+It's no problem for our computers to do it.
+So here we go.
+Start it again.
+Here comes the first data point.
+One data point doesn't do a lot of constraining, but there's already information.
+Then the second and the third.
+And you'll see that the rings on the left contract and the lines on the right dance less and less.
+Five, six, seven.
+That gray bow tie on the right is just meant to guide your eyes.
+It's not a real thing.
+It's just a visual proxy for the range that the lines can dance in given the updating to that point.
+I'll let this animation run through one more time.
+First data point, second data point.
+The third.
+The contraction happens on the left because the probability in the posterior distribution
+masses up on a smaller range of values for the intercept and the slope as we get more data.
+And then the implied lines, the real predictive implications of that posterior distribution,
+they tend to occupy a smaller and smaller range.
+Okay.
+You can do all of that with grid approximation, actually.
+There's nothing wrong with grid approximation.
+It's just that it's a grid.
+What we're going to do from here out through the first half of the course is use another kind of approximation,
+which is continuous, so it doesn't need a grid, and it's much easier to set up and run.
+It's called the quadratic approximation.
+And in the quadratic approximation, what we do is we approximate the normal distribution.
+We approximate the posterior distribution as a multivariate Gaussian distribution.
+I'll say that again.
+We approximate the posterior distribution as a multivariate Gaussian distribution.
+And we can do that because posterior distributions very, very often, and especially in this case,
+are in fact multivariate Gaussian if the sample is even reasonably large,
+even a handful of observations in this case.
+And we're going to use a tool that does this for you.
+You don't have to do the detailed algorithm programming yourself.
+A tool called quap, which just stands for quadratic approximation.
+And quap is in my rethinking package, and I designed it as a teaching tool.
+It was sort of the birth of this course now more than 10 years ago.
+It was to write a statistical tool so students could, it would have to enter every assumption of the statistical model
+so that they would know what the assumptions were and they could adjust them and see what the consequences are.
+And so that's what this tool lets you do.
+You enter a list of deterministic and distributional assumptions that define a statistical model,
+and then quap runs it and finds the quadratic approximation, the Gaussian approximation,
+of the posterior distribution for this model and the day you pass it.
+It's called a quadratic because the Gaussian distribution is in a deep sense quadratic
+because it's defined only by its variance, right?
+So the mean and its variance, and that's all there is.
+So in the log space, the Gaussian distribution is the perfect parabola, quadratic function.
+The thing that we need to do here in this new is in the statistical model,
+unlike the generative model, you need priors.
+You need to say when there's no observations, what does the model believe?
+And in the previous lecture, I punted on this because it wasn't very exciting to talk about what we believe
+about the proportion of water on the earth before we've tossed it.
+Now, there's more scientific input here.
+We can think about and we can have productive discussions about priors a little bit more.
+So I need to, when you're designing an estimator and you put the priors in,
+you could use really, really flat priors, which is quite conventional.
+I don't tend to do that.
+I tend to use more concentrated priors, not priors that build in the answer, actually.
+Indeed, actually, it's quite the opposite.
+These priors build away from learning from the data.
+And that's intentional.
+But at the same time, they constrain the implied observations of the model
+to scientifically realistic ranges.
+And that's what we're going to be doing when we design estimators in this course,
+is designing priors so that before the model has seen data,
+it doesn't hallucinate impossible things.
+And this is going to turn out to be really useful for estimation.
+I'll explain, I think, in two weeks' time.
+Okay.
+So there's more to say about the quadratic approximation and how it works.
+And there's much more in the book on that if you're interested, take a look.
+And also, of course, lots online.
+It's a workhorse approach, both in Bayesian and non-Bayesian statistics
+to do quadratic or Laplace approximations.
+I want to spend time in lecture instead of on algorithms for computing posterior distributions.
+I want to spend the time talking about something much more useful,
+which is how to construct a prior predictive distribution.
+We did posterior predictive distributions at the end of the previous lecture.
+The prior predictive distribution is exactly the same thing,
+because prior distributions are posterior distributions.
+Posterior distributions are prior distributions.
+They're the same animal.
+There's no essential difference between them.
+So there's the same procedure.
+We can push predictions out of the prior, even if the model hasn't seen data.
+We can force the model, the golem, to make predictions before it's made any observations.
+And what we want is a set of priors so that the predictions are not crazy.
+We don't want predictions that mimic our sample,
+because we haven't looked at our sample yet in any detailed way.
+So what we're doing, we just want boundaries that look in some sense like a human on the planet Earth.
+So this is what I say.
+Prior should express scientific knowledge, but do so softly.
+We do so softly because often the real generative process in nature is different than what we've imagined.
+So we want a statistical model that's flexible enough to see and learn those violations
+so that we can think about the structural flaws with the statistical model.
+So what is scientific knowledge in this case?
+You are humans and you know a lot about human biology, whether you are aware of it or not.
+So for example, somebody who is zero centimeters tall also is zero kilograms.
+So that's a strong constraint.
+So alpha should be close to zero if the linear model of weight and height is a good one.
+And so I'm going to put a prior on alpha, which is a normal distribution centered on zero,
+with a variance, a very wide variance to allow.
+This is the softliness so that if this is not true, the model will be able to learn it.
+What about the slope?
+Well, you know that weight increases on average with height,
+which isn't to say that every taller person is heavier than the people shorter than them.
+Only that on average is true that taller people are heavier.
+So this means that beta is positive.
+Yeah, it's not negative.
+Taller people are not lighter on average.
+And then weight and kilograms is less than height in centimeters, right?
+Somebody who is 170 centimeters tall is not normally on average 170 kilograms.
+Yeah, they're less than that.
+And so beta is probably less than one.
+So I'm going to put a uniform prior on beta between zero and one.
+This is not super informative, right?
+There's lots of stuff that could still happen there,
+but this is just to get into the habit of using scientifically reasonable priors
+so that the prior predictions are not totally crazy, right?
+We don't want vertical relationships between height and weight.
+And then sigma, we could think more about how much variation there is in each height and so on,
+but I'm just going to assert that the minimal scientific information here that's required
+to even get the model to run is that standard deviations are positive.
+And so sigma must be positive, and so it's greater than zero.
+And I'm going to put a uniform between zero and 10.
+This means a standard deviation of 10 is a variance of 100.
+There's not a variance of 100 kilograms around the average weight,
+so it's not even going to get that large.
+Yeah, it'll be smaller than that.
+So it must be in this range, whatever the actual standard deviation is.
+Okay, how do you understand the implications of these priors?
+You're not meant to just look at this definition and intuit it like some kind of savant.
+What you're meant to do is perform a prior predictive simulation
+and then draw the observable implications of these priors in the observable outcome space.
+That is, we're going to make some lines.
+So here's a little bit of code that's sufficient to do that.
+I'm going to draw a thousand, that's 1e3,
+a thousand random samples from the prior of alpha and beta.
+A is normally distributed with a mean of zero and standard deviation of 10.
+And B, uniformly distributed between zero and one.
+Just draw a thousand random pairs of those two things from the prior definition on the right.
+And then plot the implied lines.
+So I set up a null plot that has no points in it.
+And then I just put 50 lines in here from the random samples of A and B to see what they look like.
+And here are our random regression relationships.
+What the golden imagines before it's seen any data.
+This is a bit wild, right?
+Many of the lines are too low.
+The slopes are not bad.
+So the constraints on beta from zero to one, that's not so bad.
+It's the intercept that is wild.
+The low ones are impossibly low, right?
+Individuals 170 centimeters is not going to on average be 30 cubic grams, yeah.
+And then the high ones are too impossibly high.
+And off the top of this graph, if you expanded the range of the y-axis,
+you'd probably see some lines that were way too steep as well that we can't see
+because they've been cut off by the range that I chose on the y-axis.
+So this is what prior predicted simulation does for you.
+It gives you an idea to see this.
+You are an expert in your field.
+You are.
+And when you see the implications of your assumptions in this way,
+in the outcome space, you often realize that your assumptions are bad.
+But it's very hard to realize this just from looking at the definition of the model.
+And so we're going to do a lot of these predictive simulations prior and post
+in order to understand what the model is actually thinking in its tortured little mind.
+I'm going to leave these priors for now.
+And we're going to come back to this issue of priors
+and this particular scientific modeling problem later on in the course.
+We'll come back to it a few times, actually.
+These priors aren't going to do any damage right now.
+This is a really simple model.
+And you'll see that we could choose crazy priors, in fact,
+and Bayes is going to learn the proper relationships among the variables very quickly anyway.
+Okay.
+Short, the first of what will probably be many terms on priors.
+As I said before, I think it's unfortunate that people typically take their first Bayesian statistics course
+after they've had some other kind of statistics course.
+And then the concepts from the non-Bayesian course are interfering with their learning.
+And one of the things that happens often in Bayesian courses is you get this impression
+that it's everything else you did before plus priors.
+And so I'm showing you a linear regression and it looks, if you've already had a course in regression,
+it looks like the regressions you did before, but there are priors added to it.
+And so you get the impression that Bayes is frequentism plus priors.
+But that's not true.
+The whole approach to probability is different in Bayes.
+And that's why last week I started with the garden of forking data.
+I didn't even talk about priors very much last week.
+Yeah.
+Priors are just posterior distributions.
+It's the posterior distribution that's different and how it's computed.
+And so there are no correct priors, only scientifically justifiable priors.
+And this is exactly true of posteriors.
+There are no correct posteriors.
+They're just scientifically justifiable posteriors.
+What justifies them?
+The scientific assumptions that motivate the generative model that inspires the estimator.
+And those things have to be defended and they can't be easily tested with data,
+at least not in the context of a single study.
+We have to justify these things.
+The structure of the model and the structure model includes the priors with outside data.
+In very simple models, like linear regression, the priors don't do much work actually.
+They get overwhelmed very, very quickly.
+You'd have to make them crazy strong and you'd never do that by accident
+in order for them to influence your results.
+And I think a problem then is if you never move past simple models in Bayes,
+you never see some of the really important ways that priors work to help us do scientific inference.
+And so in the second half of this course, you're going to see in more complicated models,
+priors do a lot and we're going to have to think much more carefully about them.
+And non-Bayesian approaches for complex models have all the same problems,
+but they don't have priors to solve them with.
+And so they have other often mathematically equivalent ways of sort of smuggling priors into the computation,
+things like regularization.
+So it's not that this is a problem unique to Bayes and complex models.
+It's just a feature of complex models and Bayes, we solve it with priors.
+At least we solve some problems with priors.
+Okay, but we're going to practice with priors now even though they don't matter very much
+because you want to practice when it's easy so that you know what to do when things are hard.
+Okay, we're up to step four now.
+We're ready to validate.
+We have a generative model.
+We have, it can produce some synthetic people.
+And we have a statistical estimator now.
+We can use quap to get a posterior distribution.
+And so let's feed synthetic people into our model.
+And I keep harping on this and I'm going to keep doing it.
+You've got to test your code like this.
+You really do.
+This is sort of a bare minimum thing.
+And it's not because you're programming the estimator yourself.
+In fact, you're not programming the estimator.
+I wrote quap, remember, and quap does the searching.
+So it doesn't matter what package you're using.
+You've got some generative process.
+You need to write it as a code to generate synthetic data so that you can show that your estimator,
+whatever structure it has, whatever notation your statistical software requires,
+could work even in principle.
+That's a minimum scientific standard.
+So you test the statistical model with simulated observations.
+It's the bare minimum.
+You can do much more stringent tests than the sorts I'm going to show you in the lectures.
+There's this thing called simulation-based calibration.
+There's a literature online about that where you can test very rigorously how calibrated
+Bayesian estimators are over the full shape of their posterior distributions.
+Okay.
+So the simplest sort of test here, though, not a full simulation-based calibration,
+would have this code as a scaffold.
+We're going to simulate a sample of 10 people at the top of this code block,
+and the data generating slope is going to be .5.
+You're going to want to vary this across runs and make sure that the estimator tracks it,
+and then run the model using quap.
+And quap takes a formula list that mirrors the mathematical definition of the statistical model,
+and you see it here.
+Again, when you're using quap, there's a function in my package.
+It's called PRACI, which will give you a quick summary of the marginal posterior distributions
+of each unknown.
+Yeah, so this means the mean and standard deviation and 89 percent percentile interval
+for each of the unknowns in the posterior distribution.
+And this is just a quick summary.
+It's not sufficient for understanding what the model has learned,
+but you can already see from here that it's not having any trouble recovering the data generating slope.
+Having more trouble with the intercept, and it's also recovering the standard deviation quite well.
+So again, when you're testing, it's not sufficient to do just one run like this.
+You want to go back up to the generating code and change B, the input B,
+and make sure that your posterior distribution follows it, and so on.
+You want to try very large samples, make sure it converges,
+try small samples, and see that it's characterizing the uncertainty correctly, and so on.
+Okay, we're almost at the profit stage.
+We can take Nancy Hall's data, and we can put it into the analysis code we have already written.
+So in this drawing now workflow, it's very nice about this, is when you're going to have to do a lot of work,
+especially for more complicated models later in the course, to get through the validation stage.
+There will even be multiple rounds of model development and validation before we can pass on to step five.
+But by the time you get to step five, you can put your real sample in, and it'll run.
+And that's a great feeling, absolutely great feeling.
+A couple of projects I've worked on where I spent literally three months moving between numbers three and four,
+layering in different components of the statistical model, and making sure they worked on synthetic data,
+before finally putting the real sample in.
+And then the first time I put the real sample in, it just ran.
+It was great.
+Okay, so we can do that.
+This is a much simpler case.
+We can just put the real sample in.
+We feed the weight vector and height vector from Nancy Hall's data, where weight is measured in kilograms,
+and height is measured in centimeters, directly into the same model that we used to do the validation.
+And we can pull up the summaries the same way.
+And you see, beta is about 0.5, a little bit above it.
+You'll see it's estimated quite precisely.
+The standard deviation will be 0.03.
+Sigma is about four.
+The intercept is definitely not zero.
+So this suggests there really is something globally nonlinear about the relationship between height and weight, right?
+Because you can't have negative weights at all.
+Nevertheless, I'll show you on the next slide, this approximates the adult relationship quite well,
+and that intercept is just a weird nonbiological term.
+Let's need it to make the line fit.
+What I'm showing you on the right of this slide is something called a PAIRS plot.
+PAIRS, P-A-I-R-S, PAIRS.
+And it's called that because it plots pairs of unknowns from the posterior distribution against one another.
+So the diagonal in this grid of plot is just the density, like a continuous histogram,
+of the posterior distribution of each unknown, of each parameter, A, B, and sigma,
+and then you see they're Gaussian, yeah?
+They're nice bell shapes because that's what quat produces.
+But if you used another technique, you'd see that they were Gaussian as well in this case.
+And then in the upper triangle, the upper right, you're seeing posterior distributions as plotted from above for each pair.
+And what I want you to see is that the intercept alpha and the slope beta are very strongly related to one another.
+They co-variate along a very tight line.
+They're almost perfectly negatively correlated with one another.
+And this is how linear regressions often work.
+There's strong co-variation among the different unknowns, the different parameters that determine the shape of the line.
+And so you can't interpret the intercept in the slope separately in these cases.
+And once we get more complicated linear regressions with many predictor variables and many slopes and interactions,
+you really can't use a table of coefficients to understand what the model is doing and behaving.
+You have to push out posterior predictions.
+So we're going to do that quite a lot.
+So if we do that in this case, what I just told you is I call obeying the law.
+The first law is disk interpretation.
+Parameters are not independent of one another and cannot always be independently interpreted.
+So instead, they have a lot of variance and covariance with one another.
+So instead, we push out posterior predictions.
+We do that by extracting samples.
+And so I'll show you a little bit of the code on the right.
+Once you fit a quap model, you can use this function extract.samples for the model and get essentially a synthetic data table
+which contains samples from the posterior distributions.
+Each column being an unknown, a parameter, and each row being a set of correlated samples that have the right covariance structure
+for the given posterior distribution.
+And then you can simulate lines from it.
+That's what I do here.
+So first, in this little block of code, we extract samples from the model of weight as a function of height for the actual HAL sample.
+Then I plot the HAL sample on this graph.
+So each red dot is a person in Nancy HAL's data set.
+And then I draw 20 lines randomly sampled from the posterior distribution.
+And those are in black.
+And you can see that the slopes vary a little bit, but they're mostly just a little bit above a half.
+And they're in a fairly narrow range.
+There's over 300 individuals, adult individuals in this sample.
+So that gives a lot of information to estimate the average relationship between weight and height.
+This is only the average because you'll notice that most of the points are not on the line.
+There's a lot of residual variation from the U, the unobserved other factors that influence weight.
+Sometimes you want to put that on the graph, too, and see that sort of prediction envelope that comes from sigma,
+which defines the variation around the expected relationship.
+So I'll show you that in a moment.
+What I wanted to show you first is the Bayesian updating perspective on this data set.
+Of course, with Bayes, you can do it one data point at a time.
+And you can do that with this data set as well.
+So if you enter only one individual, that's what you get in the upper left here.
+The model is still quite unsure.
+This is just one individual, what do you want from me?
+And for five individuals, it's starting to get much more confident with its random lines for the posterior.
+For 25, even more so, 50 is basically in the right.
+It's already learned, but it's still wider than what it will be with a full sample,
+and then repeating on the far right the inference for 352.
+But it's important to start thinking about this is that there's not one true line in Bayesian analysis.
+There's no one point from the posterior distribution or one line that is the right line or the right answer.
+It's the whole distribution.
+And so this is the kind of summary you want to aim to produce is one that shows that variation.
+Yeah, and the easiest way to do it is just draw multiple lines from the posterior and plot them all.
+And then you see right away the variation.
+Okay, the posterior is full of lines.
+As I often say, it's also full of people, the individual points.
+The goal will make a prediction about how far out most of the individual should be from the expected relationship,
+and you can simulate that as well using sigma.
+And that's what I do with the code block on the bottom of this,
+and that produces the dashed line to sort of prediction envelope around the anticipated relationship,
+the average relationship that is the solid lines in the middle.
+This is just a percentile interval from the simulating individuals with this helper function called sim,
+which is part of rethinking that I use in the bottom block here.
+And you just give this a fit-quap model and some new data.
+Here are some new individuals just ranging between 130 and 190 centimeters in height.
+And it simulates from the whole posterior distribution,
+the whole posterior predictive animation that was in the previous lecture.
+It does that.
+It does it behind the scenes using the model definition that's in the quap model that you supplied it.
+And then it returns a big data table of those simulations,
+and those will be individual weights that were simulated.
+And they will use all the parameters, including sigma, to do that simulation.
+And then you just take a percentile interval for each height value.
+That's what the rest of the code does there.
+And when you apply W post-pred to PI, which is the percentile interval function,
+and then the lines command at the bottom of that block of code, just draw the dashed lines.
+If you want to understand code like this,
+what I recommend is executing each line one at a time,
+and then inspecting its output, and then moving on to the next line.
+This is always the way to learn how someone else's code works.
+Okay, that's enough for today, and it's really possibly too much.
+I apologize, but back up and review and make some notes about what was confusing,
+and this will provide the foundation for the next lecture.
+We're going to stick with the same Nancy-Hell dataset,
+but we're going to take a look at some other variables as well that influence these things,
+or maybe they don't.
+The thermometer on your screen is meant to remind me to say that things like linear models,
+most statistical models are akin to thermometers because they're measurement devices.
+They're ways of measuring something, measuring associations between variables,
+in the case of linear regression.
+And thermometers, it's something we call temperature.
+But of course, you have to define the temperature in a particular way about what's being measured,
+and your interpretation of what the thermometer reads depends upon other issues as well,
+like who you are and your perception of the temperature, or the conditions outside,
+how damp it is, so on.
+There's no real subjective agreement on the meaning of what the thermometer says, right?
+And then you may know about these things that North Americans are weird
+because we talk about this thing called wind chill,
+that's sort of how apparently cold it is.
+Europeans are starting to adopt this, but it's still not very common here.
+This is just to say that temperature is a socially constructed object,
+but it's incredibly useful.
+The things that statistical models like linear regressions, measure,
+or also socially constructed objects in their meanings come from the purpose we assign
+and our scientific beliefs about the processes that generate the sample.
+This is not to demote statistics in its power,
+it's just to be honest and realistic about what it's doing,
+as we should be honest and realistic about how useful the information we get from a thermometer is.
+Okay, so this distinction then in our linear thermometers
+between the generative model I'm showing here on the left,
+there's some background scientific idea about how a sample is generated,
+that weighted some function of height and other stuff that we haven't even measured,
+but since we haven't measured it, we need a statistical model that can cope with that,
+and so we use a Gaussian error distribution that tries to cover for the stuff we haven't measured.
+And it can do unreasonably well at that in lots of situations,
+but there are also situations where it can't.
+The other thing that goes on in the statistical model is we need priors.
+We need to define an initial state of information,
+and there's good scientific information that can be added at that stage as well.
+Okay, I appreciate your attention for this material.
+We'll continue in the next lecture building directly upon this
+and talk even more about causal inference in linear models,
+and I'll be looking forward to seeing you there.

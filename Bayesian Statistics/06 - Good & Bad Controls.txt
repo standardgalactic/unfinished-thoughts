@@ -1,0 +1,980 @@
+Welcome to lecture 6 of statistical rethinking, 2023.
+Putting out candles like this is very impressive, unless of course you realize how it was achieved.
+And it was achieved probably with hundreds of takes.
+All of these tricks are amazing when it works, but most of the time they make a big mess.
+The scientific literature is very similar.
+The scientific literature misrepresents the clumsy process by which we often design, research, and analyze data.
+And that means it's hard to interpret published research just like it's hard to interpret these nunchuck tricks.
+So we'd like to do better.
+And we do better by avoiding being clever.
+And what I mean by that is we should not try to represent our work as if some flash of insight, because we're very clever people, allowed us to find the solution.
+Instead, we should conduct our research and represent it as boring as possible.
+That is, we want some reliable, transparent, and logical set of procedures that can communicate our assumptions,
+deduce their implications, and expose them to critique.
+And that's what I'm trying to represent in this class when it comes to the data analysis stage of scientific inference.
+So we avoid being clever because it's unreliable and opaque.
+In these examples in the course, we're going to develop causal models at different levels of abstraction.
+And then we use logic to derive their implications.
+And in this lecture, we're going to spend all of our time on that issue.
+What does it mean to use logic to derive the implications of a causal model?
+We're going to develop the tools, the elemental confounds from the previous lecture, the fork, the pipe, the collider, and the descendant into a framework that we can use to do logical deduction about the implications of a set of causal assumptions.
+Just to remind you, the three basic ones, the descendant, as I explained before, is a bit of a parasite on these three.
+The three basic relations between three variables are the fork, the pipe, and the collider.
+And in each, what you want to understand is how X and Y become associated or seem not to be through stratification.
+So in the fork, X and Y are a common cause, Z, or Z, if you're from the continent.
+And X and Y will therefore be associated in a sample.
+However, if you stratify the sample by Z, that association statistically vanishes.
+In the pipe, you get the same set of statistical relationships that is X and Y are associated in the sample because X's influence on Z is passed on by Z to Y.
+Z is a mediator.
+And again, if we stratify by Z, the association between X and Y vanishes.
+This illustrates the basic principle from the very beginning of this course that the causes are not in the data.
+You cannot distinguish a fork from a pipe by the sample alone.
+And then the collider.
+In the collider, X and Y are not associated because they don't share any common causes, but they both influence a common variable, Z.
+If they're not associated in the sample, unless you stratify by Z, and then they are often very, very strongly associated.
+So what we want is a framework for taking these building blocks, the elemental confounds, and using them to make deductions about larger causal diagrams and generative models.
+So let's just start with the most basic sort of causal inference problem, the confound.
+That is, there's a treatment in an outcome, X and Y, and we want to estimate the causal influence of X on Y.
+And the problem is that they share a common cause, U, which may or may not be measured.
+Often it isn't.
+And in observational studies, it's possible to imagine many, many variables to you that you can't even imagine that could be confounding your inference.
+What can be done in this case?
+Well, if you can't, we're going to talk about measuring you later.
+But if the classical solution to this, and I think in most cases still the best, is to randomize.
+If you can do an experiment, a randomized experiment, what this effectively does is it removes all the other arrows into X, and it creates this node that I've labeled here R, which is your randomization mechanism.
+And if your randomization mechanism is a good one, you are determining X completely.
+There are no other causes of X. You assign the treatment.
+And then the confound vanishes because you have removed its influence on X.
+This is the best thing that we can do in most scientific contexts, but it's not always available to us for lots of reasons.
+Of course, there's many questions.
+Probably the most important questions in science cannot be studied experimentally.
+They're inherently observational questions that are about very large scale phenomena that take place over long periods of time.
+And then there'll be many other phenomena which could be done experimentally in principle, but it would be monstrously unethical to do so.
+And then there are the cases where randomization is just really, really difficult.
+And so we end up with some sort of partial randomization.
+We attempt to randomize, but we can't actually totally control the treatment assignment.
+Why does this happen?
+It happens very often in human research because people as research participants are not 100% cooperative.
+They're not 100% compliant.
+And so we attempt to treat is one of the terms that you'll see in the stats literature.
+So in these circumstances where we can't randomize or we can only partially randomize, what can we do?
+Well, what we'd like to have is some statistical treatment of the sample that gives us randomization, as if randomization.
+Now, it'll help to think about, again, what the experiment does.
+What the experiment does is it cuts all the causes of the treatment except for our randomization device.
+If there's a statistical procedure that mimics that, that gives us the same kind of estimate, that's what we want.
+And we're going to use this notation, do x, which, which represents intervening on x.
+And when you intervene on x, that's like randomization, you set it to some value.
+And so all the arrows entering x are deleted from the graph.
+That's what you see on the right of this slide.
+So what we want is to derive, to deduce for any particular DAG, any particular causal model, more generally.
+Some statistical procedure, some way to process the data, so that we can get a mathematical expression which is equal to the distribution of our
+outcome variable y, conditional on do x, that is on intervening on the treatment.
+And so that's why there's a question mark there on the middle left of this slide.
+Is there such a mathematical expression for any given DAG?
+And that's what we can derive using logic.
+So do x means intervene on x most of the time in this course.
+And so there is a procedure for doing this.
+And we're not going to learn it in a detailed mathematical way in this course.
+This is not a math stats course.
+But I do want to teach you some of the most powerful and accessible results of this logical framework.
+Because you can use it to do a lot of analysis for lots of causal models.
+Let's come back to our simple example.
+The simple confound x is our treatment, y is the outcome, u is a confounding variable.
+If you can measure the confound u, you already know from the previous lecture how to remove this confound.
+We want to stratify by u.
+But let's explore the logic a bit.
+Expose the logic of why that works.
+Let's not rest on intuition.
+Let's be transparent.
+Let's not be clever.
+Why does stratifying by u control for the confound?
+And it's because there's a pipe.
+I mean, sorry, a fork.
+U is at the center of a fork.
+It's a common cause of x and y.
+And you understand the properties of the fork.
+It's one of the elemental confounds.
+X and y, just focusing on the fork, are associated because of their common cause.
+But if you stratify by u, it removes that association.
+So in a data analysis where we have these three variables together, x, y, and u,
+after stratifying by u, any remaining association between x and y is not due to their common cause u.
+It's due to the causal influence of x on y.
+Or y on x, I suppose.
+But that aspect, the directionality of the arrows is always up to scientific background.
+And there's a framework for proving all this analytically.
+And again, I'm not going to emphasize that in this course.
+But I think you should know that it exists.
+Every intuition and visual method of analysis I'm going to show you in the rest of the lecture is supported by deduction.
+You translate the DAG into an algebraic system.
+And then you can deduce the kinds of transformations, the proper stratification you need.
+In these particular cases, this is worth emphasizing a little bit,
+what you end up with is what you've already been calculating in the previous few weeks,
+that the causal effect of x on y, that is the distribution of y,
+conditional on intervening on x, that's the causal effect,
+is the distribution of y stratified by x and by the control variables averaged over the control variables.
+I'll say that again.
+The causal effect of x on y, that is the distribution of y,
+conditional on intervening on x, is equal to the distribution of y stratified by x
+and the control variables, here you averaged over the distribution of the control variables.
+That's what the PU in the middle of the slide there is.
+This is a very important thing to understand about causal effects,
+is that you marginalize or average over the control variables,
+because that affects the causal effect, it changes it, it really matters.
+In the simplest models, it won't matter, the simplest linear models or additive models,
+but in general it does, and I want to teach you the in general correct approach first,
+even when you don't need it, so that when you do need it later, it doesn't seem like it's new.
+I emphasize this in the previous lecture even, when I stimulated the causal effect,
+I had to sample the other variables and include them in the simulation.
+This is what we call marginalizing, or averaging over the distributions of the control variables.
+The point here is that the coefficient in the summary table is not usually sufficient to compute a causal effect.
+You need to do this marginalization, and that allows you to simulate different kinds of interventions
+for different populations, so this is a very useful sort of skill to have.
+The causal effect is the distribution of y when we change x,
+and we average it over the distributions of the control variables.
+Let me give you a cartoon example to provide some intuition to anchor this for you,
+and then of course there'll be code examples as we go through,
+and there was a code example actually in the previous lecture, if you go back and review that.
+Here's a conservation biology example that I quite like.
+I learned about this example some years ago.
+In many parts of Africa, you find cheetahs, baboons, and gazelle, or antelope, more appropriately,
+living in the same areas, and these species interact in powerful ways.
+In particular, cheetahs eat both baboons and gazelles, or enclobes,
+and baboons never eat cheetahs, at least it's never been observed,
+but baboons do sometimes hunt and eat gazelle.
+If we go out and we collect data on these interactions,
+because we're interested in studying the population dynamics for conservation reasons of these different species,
+it turns out to be critically important to think about causal effects of the numbers of any one of these species
+as being contingent on the presence of the others.
+So let's focus on the cheetahs, because they're a very powerful regulator in these systems.
+When cheetahs are present, baboons are terrified because cheetahs are the monster on the grassland.
+So baboons hang out more near trees, and they don't, in general, pursue the gazelles very much.
+So when cheetahs are present, they eat both baboons and they eat more gazelle or antelope,
+but the baboons effectively do nothing to regulate the population of gazelle in that circumstance.
+But when cheetahs are absent, the regulator is absent and the baboons become the predators,
+and they're pretty fearsome and they'll happily eat meat, and they become the top predator of the gazelles.
+And the interesting thing about this is there are a lot more baboons than cheetahs,
+because baboons are omnivores, and so they regulate more gazelle dog from when the baboons are on the top
+than the cheetahs do, when the cheetahs are.
+The statistical point here is that if you're going to calculate the causal effect of baboons in any particular nature reserve,
+you need to average over the distribution of cheetahs.
+Know something about the distribution of cheetahs in that particular place to make the correct prediction about what would happen
+if you increase or reduce the number of baboons there.
+Okay, the framework that justifies all this, that takes a DAG, translates it into an outbreak system,
+and lets us deduce if, in fact, there is a statistical procedure for calculating the causal effect is called due calculus.
+Calculus here is not calculus like taking derivatives and integrals, it just means a calculation, and the due means an intervention.
+So for DAGs, there are rules for due calculus.
+In fact, only three.
+It's just three rules for transforming causal statements and statistical statements.
+And due calculus allows us to deduce for a given DAG if it's possible to statistically get an estimate of a desired S-demand.
+And what it also does, and this is what I'm going to teach you, is it justifies a graphical form of analysis.
+You can analyze DAGs with your eyeballs using graphical heuristics.
+But those graphical heuristics are justified by due calculus.
+They're not just something we invent as convenience.
+Due calculus is largely the work of one man, not entirely, but largely.
+This guy on the slide, Uda Pearl, here playing guitar.
+If anybody knows what he's playing here, I would like to know.
+Due calculus is interesting because there are two perspectives, and they're both powerful perspectives on what it's good for in statistics.
+It's not the entirety of causal inference, because of course with generative models we get more assumptions, and that matters.
+So you can think about due calculus in a sense of being the worst case scenario.
+DAGs don't make assumptions about the functional relationships.
+They're nonparametric.
+And that means due calculus is in some sense less powerful than causal inference if we're willing to make additional functional assumptions.
+But that's a positive view because that means we can do better when we start making assumptions if they're scientifically justified.
+On the other hand, due calculus is kind of a best case scenario because it will tell us if we need to make additional assumptions at all.
+That is, if we can justify an estimator in the absence of additional functional constraints,
+that's a very good position to be in scientifically because then some critic can't just criticize our functional assumptions.
+We can say, but look, the due calculus shows that I don't need to make an assumption about that functional shape,
+or all I need to assume is monotonicity or something like that.
+And that's a very good position to be in that you don't need to make special assumptions to prove your point.
+Okay, the particular result of due calculus that I want to focus on in the remainder of this lecture is called the backdoor criterion.
+The backdoor criterion is a shortcut for applying due calculus essentially graphically.
+There's a simple graphical eyeball tracing methodology for applying it,
+but the backdoor criterion is a theorem that emerges from due calculus from asking about the existence of an estimator.
+So let me walk you through it and teach you how to do due calculus with your eyeballs.
+So it's just part of due calculus, by the way, that there's more than the backdoor criterion.
+So what is the backdoor criterion?
+It's a rule for finding a set of variables that we want to stratify by that will yield an estimate of our s-demand.
+That is the causal effect of x on y.
+It has three steps.
+The first is to identify all paths connecting the treatment x to the outcome y.
+It'll become clear by path in a moment, but in the simplest sense it just means you follow the edges in the graph from node to node and you can go against arrows.
+Why?
+Because statistical association doesn't follow arrows.
+That's the basic problem in causal inference.
+Causes follow arrows, but association goes both ways.
+So we find all the paths that connect the treatment to the outcome and then for each path we ask whether it has an arrow entering the treatment x, the thing we're imagining intervening on.
+Any path that has an arrow entering x is a backdoor path.
+These are, in a sense, non-causal paths because if you intervene on x, the cause will not flow against the arrow and so it will not flow into the backdoor path.
+Only arrows going out of x will be affected when you change x.
+And then third, we find something called an adjustment set or a minimal adjustment set usually that closes or blocks all the backdoor paths.
+I'll explain what I mean by closes or blocks in a moment in a detailed way, but it's those rules you learned from the elemental compounds about how to open or close the association in each of the fork, the pipe, or the collider.
+So let's come back to our simplest example.
+There's x and there's y and there's u, but I'm going to add one more variable, z, which is a mediator on the path from unobserved confound u to x.
+So imagine here that we can't measure u.
+That's why there's an open circle, but there's this mediator z.
+We know it's caused by the unobserved confound u and then z influences x.
+We want to identify the causal effect of x on y.
+So the first thing we do is we identify all paths that connect the treatment x to the outcome y and there are two.
+The first is, of course, just x to y.
+It's a path.
+That's the path of interest that we want to estimate.
+And then there's the over the highland path, so to speak, that passes first through z and then u and then the y.
+This is a non-causal path you'll see because there's an arrow entering x at the point where it contacts x.
+And then because the second path has an arrow entering x, it's also a backdoor path and therefore it's potentially a confounding path.
+In this case, it actually is a confounding path because z beautifully transmits the influence of u on the x
+and some part of the association between x and y in the total sample is due to the common cause u.
+And we want to remove that to get an estimate of the causal effect.
+So if we knew u, we'd stratify by u, as you've already seen.
+But we don't know u, but we know z.
+So we find the set of control variables that close block all the backdoor paths.
+The path from u to z to x is a pipe and you know how to turn off the association between the ends of the pipe.
+You stratify by the variable in the middle of the pipe.
+That blocks the pipe, so we stratify by z.
+Why does this work?
+It works because z knows all of the association between x and y that is due to u.
+I'll say that again.
+z knows, in quotation marks, we're going to anthropomorphize the variable, all of the association between x and y that is due to u.
+Because all the influence of u on x has to pass through z.
+So once you know z, there's nothing additional about u that you need in order to remove the statistical association between x and y that is due to this non-causal path.
+And then all you're left with after you stratify by u and marginalize appropriately over z is the causal effect of x on y.
+And that's what this notation indicates.
+Again, this notation is not important.
+If you go forward in reading additional books about causal inference, you'll see this sort of notation.
+And I just want to say all these things are averages where you're doing the marginalization.
+And when we run a linear regression, this is what you're doing.
+These simple linear regressions are devices for stratifying by variables.
+So in this case, this is linear regression you would use if linear regression were appropriate for your measurements x, y, and z.
+So let's simulate that to prove it.
+Again, you don't have to trust me.
+All this stuff is provable with algebra.
+But for lots of people, these simulation demonstrations really build intuition and confidence.
+So let's do one.
+What I'm going to do here is we're going to take this simple example to dag on the right.
+And we're going to simulate it.
+We're going to simulate a little data set.
+So let's say there are 200 observations from this generative model.
+I'm going to set up the causal effects in each of those paths.
+The causal effect of x on y, I'm going to set to zero just to make the example easy to understand.
+There's really no causal effect, and that's what we want to be able to infer here.
+And then the influence of the confound on y and on z is negative in both cases.
+And then the influence of z and x is one.
+And then we simulate.
+I'm going to make the confound binary, random Bernoulli.
+And then I'll simulate z, x, and y with Gaussian noise in each case.
+And their means are given by the path coefficient times the appropriate variable in each case.
+And then I have a little data set D that we set up from this.
+And then we can run little, little linear regressions.
+And in the first case, the top one here, we're going to ignore.
+Unz, where this is naive, just regress y on x.
+So this is a confounded estimate.
+You don't expect that to work, but we want to see the impact of stratifying by z.
+And then in the next model, we stratify by z.
+Remember, we can't measure you.
+That's the assumption here.
+Even though we simulated it, we know the values.
+We're analyzing this and testing our estimator under the assumption that in a real study,
+we would be able to measure you.
+But we stratify by z, which means add it to the linear model.
+And then I compare the densities in the lower right of this slide.
+The black density is the confounded one.
+That's our model that only stratifies y by x.
+And that's the posterior distribution of the coefficient relating x to y.
+And you'll see that it's biased upwards.
+The true effect is zero at the vertical dashed line on the plot.
+And then the red density is the posterior distribution for the second model where we stratify by z.
+I haven't marginalized over z here.
+This is just the path coefficient.
+But to go on to actually calculate the causal effect, you'd want to marginalize over the z values in a target population of interest.
+Yeah.
+Since this is a linear model without interactions, that's not going to change the shape of this distribution in this case.
+But in general, it could once you have interactions and nonlinear models and so on.
+Okay.
+So it works.
+The new calculus gives us the right answer.
+You close the pipe, you get an estimator of the estimate you want.
+Oh, a point I want to make about this.
+There's also the coefficient b underscore z in the second model.
+And you'll see it in the previous output here.
+And its posterior distribution has a mean of 0.24.
+And it's almost all positive, right?
+Almost all above 0.
+This coefficient is meaningless.
+I'll say this again.
+This coefficient, b sub z, which has all of its probability mass above 0, is meaningless.
+It is not the causal effect of z on y.
+Why?
+Because look at the dag.
+z doesn't influence y except through x.
+Yeah.
+So the causal effect of z on y, you could calculate that.
+You could estimate it.
+Yeah.
+You would need another model to do that, though.
+A different model.
+You would use the vector criterion again, but you would end up with a different adjustment set.
+Yeah.
+In this particular case, actually, I don't think you can estimate the causal effect of z because of the compound u.
+No, no.
+Maybe you can use the front door criterion.
+No, sorry.
+I won't teach you that.
+But there's this thing called the front door criterion, which may apply here.
+I have to think about it.
+So the point is in this summary table, b underscore z is not the causal effect of z on y.
+It's control variable.
+Any variable you add to a model just as part of the adjustment set, usually its coefficients are not interpretable.
+I'll say that again.
+Any variable you add to a model as part of the adjustment set in order to make it possible to get an estimate for some other variable,
+its coefficients are usually not interpretable.
+There's this thing called the table two fallacy, which I will speak about much later, which highlights this.
+So think of it as a fallacy to interpret the coefficients of control variables.
+Okay.
+Let's have a more complicated example.
+This DAG might look a bit intimidating, but we're going to take it one step at a time and I'm going to show you how to use the vector criterion
+in a more complicated and realistic kind of example.
+So remember, how do we use it?
+The first thing we do, we list all the paths connecting x and y.
+x is the treatment of interest still, y is the outcome of interest, and then we ask which gate to be closed,
+and you know how to close any given path because you understand the elemental compounds.
+So this is a complicated sort of DAG, and I'm going to do my weird animation again just to show you how all the causes pile up.
+You've got secondary and tertiary causes feeding into one another, and so there's a bunch of influences.
+There's three arrows entering x, and then x transmits influences of all of those separate causes along.
+You get this weird multicolored clover spinning over to the right,
+and y and x are associated through all kinds of effects over there.
+Essentially every variable in the graph is participating.
+But we can analyze this. We can deal with it.
+So remember, the basic intuition is we're trying to find a mathematical operation that effectively deletes the arrows into x.
+There are three arrows entering x, and those define some backdoor paths.
+If we could actually randomize x, it would effectively remove those arrows,
+and you'd have the graph on the right, which represents the intervention do x.
+We want a statistical procedure which allows us to transform our sample into results that were as if we had been able to do that experiment.
+Okay, so let's use the backdoor criterion to analyze this graph.
+Remember, the first thing you do is you list all the paths connecting the treatment x to the outcome y,
+and here they are on the screen. I've found them for you.
+We're going to take each of these one at a time, so don't panic.
+The first one in the upper left, this is the direct causal path from x to y.
+This is a causal path that we're interested in, and it's open. We must leave it open.
+It's a causal path. We don't stratify by things that close causal paths because we want to measure the causal influence.
+So we set that path aside, leave it alone.
+The second one from the top row, we have a fork at the bottom from a common cause c to both x and y.
+This is a backdoor path because if there's an arrow entering x, it's a noncausal path.
+If we intervene on x, the consequences of that intervention would not also influence c,
+which is why this is a noncausal path.
+But it will generate statistical association between x and y, so we need to stratify by c to remove that from the estimate.
+So we're adding c to our adjustment set.
+Third path from the upper right.
+This is also a backdoor path. It's symmetric with c.
+We have a common cause z of x and y.
+We remove that confounding association by stratifying by z to close the fork.
+So now we add z or z to the adjustment set.
+So we have two variables now c and z or z added to the adjustment set.
+Let's move to the bottom row.
+Here's a path that's cobbled together out of two or three, depending upon how you count, different elemental confounds.
+There's a fork with a in the middle, there's a fork with b in the middle, and there's a collider with z in the middle.
+And this is a noncausal path as a backdoor path because there's an arrow entering x or a context with x.
+If we had already decided to stratify by z, this path would be closed because colliders are closed by default.
+So a statistical association flows between x and z, and because of a, it flows between x and z, and because of b, it flows between z and y.
+But none of the contamination flows through z unless we stratify by z.
+Remember, that's how colliders work. They're closed by default unless you stratify by the collider.
+We are stratifying by the collider because we have to, because z is a confound on the fork that connects x and y.
+That's what we just decided. So this path is open.
+Therefore, we need to close it with some other variable, and luckily we have a and b.
+So we can use either a or b or both to close this overhead path.
+So we add a or b to our adjustment set.
+We've only got two more. They're basically symmetrical kinds of problems.
+Let's analyze the first.
+This is another overhead path, but it goes through a and z.
+There's a symmetric one that goes through z and b.
+This is already closed because we're stratifying by z.
+Yeah, and the same is true for the other one that passes through b.
+These are both already closed. They're non-couple paths or backdoor paths,
+but they're effectively closed by the existing adjustment set.
+Okay, so we have our adjustment set.
+It has three variables in it.
+The minimum adjustment set would be c, z, and either a or b.
+Now, I'll show you a bit later after the break that b is a better choice here,
+but it's not a better choice because it's required.
+It's because it's more statistically efficient than choosing a.
+And that's another criterion.
+What the backdoor criterion gives you is a minimum adjustment set that is needed
+so that you're not confounded by non-causal paths in your estimate.
+What it doesn't do is consider the issues of statistical efficiency and estimation,
+and those also matter.
+So sometimes you want to stratify by variables that aren't required by the backdoor criterion
+because they make your estimate more efficient.
+So this is to say the minimum adjustment set does not necessarily need the best adjustment set.
+If you're new to this, it's often very helpful to use a tool that analyzes DAGs for you.
+This is a way for you to draw a DAG, attempt to analyze it yourself on paper,
+and then ask the computer what the right answer is.
+This helps a lot of students learn this stuff.
+There's a great website.
+You can run it in your browser.
+It's called daggity.net, the URL at the top of this slide.
+And you can draw with your mouse DAGs on your screen,
+and then daggity.net will tell you the adjustment set for any given treatment and outcome you choose.
+You can also toggle some things to be observed or not and so on.
+It will also calculate other things about DAGs like the testable implications that I talked about in the textbook.
+Okay, so now you're armed with the backdoor criterion.
+Let's come to this complicated example that I just flashed briefly at the end of the previous lecture.
+This is an interesting example that combines together two forks and a collider in the middle of them.
+So here's an example which I'll talk about in the context of the intergenerational transmission of education,
+achieved education, but it's got the same structure as lots of things, including like the gender wage gap,
+and lots of other important problems have a very similar causal structure.
+Okay, so on the left we have our cause of interest, which is grand parental education,
+how much education did an individual's grandparents achieve,
+and then we're interested in the blue arrow, is there any direct causal effect of grand parental education on their grand children's education?
+And that could such an effect work, could be through encouragement,
+a monetary investment by the grandparents, so on.
+There are other potential effects too.
+Grandparents could also influence their own children, that's P, the parent's education directly,
+and then if grandparents can influence their own children, then the parents can influence the grandchildren,
+so there's an arrow from P to C as well.
+And then parents and their children probably share unmeasured common causes that influence the education of both,
+like where they live and the economics of the area and its cultural background,
+and some of those are not shared with the grandparents because they don't live in the same place.
+So let's analyze this using the backdoor criteria, so we find all the paths that connect these things together,
+and let's just think first about this particular causal path.
+This is a pipe, and along this pipe, P is a mediator that passes any effect from grandparents to their own kids onto their grandkids.
+Yeah, P is a mediator on this path, but there's another path that connects G to C,
+which passes through U, goes the long way around.
+And on this path, P is not a mediator, it's collider.
+So this path is closed by default, but if we wanted to estimate the direct causal effect of G on C,
+we would have to stratify by P here to close this pipe, right, so that we could isolate the blue arrow.
+But if we do that, we open this path, defined by the fork out of the unobserved confound U,
+the so-called neighborhood effect, or cultural background effect.
+So this is a case where we can't get the direct causal effect of G on C, assuming this tag is the case,
+because to do that, to block the indirect causal effect, to isolate the direct effect, we activate a confound as it were.
+But it is possible to estimate the total causal effect of grandparents, but that isn't our research question.
+Yeah, so you can't always get what you want, but sometimes you get what you need.
+So let me try to summarize that. You can estimate the total effect of G on C.
+That's what I'm trying to show you on the left.
+The confound U doesn't matter as long as we don't stratify by P.
+So if you just run a model where you stratify by G, you can estimate the total causal effect of G on C.
+On the right, however, you cannot estimate the direct effect because stratifying by P is needed to isolate the direct effect,
+but doing that creates a confound.
+So if you run the model on the right, you end up with a confounded estimate.
+You could actually end up concluding that grandparents hurt their kids, depending upon the nature of the confound.
+So let me summarize a bit and then we'll take a break.
+The backdoor criterion is a particular theorem that emerges from due calculus and analyzing causal DAGs.
+But due calculus is much more than backdoors and adjustment sets.
+There's other things you can derive from it more generally if you use it algebraically.
+It's also true that we can achieve all these same results, sort of proceeding blindly by taking a generative version of every DAG
+you take the DAG and then like in previous lectures or the examples in the book, you program it as a generative simulation
+and then write a statistical model that mimics that structure and then put the sample into it.
+And what that will do, what the posterior distribution will do, is it will effectively surreptitiously do the due calculus.
+And it'll give you estimates if they're possible and if they're not, it gives you the prior.
+But this is often a pain in the programming because you end up with models that have a bunch of submodels in them
+because you're programming the whole DAG simultaneously. It's not a single regression.
+This is important to understand is often, like with adjustment sets, you can think about causal inferences being a problem
+in deciding which covariates to use.
+But in general, causal inferences is much more than that and it's only a very narrow set of research questions
+where you can get a causal estimate with a multiple regression. I'll say that again.
+It is only a very narrow set of research questions where you can get a proper causal estimate using only a multiple regression.
+Often we need to use multiple simultaneous equations to get things right.
+Due calculus has value. I call that intermediate thankful luxury base and there was a bonus section in one of the previous lectures about it
+where I talked about it in more detail. So rewind to that if you're interested in an example.
+Due calculus is a value even if you decide to use the luxury base because it's less demanding.
+It tells us what's relevant and it saves us from having to add some of the submodels.
+Due calculus as well will not always tell you that your estimator is a single equation.
+Or rather it will use multiple equations in ways that are not mimicked by stratified in a linear regression.
+Okay, let's take a break. That's been a lot. I encourage you to go back and review the backdoor criteria in example skin.
+Make sure you understand it. Then do something relaxing for a bit and when you come back, I will still be here.
+Music
+Welcome back.
+Now let's apply the backdoor criterion to some examples and these examples are chosen to highlight a particular issue for you.
+That is when it comes to the issue of choosing control variables, which is often the question that beginners in data analysis have,
+which control variables that you add to your regression model, adding control variables can hurt you as well as help you.
+There are good controls that help you get an estimate of the desired estimate and there are bad controls which can actually ruin a perfectly fine design.
+So what do I mean by control variable? This is a variable that we add to a model to make it possible to get a causal estimate.
+Or at least that's our intention. There are lots of heuristics that are taught in the sciences for choosing control variables and unfortunately most of them are simply wrong and damaging.
+One of the approaches of course is to just add everything in the spreadsheet and see what's significant. This is the YOLO strategy.
+There is no statistical framework that justifies this at all, but it is a great way to get published because you can farm asterisks and publish them and leave a trail of damage through the scientific literature that can last for decades.
+Not the posterity we should aspire to.
+Lots of people have been taught to look at the correlations among the variables and not to include control variables that are highly correlated to another or co-linear.
+This is also nonsense unfortunately. There is no deduction from the calculus that will lead you to this or from any generative model.
+The reason is because coloniarity can arise. It's a statistical phenomenon. It can arise through lots of different causal processes. You need to analyze a causal model to understand whether coloniarity is a problem.
+Another heuristic is that it's safe to add any pre-treatment measurement or baseline measurement. This is also false.
+Pre-treatment controls can mess up your analysis just like post-treatment controls can.
+Let's do some examples. These examples aren't meant to scare you, but they are meant to make you cautious. We need control variables, but we need a logic for justifying them. That logic always comes from some external causal model.
+All of these examples are going to be the estimate. It's going to be the causal effect of X on Y. That's the focus of our intention. These examples are from this great paper, Crash Course in Good and Bad Controls.
+I give you the citation at the bottom of the slides.
+First example. This is one of my favorites. It's one of the ones that convinced me of the value of using graphical causal models to school my own intuitions.
+In this example, there are two unobserved variables, U and V, and unobserved confound Z. Z is not a cause of X or Y. It's not a confound.
+But U is a common cause of X and Z, and V is a common cause of Y and Z. Z is a collider of the unobserved confound U and V.
+And unfortunately, there are lots of structures like this. This represents the sort of situation that happens when we do sample selection based upon some feature of the sample that is caused by unobserved features.
+So, for example, in social network analysis, this sort of problem is very common.
+Imagine that U and V are the hobbies of two people, and we're interested in understanding the causal effect of health of one friend, X, on the health of the other person, Y.
+So, hobbies may influence these people's health status directly. So, if your hobbies involve exercise, that will influence your health. Or if they involve binge drinking, that will also influence your health, but in the other direction.
+Hobbies also, if they're similar, influence whether people become friends. And so, if you're only looking at a network of friends, you've effectively conditioned, you've stratified by Z.
+And Z is a collider. And so, even though you haven't measured the hobbies, they have now turned on as confounds, and any estimate to the physical association between the health of person one and person two will be confounded by the fact that you've conditioned on a collider on whether they're friends or not.
+This happens a lot. It's a kind of sampling bias, but you can also do it within a data set, which has not initially been stratified by friends. So, you have to be careful.
+Notice this is a pretreatment variable. It has nothing to do with the time sequence. It has to do with the causal structure.
+So, I just asserted, maybe you already see it, that conditioning on Z here is bad news, but let's, we're starting out here, so let's do it. Let's take the vector criterion one step at a time.
+First step, list all the paths. There's X to Y. That's the causal path of interest. There's this really long path over the top, and that's the second one.
+X to U to V to V to Y. Notice this, the path goes against arrows. That's fine, because statistical associations can pass against arrows.
+But this is a noncausal path, the second one. It's a backdoor path, because there's an arrow entering X.
+The first one is a so-called frontdoor path, and it's open. That's good. We want to leave it open, but we want to close.
+You always want to leave frontdoor paths open, because they're part of the causal effect of the variable X.
+And then there's the backdoor path. We want to close this, and it is closed as long as we don't condition on Z, because it's closed because there's a collider in the middle,
+and colliders block the passage of association, unless you stratify by them, and then they create association along the path.
+And so this is the nature. Z is a bad control. If you add it to the model, your estimate of the causal effect of X and Y will change,
+but that change will mislead you.
+So this is just a summary of what I just said. If you stratify by Z, it opens the backdoor path.
+Z could be a free treatment variable. It is not safe to stratify by free treatment variables. Avoid heuristics. Draw your assumptions.
+Okay, here's another example. Here's an example where we've got a mediator Z of the causal effect of X on Y.
+And there's a common cause, U, which is unobserved of Z and Y. In principle, we could estimate the causal effect of X on Y as long as we ignore Z.
+Yeah, so here's an example of some way to think about it. Imagine the outcome is your lifespan, and X is winning the lottery,
+and we're interested in what winning the lottery does to people's lifespans. And Z is some mediator like happiness.
+This is the idea, the research question, is that winning the lottery is mediated by changing the person's happiness, which modifies their lifespan.
+But there are lots of common confounds of happiness and lifespan as well, lots of other things affect both happiness and a person's lifespan,
+like where you live, family circumstances, health status, and so on.
+If you condition on that confound, those contextual confounds are harmless as long as you don't stratify by Z.
+As soon as you try to measure the mediation effect, that is the role of happiness in this, that estimate will be confounded.
+And so this is a case where you could, in principle, estimate the total causal effect of winning the lottery, but you could not break it down into its mediating components.
+Now, of course, I've left off this graph that winning the lottery has lots of other effects through other mediating paths, but all of those could have the same problems.
+Yeah, so this is a case where the mediator is a bad control. Now, of course, it's a post-treatment variable, so you might expect that there would be risks involved.
+Yeah, post-treatment variables are often risky controls.
+So, again, analyze the path. There's two causal paths here. There's the direct one, X to Z to Y, and then there's the confounded path, X to Z to U to Y.
+Note that there is no backdoor path here. There's no need to control for Z. Yeah, it's not a backdoor variable.
+If you add it, it's a post-treatment variable. You could actually turn on a confound by conditioning on it.
+Controls are not, in general, safe. You need a diagram. You need to think it through.
+You can simulate this. I think it's good to see how these simulations work.
+And here's a case where I just wanted to show you an example of how to do a big batch of simulations, so you're not doing only one at a time.
+You can write a function that has a generative model in it and an analysis, and I'm using R's LM or linear model function here to do a quick Gaussian regression.
+This is fine. People don't usually think of the LM function as Bayesian, but I want to remind you that Carl Friedrich Gauss invented least squares estimation.
+Yeah, so Bayes has a strong claim to it, and LM will find the posterior mean and standard deviation under weak priors just fine.
+And so what we're harvesting here is the posterior means for 10,000 simulations, and then we can plot the distribution of those posterior means across simulations
+to see the variation across simulations and what the central tendency is for the total causal effect.
+That's the BX coefficient that I'm pulling out, and then the one where we stratify by Z.
+And I want to show you the biasing effect of adding this control variable here.
+So now it's in the lower right. I show you these are the distributions of posterior means across all these different synthetic analyses with simulated data.
+And the black density there is the distribution for the model that does it right, gets the total causal effect correct, which I've set to 1 in the simulation.
+And the red is where we get it wrong because we stratify by Z, and it makes it look like the effect is negative because of the compound.
+It might be easier for you to see this. This is often the thing you want to do when you're doing, you're testing your software this way.
+You want to vary the strength of the causal effect and see what happens.
+So here I turn off the causal effect by making it so that Z doesn't pass on any cause to Y.
+You can see I may have put a little zero there on that path.
+And now the correct difference is that X has no causal effect on Y because even though it influences Z, it does not influence Y.
+However, because it influences Z, and U influences both Z and Y, if you stratify by Z, you end up concluding that there's a negative effect of X on Y.
+That's the red density in the lower right, and this is wrong.
+This would be a significant result.
+So if you're just choosing your model based upon the presence of significant terms, Z would be a significant variable here, and you would be misled.
+Statistical significance is not a guide to model structure.
+You have to design the structure of your model using something else.
+You can't design the structure of your model based upon its results.
+You need a causal model to justify it.
+Okay, this is just a summary slide for this example.
+This is a case where we've got these two cases.
+There's no backdoor path.
+There's no need to do control.
+So you might be tempted anyway because you want to analyze the mediation effect of Z, and in this case, you can't do that because of these unmeasured compounds.
+Just to remind you, in a previous lecture, I told you about post-treatment variables, and Z is, I think, quite obviously a post-treatment variable.
+It's a direct result of the treatment of variable X, and so this is a risky thing.
+I'm not saying never use post-treatment variables, but draw your dag and think very carefully.
+Okay, let's come to colliders.
+Colliders are part of the funnest part of this topic.
+You already know not to touch the collider, right?
+In a graph like this, we're interested in X and Y, and X and Y both influence something else.
+They have a joint outcome Z.
+If you knew this was the dag, you would not touch that collider, right?
+You would not add it.
+It would be a bad control.
+Yeah, so there's this classic example of a bad control is conditioning on a collider.
+It's like a form of endogenous collection bias.
+But sometimes the collider is not so obvious.
+You might have X as a treatment, might influence Y, and it might influence something else you've measured Z,
+and then there will be some unmeasured common cause of both Z and Y.
+And now Z is a collider, but you won't realize it unless you consider the possibility of unmeasured common causes between Z and Y.
+So for just as a toy example, a simplified toy example, imagine X is education, years of education,
+and we're interested in the effects of years of education on income.
+Education affects lots of things, for example, a person's values, or at least plausibly it does.
+And then there are common causes of a person's values and their income, like their family situation,
+their cultural background, where they live, things like that.
+And these numerous unmeasured confounds, and if you decide, oh, I've measured a person's values through some questionnaire,
+so maybe I should stratify my sample, buy values when I inspect the association between education and income.
+If you decide to do that, you could be conditioning on a collider, and accidentally,
+and you'll get estimates for sure, and they might be very exciting and publishable, but they could be highly spurious.
+So use the model and justify it, or use the causal model to justify your statistical model.
+Here's an example, which is not something that comes out, obviously, out of the backdoor criterion,
+and I'm going to have a couple like this as we go.
+But I think they're incredibly important because they're routine bad controls in research.
+So imagine you have some variable here, Z, that is a descendant of your outcome variable Y.
+It is very bad to add these variables, descendants of your outcome variable, to your analysis as a control variable.
+This is called case control bias.
+Sometimes it happens because your sample has been selected on some consequence of the outcome,
+and that's a research design problem, but you can do it to yourself endogenous to a statistical analysis just by stratifying by Z.
+This is effectively selection on the outcome.
+This is very bad because it reduces, if you stratify by Z, your weekly stratifying by Y, by the outcome itself,
+and selecting on the outcome is the most powerful way to ruin scientific inference.
+You don't choose your cases by what happens to them.
+You've got to let the causes flow.
+The way to think about this statistically is it reduces variation in the outcome that X could possibly explain.
+Because once you stratify by Z, the association between X and Y is only examined within each level of Z.
+And since within each level of Z, Y doesn't vary very much because Z is highly correlated with Y, X doesn't have much to explain at all.
+So for example, it may be easier for you to think about this in the context of a toy example.
+If X is education and Y is occupation and Z is income, if you're examining the causal effect of educational occupation,
+you should not stratify by income because when you stratify by income, there are a narrower range of occupations that experience a narrower range of educational levels.
+And it will look like education doesn't have much of an effect.
+Again, just to show you what a simulation of this particular problem would look like.
+Again, write a function where we make a generative, the world's simplest generative model using Gaussian variables of the X to Y to Z pipe model.
+This model is just a pipe.
+And then you can fit two linear models to this, one where we just stratify by X.
+This is the model that works and recovers the correct causal effect.
+You see that in the black curve in the lower right.
+And the model where we also stratify by Z, the descendant of Y.
+In this case, we estimate the effect of X to be half as large as it actually is.
+Okay, let's kind of look on the other end now.
+We just looked at the descendant of Y.
+Let's look at a parent of X.
+Now Z is an influence on X.
+It's something that influences the treatment.
+This is not a backdoor because Z isn't connected to Y through any other path.
+So there's no backdoor path here.
+There's no confounding path.
+There's no reason to stratify by Z.
+And doing so is actually bad news.
+Sort of for the flip side, the same reason, an analogous reason to the reason you don't want to stratify by a descendant of the outcome.
+If you stratify by Z here, you're explaining a way variation in X.
+And then there's less that X can explain in the outcomes Y.
+It's not destructive of your analysis.
+It won't bias your analysis in any particular direction, but it will reduce your precision.
+And this is what I keep saying.
+The backdoor criterion is not everything.
+The adjustment set is not everything.
+We still have to cope with estimation, and estimation is hard.
+We have finite samples.
+And just because the backdoor criterion says an estimator is possible does not mean in practice we can actually achieve it in any particular case,
+especially once we get to non-linear models.
+And so it's worth focusing on estimation.
+And I think if I can grind my own ax for a moment here, I think this is a big flaw with lots of courses in causal inference,
+is that they essentially ignore the problems, the serious issues of estimation, push that all aside.
+Estimation remains the first and hardest.
+Estimation with finite samples and how to get the structure right and be efficient,
+use the available information efficiently, remains the first and hardest problem in statistical inference.
+So these things have to cooperate together.
+We can't just worry about the structure of the graph.
+We have to also simultaneously worry about the machinery of the golem.
+Okay, so let me show you in a simulation what I mean by this.
+This is called the precision parasite.
+Same idea.
+We just simulate this pipe.
+Now z to x to y is the order of simulation.
+And I make the coefficients.
+One, by default in this example, but you see in the header of the function,
+you can change the arguments and make them whatever you want.
+And I encourage you to play around with it and see.
+And then we run the model that is, since correct and what correct means here is efficient.
+It doesn't include the parasite.
+And you get the black distribution at the bottom of distribution of posterior means across 10,000 simulations.
+And the point of this is that it's centered on the correct value, sure,
+but also that it's got a certain uncertainty and that arises from the finite sample.
+And then the red shows the model that includes the parasite and you see that there's an inflation of uncertainty.
+And this is bad, right?
+Because in any particular study will be some component in the idea world,
+will be some component of this distribution and you don't know where.
+So wider distributions, wider estimator distributions are worse.
+Okay, a related example.
+Let's take the previous example with a precision parasite and let's add an uninserved confound between x and y.
+And now you know that in this case, this graph, you can't get an unbiased estimate of the causal effect of x and y
+because the confound u is unobserved.
+You already know that.
+The question is what happens if you also stratify by z?
+And the answer is now you get a bias.
+So not only will it suck efficiency away from your estimation,
+but it will actively bias you away from the true answer because it essentially double activates the confound.
+This is sometimes called bias amplification in the literature.
+There are literatures, I believe, in education that recommend using variables like this.
+That's control variables, but this is a bad idea.
+Okay, here's the simulation to show you.
+I'm not just making stuff up.
+We take this simple tag.
+We write it as the world's simplest generative model on the left.
+And I assume that z's coefficient to x is one and x is to y is one.
+And the u effects are also one, both to x and y.
+Keep things simple.
+Run 10,000 simulations.
+And then I plot in black.
+We're called the bias, the sort of default bias model.
+We know it's biased because the true effect of x on y is zero in the simulation that I've run.
+You see on the sin line, I set b x, y is zero just to make it less easy to understand.
+So the default model that's stratified by x is already biased.
+But you knew that.
+That's just the effect of a mental sort of compound.
+It happens.
+When we add z and also stratify by z, we get the red distribution.
+There's even more bias about double effect.
+So this is bias amplification.
+This is a bad control.
+Okay.
+Let me attempt to explain what's going on here.
+I understand this is difficult, but many people have asked me, so I want to attempt an explanation.
+So the covariation between x and y can only exist if there are variation in the causes of x and y.
+X can't vary if its causes don't vary.
+So for x and y to co-vary, you have to have variation in the causes of x and y.
+The cause of y is x.
+So if x doesn't vary, y can't vary.
+That's obviously true.
+So you want to sample where x varies and y varies if you're going to examine their co-variation.
+That seems obvious, I hope.
+But this also means that z is a cause of x.
+So if z doesn't vary, then x can't vary.
+When we stratify by z, we're essentially removing the variation in z that influences x.
+So for each level of z in your sample, there are a smaller range of x values.
+And when you stratify by z in a model, that means now you're inspecting the co-variation between x and y within each of those levels.
+And within the levels of the x varies less, and therefore the co-variation between x and y must be smaller within each level of z.
+As a consequence, the compound becomes relatively more important within each level of z.
+And so when you average across the levels of z, you find an even stronger association between x and y.
+It's really weird and also fascinating.
+Here's a picture that I made to try and illustrate this weird effect of these little golems.
+It's dangerous to use a golem without thinking about its causal inspiration.
+So in simple DAG world's simplest generative simulation from it, I make z binary just to make the visualization easy to understand.
+I simulate a Gaussian compound u from it, which is going to be a common influence of x and y.
+X might get the same u value for each observation.
+And then I simulate the x's and y's as Gaussian.
+And I make z a powerful influence on x, so variation in x is strongly driven by z.
+And I make x have no causal effect on y, just to make the example easy to understand.
+So what we'd be looking for here when we run a regression stratifying y by x is a slope of zero.
+That would be the right answer.
+That's what I've built in as the right answer.
+The black line on the right is the scatter plot of the data from this simulation, one instantiation of it.
+The blue points are where z equals one, the red points are where z equals zero.
+The black regression line is the line we get if we ignore z.
+And it's almost zero, which is the right answer.
+It's not exactly zero, it's positive, but it's barely positive.
+This is a biased estimate, but it's not biased very much at all.
+The confound isn't doing that much damage here.
+However, once we stratify by z, if you look within each of the clouds of points, the red or the blue,
+you'll see that the slope is higher.
+Once you stratify by z, you're estimating the association with any level and averaging over them to get the causal effect.
+And you can see then that it will be much bigger estimate in this case.
+Highly biased because of the biased amplification effect.
+Okay.
+This sort of thing is not just some weird fantasy dreamed up by statisticians to scare you.
+It's meant to school your intuitions, first of all.
+These toy models are nice, even if they were total fantasies.
+Nightmares dreamt up by statisticians because they help you train your intuition in the same way that if you were trying to learn to play chess,
+you would say gambits, you would look at chess puzzles and those sort of things available on chess websites, not playful games.
+In the same way, if you're trying to learn to do scientific modeling, you shouldn't play full games.
+As it were to start, you should look at simplified toy examples built by experts to teach you particular criteria
+and caution you against particular kinds of mistakes.
+That's what we're looking at.
+This is the causal inference version of a chess gambit.
+But that said, there are plausible situations which mimic this structure.
+And I said it shows up in literature and there are scientific literatures where people recommend including causes of the treatment as a control variable.
+It can be a very bad idea.
+So let's consider just as a toy example, we're interested in the causal effect of occupation on income.
+And we know that education, Z, influences occupation.
+And there are lots of regional and cultural factors, too many to even measure, that jointly influence occupation and income.
+This would be a case where you would get bias amplification if you stratify by education.
+Stratified by education seems like a reasonable thing.
+If someone told you you were examining the association between occupation and income, you can imagine a reviewer saying,
+oh, well, I need to see the stratified by education.
+But this is a bias amplification problem.
+Okay, let me try to summarize that.
+There are good controls.
+We need control variables.
+And the backdoor criterion is one way to justify control variables.
+But we also need to worry about bad controls.
+There are controls that can make things actively worse.
+This is important to emphasize because sometimes students get the impression or are actively taught that they can just add sets of control variables to a model
+and see what becomes or falls out of statistical significance.
+And even sometimes horrifyingly, they're taught that they should do that until all of the covariates are significant.
+And then that'll be the right model.
+None of that makes any sense.
+And there is no statistical framework, Bayesian or otherwise, that justifies such a procedure.
+You need a causal model.
+You need to use it to justify things.
+And you should not be farming statistical significance of your coefficients.
+Make your assumptions explicit.
+You have to do scientific modeling to do scientific data analysis.
+All right.
+Thank you for your indulgence.
+In next week, I'm going to talk about estimation more.
+I hinted a bit, my little tiny rant earlier in this lecture, about the importance of estimation and statistical efficiency.
+So starting next week, I'm going to do a lecture on that.
+And there's always a looming problem of overfitting.
+And then in the second lecture next week, I'm going to introduce Mark Optane, Marty Carlo, which will power our golems for the rest of the course.
+So I'll see you then.
+Thank you.
+Are you still there?
+Well, I'm here too.
+How about some bonus?
+In the lecture, I mentioned something called the Table 2 fallacy.
+But I didn't really have time to explain it.
+So why don't I do that?
+This is a Table 2, the so-called because it's typically the second table in a paper, surprisingly.
+The first table being traditionally descriptive statistics about your sample.
+And then Table 2 is the results of some modeling activity, typically a table of coefficients, sometimes across multiple model structures, as you see here.
+There is a problem with these tables.
+And the problem with these tables is that they are often misinterpreted, and they actively encourage such misinterpretation
+because the meaning of these coefficients always depends upon causal assumptions.
+That won't surprise you at this point in the course.
+Let me unpack this and explain what we even mean by the Table 2 fallacy.
+The name comes from this great paper from 2013 by Westwise and Greenland.
+And the basic idea stems from the fact you already appreciate that not all coefficients in a model are causal effects.
+The coefficients on control variables, variables you add for the adjustment set solely to enable the possibility of getting the estimates you want for the treatment X on Y,
+those coefficients are not necessarily causal effects.
+And if they are causal effects, they are not necessarily total causal effects.
+They could be partial causal effects because you have blocked some paths by closing back doors, stratifying in certain ways.
+And so the coefficients in the table, for example, on the right, aren't the same animals.
+They're different kinds of creatures, and we have to segregate out the estimate that we designed the model to produce from the coefficients on pure control variables.
+If we are interested in the causal effects of those control variables, we should design other models for them.
+Table 2 is a bad idea.
+Here's the example that comes from the paper.
+I think it's a nice one, so I'll just carry on with this example.
+It examples this epidemiological problem of thinking about the effect of HIV infection here, the treatment X on stroke.
+So HIV, most of you will know what this is.
+It's an immune disorder.
+It was a big deal in my generation.
+There are lots of more effective treatments now with antiretrovirals, but it really overshadowed a lot of whole generation of epidemiology.
+And it has lots of side effects aside from immune disorders that also increases risk of stroke.
+So if you're looking in a study to estimate this, and this is the kind of thing you can't do experiments on, by the way, really important question, experiments are not plausible or ethical.
+How would you estimate, isolate the effect of X on Y if the graph looked like this?
+You also had age, and age is an influence of both HIV infection of stroke.
+It's a risk factor for stroke.
+And of smoking, whether someone smokes or not.
+And then smoking, in turn, influences both HIV infection.
+Smoker is more likely to be infected when exposed.
+And then smoking directly affects the risk of stroke as well.
+So what we want to do here, this is not going to surprise you, is find an adjustment set.
+We're going to use the backdoor criterion.
+We're going to find an adjustment set.
+Decide, assuming this tag, what we need to control for.
+And then we're going to do the extra thing that I didn't do in the main lecture.
+I've been thinking about what the coefficients on the control variables mean.
+So let's do that.
+First, here's one of my goofy animations to show you what this looks like in cartoon form.
+We have effects that come from age into the other variables.
+And then those cascade forward.
+Everything in this tag is influenced by age.
+Yeah.
+And then that combines, moderates other effects on smoking or HIV infection.
+And then everything flows to the right.
+And why, the associated between why and the other variables is a rich mix of the alchemy of these different elemental compounds.
+Okay.
+So we're going to use the backdoor criterion.
+No surprises here.
+You're getting better at this, but it's good to have lots of examples.
+What are the paths?
+There's X to Y.
+That's the front door path that we want to leave open.
+We're not going to block that.
+Then there's this path on the top.
+This is a fork with smoking at its center.
+Smoking is a common cause of X and Y.
+This is a backdoor path because the arrow is entering X.
+Likewise on the bottom, we have a structurally similar path from age to X and Y.
+This is a backdoor path again because it's an arrow entering X.
+And then there's this long circuit backdoor path again through age, but now also through smoking that creates a more non-causal association between X and Y.
+It's also a backdoor path because the arrow is entering X.
+So we have three backdoor paths.
+We need an adjustment set to block them.
+Look at this and think about it for a second.
+For each of these, you want to analyze it and think about what you do.
+But seriously, engage with it and try to figure it out.
+It's okay to make mistakes or feel a little confused when you're new at this.
+That's fine.
+You can use software like Daggerty.net to check your answers, but you get better at this really rapidly.
+You absolutely do.
+Pretty soon, you'll be analyzing even complex tags with your eyeballs.
+Okay.
+So here's the answer.
+We need an adjustment set that includes both age and smoking.
+You can see this just by moving an order and analyzing the backdoor path.
+We need to stratify by smoking to deal with the fork that comes from smoking.
+And we need stratify by age to deal with the fork that comes from age.
+And then the other path, the long circuit that includes both age and smoking, is blocked also by stratifying on those individually.
+And so our adjustment set is age and smoking.
+But when we add age and smoking to the model and stratify by them, there will be coefficients for them.
+What do those coefficients mean?
+Here's the model.
+If we're just going to imagine we're in this benign statistical situation where we can just run a linear regression.
+And often we are in a situation like that.
+I'm very generous about what Gaussian distributions mean.
+Remember, a Gaussian outcome distribution is a golem for estimating a mean and a variance under very weak assumptions about the measurement.
+We can often do better, but this is not a bad place to start.
+So we model the mean as conditional on an additive function of the covariates and their coefficients, and that's what we see here.
+No surprises.
+The same machinery as from last week.
+So the coefficient beta sub x is what we're after, and we're going to use that to generate a causal effect by marginalizing over distributions of the other variables eventually.
+But we're not going to focus on that now.
+We're going to focus on the meanings of the coefficients on the other variables because these are the dangerous creatures that appear on table two and that readers will be tempted to interpret as if they had the same status as beta sub x.
+But they don't because the adjustment set was not designed for beta sub x and beta sub a to yield causal effects of those variables.
+This model is designed to yield a causal effect of x and only x.
+So what happens with the other coefficients?
+First, let's look at x and remind you why we believe this is a causal effect.
+It's confounded by a and s in the unconditional model.
+So if we only regress y on x, it's confounded.
+But conditional on a and s is like deleting these arrows.
+Yeah, effectively, because remember that's what the due tax list tells us.
+If we use that adjustment set, it's as if we had done randomization and randomization deletes all backdoor paths.
+And so we get a coefficient for x that can be interpreted as if issues of precision and finding sample side to side.
+It came from the graph on the right.
+Remember, we still have to marginalize.
+So the coefficient is not enough, but the coefficient needs to be estimated correctly.
+Okay, that's just the reminder of how the backdoor criterion works.
+What about s in the unconditional model?
+If we were going to think about the causal effect of s and we regress y on s, it's also confounded.
+Yeah, it's confounded by a.
+A is a common cause of s and y.
+Now, so it's confounded.
+In a model conditional on a and x, we could get, right?
+Because you're thinking now, we ran that regression that includes x, a, and s.
+That's our regression, the regression that was just a few slides back.
+But now we're taking the perspective of s.
+And we're imagining a reader who's looking at table two and they're looking at the coefficient on s.
+And they're going to interpret it causally.
+So now it's the same statistical model, but we pivot our perspective so that we're looking from the perspective of s
+and what the coefficient is actually meaning from a causal perspective.
+And since we've stratified now from s's perspective on a and x, we've deleted backdoor pass into s that can be deleted through that operation.
+And that means, yeah, we have de-confounded s, but we've also removed the causal, the front door path through x
+because we stratified by a mediator of smoking's effect on stroke.
+I'll say that again.
+We stratified by a mediator of smoking's effect on stroke.
+And that means we are not getting the total causal effect of smoking on stroke, but only the direct effect.
+So this coefficient is not like the coefficient on x because the coefficient on x is a total causal effect.
+The coefficient on s is not.
+Now for a, same sort of procedure.
+We imagine the unconditional model, right, the total causal effect of an AY flows through all the past.
+And if you wanted to get that, you would just regress Y on age.
+That would be the way to do it.
+You don't need any adjustment set at all.
+Yeah, there are no backdoor errors into age ever.
+You need a time machine to do an intervention on age.
+What about the conditional model?
+Again, from the perspective of the variable A of age, the association with Y has been stratified by smoking and by HIV status.
+So the coefficient for A means the direct effect of age on Y, which might be almost nothing compared to the total causal effect which passes through the rest of the deck.
+Yeah, so again, the coefficient on A that would appear in table two is not the same status as the coefficient on x because it is not a total causal effect.
+It is only a direct effect for a particular path.
+Okay.
+We can make this worse, of course, because in a realistic situation you'd imagine there was an sort of confounding.
+The way I like to engage with this idea of imagining unobserved confounding is draw the original DAG and then look at pairs of variables in your DAG and consider whether it's plausible that there's unobserved confounds, common causes.
+And then draw them in and then redo the backdoor criterion.
+So let's think about this particular case where it's very likely that there are unobserved confounds that influence both smoking and stroke.
+Other lifestyle issues, right, that are correlated that influence smoking and influence stroke.
+We reanalyze, sorry, they don't have that summary up.
+Now if you reanalyze this, what you're going to find now, leave this to you as an exercise, go through the backdoor criterion again, you're going to get the same adjustment set.
+So you'll notice adding this confound does not stop our ability to get a causal estimate, right?
+We can still get a causal estimate of the effect of X on Y.
+But now the coefficient on smoking, when you stratify by smoking, smoking is a collider between the unobserved confound and age.
+And so it will open the biasing path through the unobserved confound when you do that.
+And that means that from the perspective of S, the coefficient of S, is not a causal estimate at all.
+It's biased by unobserved confounds even though you can get the estimate you want in this case for the variable X.
+Okay, I encourage you to read the original Table 2 policy paper.
+It's a short paper.
+It's extremely clearly written for statistics paper.
+It's really about them.
+They use DAGs and explain the whole thing very patiently to you and give you broader context and other papers to read if you're interested.
+It's a modern classic, really, in statistical pedagogy.
+Here's the summary.
+Not all coefficients are created equal, so you shouldn't present them as if they're equal.
+There's no consensus on what to do about the Table 2 fallacy because most scientists have not heard of it.
+But we've got to get the word out because this is a serious problem.
+There are multiple options.
+My preference is simply not to present the control coefficients at all.
+The code exists and the sample can be shared in many cases.
+And so if people are interested in control coefficients or running other models, they can do that themselves.
+But we should not pollute our paper with uninterpretable posterior distributions or sampling distributions.
+The other option would be to give explicit interpretation of each using a causal model.
+If journals allowed longer papers, that would be a great choice.
+The punchline here is that there's no interpretation possible for any coefficient without some kind of causal representation of where it comes from.

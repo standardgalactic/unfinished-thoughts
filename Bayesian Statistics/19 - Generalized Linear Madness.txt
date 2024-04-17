@@ -1,0 +1,696 @@
+Welcome to lecture 19 of statistical rethinking 2023. In this lecture, we're
+going to go back to the beginning in a way and consider the scientific
+foundation of statistical modeling. Let me explain. It's a real benign aspect of
+the universe that linear models work at all. Linear regressions and the
+generalized versions of them, generalized linear models, and generalized
+linear mixed models have at their heart additive combinations variables. They're
+the square hole of nature and as the square hole of nature we can use them
+for things that aren't square because the square accepts all. This is a bit
+disappointing from a scientific perspective, from a research perspective,
+because when we put the round peg in the square hole, we're giving up some
+scientific power. The fit is okay, but it's not ideal. We give up some
+statistical power on one side because the statistical model is ignoring some
+important features, but we also give up some opportunities to use scientific
+information, to better inform the statistical analysis and get more of that
+way as well.
+A funny thing about cats is no matter how big they get, there's still just cats.
+Tigers act like house cats. They stretch like house cats. They wash themselves like
+house cats. They play like house cats. Linear models and generalized linear
+models are similar. No matter how big they get, they still have all the same
+fundamental properties of generalized linear models. By that I mean that
+they're association engines. They're not real scientific models of the
+mechanisms that generate phenomena in the world. They're information
+theoretic devices and that's no insult because these models are extremely
+useful and they've dominated this class so far because probably more than 90% of
+all productive scientific modeling is done with generalized linear and
+generalized linear mixed models. But you have to keep in mind that these are not
+mechanistic causal models of scientific phenomena and as such they leave
+something on the table. Maybe we don't see this thing that's on the table. We have
+to look for it because the table is in darkness but when we think hard about the
+scientific phenomena that we're studying there's extra information to be had
+that the generalized linear models and generalized linear mixed models don't
+capture because they're just engines for stratification of variables
+essentially. So let me introduce you to another way of modeling scientific
+phenomena that starts with more basic principles and builds into estimation.
+So we're going to consider human height again. Remember I said we're going to go
+back to the beginning and human height was the first serious statistical
+problem that we looked at in this course. So here's a human being as one might
+imagine a human being and if we're going to model the relationship between body
+weight and stature or height there are certain physical properties that we can
+take into account that arise from the structure of the human body that the
+weight of a human is proportional to the volume of that human. I'll say that again
+the weight of a human is proportional to the volume of that human and so taller
+humans have more volume and shorter humans have less and this is why taller
+people weigh more and shorter people weigh less and of course you're already
+objecting but I know tall people who are really thin. Yes of course proportionality
+matters as well the width matters so some people are thinner others are wider and
+that also affects volume and that's another thing that we have to take into
+account but nevertheless the connection between height and weight is not
+mysterious at all it arises from the physics from the shape of the human body
+and the nature of mass. So let's model it that way. I'm going to model it in the
+most cartoonish way I can because I want to show you how powerful this approach
+is of just thinking about the scientific basis of the phenomenon and pushing
+statistics into the background as long as possible. And by cartoonish I mean
+let's imagine that people are cylinders. That the human body is just a
+cylinder. Yes they're arms and obviously you're not a cylinder but let's start
+with this approximation and this approximation is a great start because
+most of your volume comes from the relationship between your height and
+your radius if you imagine yourself as a cylinder which is say how wide you are.
+And the volume of a cylinder you learned at some point in secondary school and
+then forgot because you have a rich and enjoyable life is pi r squared times
+height. The volume of the cylinder which is proportional to the weight we'll deal
+with that in a moment is equal to pi r squared times height. Why? Because the area
+of a circle is pi r squared and then we extrude it through the height of the
+cylinder h and that gives us the volume of the cylinder. Okay that's the volume
+of the cylinder and we're going to say people have a mass that is somehow
+proportional to this and this is what we're going to say. We need to express the
+radius in a different way. Humans don't come in every possible shape. There are
+no people I should say none. There are very few people who are wider than they
+are tall and so we're going to re-express the radius r as a proportion of the
+height where p is some proportion of the height variable. And this
+proportion will be less than a half and we'll talk about this in a moment. And
+then finally we deal with the issue of density. The way that volume of this
+cylinder, this human cylinder translates into weight depends upon the density of
+that volume and this translates the units of volume into units of weight and so
+there's some other parameter k that we don't know which is essentially the
+density. So here we have a scientific model of the most cartoonish I could
+imagine. I tried to think of something more cartoonish but failed so I think
+this is pretty cartoonish. This is a cartoonish scientific model of the
+causal relationship between weight and height. And by causal I mean it tells
+us in a very specific mechanistic way how interventions on height will change
+weight. And it's not in any obvious sense a regression model. It's a scientific
+model that arises from the physical structure of human bodies. We can
+simplify this, make it look a little bit nicer. Now here's our scientific
+model. The weight is equal to, we're going to say the expected weight because
+of course we're going to allow for other processes that we haven't modeled to
+add error variation. The expected weight will be k pi p squared times h to the
+third. So what do we do with this monstrosity? W is the weight. This is
+data. We have this, remember from Nancy Howell's Kung data, life history data.
+And we have height on the far right. That is also data, courtesy of Nancy Howell.
+And k is some unknown density. We're going to think about that quite hard in
+this first part of this lecture. And p is some unknown proportionality, the
+proportionality of width to height or the radius of the cylinder to its height.
+It could be less than a half, right? So we need to estimate these to fit some
+curve. So let's make a statistical model now. I've pushed this aside long enough.
+But we're going to revisit this step, the scientific model. So hang on. These are
+the basic components, right, that you understand. If you're going to connect
+any theoretical model to observations, you want to have some distribution for
+those observations to account for the error. And that's what the first line in
+this very abstract statistical model on the slide means. That the weight of
+individual eye has some distribution around an expected value, mu sub i, toward
+individual of that height. That is the second line expresses the expected
+weight for height. This is the equation we've derived from first principles,
+just from the geometry of the human body. The third line, of course, we've got
+our unknowns and sometimes called parameters. And we need to assign priors
+for these. They also have distributions. And we want these to be scientifically
+informed. And since these parameters now have real scientific natures to them,
+they mean particular things, this will be much easier than it is in a typical
+regression model. So let's work through this. Let's have a workflow. How do we set
+these priors? There are different ways to do it. But I think there are some good
+heuristics that work in lots of contexts. We want to think about measurement scales.
+Then we want to simulate. And third, we want to think. You're thinking, well,
+shouldn't we think first? Yes, of course. But we're thinking in every one of these
+steps. But you'll see what I mean when we get to number three, by think.
+So let's start with number one, choosing measurement scales. So all
+measurements have units typically. There's some unit measurement on them. So in our
+particular example, weight is measured in kilograms because we're on the metric
+system. And this has implications for all the other variables as well. Height is
+measured in cubic centimeters. Well, height is measured in centimeters, but height
+cubed is cubic centimeters. And that's not far right. And so in order for this equation to balance,
+the parameter K has to have units, kilograms divided by cubic centimeters. So those of
+you who haven't done physical sciences in a long time, let me explain this a little bit better.
+The units in an equation have to cancel in a way so that they all agree. So the left-hand side of
+the red equation on this slide has to be equal to the right-hand side. And for that to be true,
+K has to have units, kilograms divided by centimeters squared. Otherwise, the centimeters,
+sorry, centimeters cubed. Otherwise, centimeters cubed won't cancel.
+All right. It has to be kilograms equals kilograms. The units have to balance.
+The thing about this, so I'm revving you up to think about units because I want to get rid of them,
+actually. Measurement scales are social constructions. And that isn't to insult them because
+it's impossible to have a human society without social constructions. We depend upon it.
+That's what we do. We're monkeys that make social constructions.
+But when we do scientific modeling, measurement scales often get in the way.
+And they're totally artifice. We can do without them. Nature doesn't know anything about kilograms.
+It doesn't know anything about centimeters. These are projections of the human mind onto nature.
+And it's always possible to divide them out and get rid of all the units and work with
+dimensionless quantities in your scientific models. And often, not always, but often,
+this makes things much easier and it sometimes just gets rid of variables.
+And that's what I want to talk about here in this example.
+So on the right of this slide, I'm plotting weight and kilograms against height centimeters.
+So you think back to the second week of this course. We worked with these data, Nancy House,
+home data. And I've also drawn on there some dashed lines that intersect at the mean weight
+and mean height. And the thing about an individual average height who has average weight
+is that they will always be somewhere near the regression line. Yeah, and you see that here.
+We can always rescale any measurement by dividing it by some reference values.
+So in this case, I'm going to divide weight by the mean weight and I'm going to divide height
+by the mean height. There's nothing special about those values. You could use any other
+reference value. But it's nice to think about the means because they're close to the expectation.
+So here, I've added a new plot on the right, which looks exactly the same, right? Your eyes
+are not tricking you, but the axes are different. The axes on the right are different from the
+axes on the left, even though everything else about the plot is the same. And this is the nature
+of measurement scales. They're arbitrary. So now, since I've divided weight by mean weight,
+weight on the plot on the right, that is the vertical axis on the plot on the right is weight
+rescaled. It's dimensionless. One means average. And greater than one means greater, proportionally
+greater than average. And less than one means proportionally less than average. And the same
+for height on the horizontal. This is the scaled height. One means average. Greater than one means
+more than average. Less than one means less than average. There's nothing wrong here. We've lost
+no information. We could always go back to the original measurement scale or any other
+measurement scale you like, all right? We could measure weight in stones. We could measure height
+in apples. And that would be perfectly fine. We haven't lost any information. Okay, what good
+is this? Well, I'm going to show you. I'm going to try this out to show you. We need to assign
+priors now to the unknowns. Yeah, and because the unknowns are p, the proportionality of radius
+to height, and k, which I call the density. And since these parameters mean something now,
+they have physical implications, it's much easier to think about them and assign meaningful scientific
+priors. It's harder in general regression. And this is one of the things that's nice about
+going back to basics. So for p, the proportionality constant, what do we know about this? Well, we
+know it's bounded between zero and one because of the proportion. Yeah, proportions are dimensionless
+units between zero and one. And it's got to be less than a half. Yeah, because on average,
+but especially for the population where we're modeling here, the radius of a human body bottle
+is just cylinder is less than a half of its height. Yeah, often quite a bit less than half.
+And k, the density, what do we know? Well, the most minimal thing we know
+is that it's a positive real number. And it's greater than one. Yeah, so that the volume translates
+into kilograms in greater than one because of the shape of the graph we had before, the relationship
+between kilograms of mass and height and centimeters. So let's take a conservative
+approach. Yeah, and not express too much constraint. Let's assign p a beta distribution,
+which is between zero and one. That's what the beta distribution does. It's a distribution
+for proportions. And I've chosen the values inside of this, this 2550 so that the mean is a little
+over 0.3. Yeah, and you can see the plot of it on the right of this slide, the top red curve over
+there. And you might think, oh, this is a very strong prior. And actually, it's not. If there's
+a lot of data in this sample and this prior could easily be overpowered. But what this does is it
+expresses our prior knowledge that the portion is less than a half and probably closer to 0.25
+than anything else. I mean, just think about your own body. Yeah.
+And then k, I assign an exponential with rate 0.5. Remember, the mean of an exponential
+is one over its rate. So the expected value in this prior is two. Yeah. And that's the only
+information it contains that it's positive value with expected value two. We're going to start there.
+Surely there are better priors that we could use. But remember, you don't have to get the
+perfect prior. You just have to do better than flat. Yeah, do better than no prior. And it's
+really easy to do better than no prior, especially when the parameters mean something
+scientifically. Now, as always, we do a prior predictive simulation. So the code, I hope at
+this point in the course, the code is not too mysterious. The first thing I do in this code
+is I simply sample a bunch of values, 30 in this case, for p, the portionality constant from the
+beta prior, and then 30 values of k independently from the exponential prior.
+And then I plot them. Yeah. And over on the right, this is the sort of prior expected relationships
+between weight and height. Yeah. There's a little bit more going on in this prior
+predictive simulation that I haven't talked about. So I'm going to get to that now.
+When we assign a distribution to weight, we need to think equally about that. Remember,
+even though weight is observed, the distribution we assign is a prior distribution.
+Yeah, I'll say that again. Even though weight is observed, the distribution we assign to it is
+a prior distribution. The actual residuals of weight relative to the mean mu sub i can have
+any distribution they like. Well, within reason, they can be, they don't have to have come from
+that exact distribution. This is a prior for those residuals. But we use scientific information,
+we know about these data, to assign the best prior we can, as always. And what do we know in
+this case? Well, we know that weight is positive real value. There are no negative weights. Yeah.
+And we also know that the variance scales with the mean. That is, individuals have a collection
+of individuals who are heavier. The variance, or sorry, are taller. The variance in weight among
+them will be greater than the variance in weight among individuals who are shorter. That's just
+a natural feature of the way the scaling works. So, we want some distribution that has that
+relationship. And there are several to choose from. The most convenient is just the log normal.
+And the log normal makes a lot of sense. Long ago in this course, I explained, and I say something
+about this in the book. Growth is a multiplicative process, right? If you have fast growth early
+on, that makes later growth more powerful, because there are just more cells to divide.
+And multiplicative growth processes generate log normal distributions. And so we can just use
+a log normal distribution here. The weird thing about log normal, I have to note for you, and this
+catches me up every time I work on a project that has a log normal distribution. The log normal is
+parameterized with two parameters, mu and sigma. So it looks like a normal distribution. But those
+are the parameters of the normal distribution that you get by logging. I'll say that again. The mu and
+the sigma inside the log normal there are the parameters of the normal distribution that you
+get by logging the outcome variable. They're not the parameters of the log normal. The mean of the
+log normal is a function of both mu and sigma. Now I'll say that again, because this again,
+this always confuses me. The mean of the log normal is a function of both mu and sigma.
+Yeah, but the mean of the normal distribution you get by logging w is just mu. So when we model
+this, our scientific model, this k pi p squared h cubed, we need to put an exponential link on it,
+you know, on mu. Because this is the expected value of weight on the natural scale, not on the
+log scale. I know this is weird. Think about it for a moment and you're going to work with the code
+and you'll get it. I'm very confident. Here's the code. So we set up a simple data list and this is
+just a log normal distribution. DL norm is log normal. And then I just write the exponential link.
+And I write in pi manually. You don't have to do that, but I think it makes it easier to parse what's
+going on in the code. And then k p squared h cubed. And then the priors we talked about before.
+And this is the fit we get from this. And you can tell us not perfect, but that's okay. This is not
+bad for a cylinder. I told you I wanted to use the most cartoonish and feeble scientific model of
+human height. How human height influences human weight that I could. But this gets it, this gets
+most of it. Seemingly almost for free. But it's fitting children quite badly. And you'll see the
+expected curve misses the data at the lower end. So something interesting is going on there. And
+the good news is in a model like this, errors are much more informative. Because the direction of
+the error tells you something in relation to the scientific parameters. In a general regression
+model, which is just a curve fitting exercise, failures don't immediately tell you something
+about what's gone wrong. But in a model like this with scientific structure, we get clues. So in this
+case, the proportionality is different for kids, right? It's probably not their density. It's
+their proportionality. That is the ratio of their height to their width to their radius as it were
+is different. And that makes a lot of sense. And so if we were going to try to improve this,
+we would start there. If you just have epicyclical models like regressions, multiple regressions,
+it's much harder to learn from the prediction errors. Okay. So that's already pretty good,
+but we can do even better by thinking about this for a second. So let's come back to the basics.
+Here's the expected weight for a given height h. And if we take the posterior samples from the
+model we just ran, the posterior joint posterior distribution of the two parameters k and p are
+very weird. Here they are, or rather, k and p squared are very weird. Yeah. And remember, these
+are the only two unknowns. We've only got two parameters, k and p squared. Well, there's the
+sigma in the log normal, but we'll leave that aside because that's an error variance thing.
+So k versus p squared, and you'll see there's just basically just a curve that expresses the
+relationships in k and p squared. What's going on here? What's going on here is that these parameters
+are completely unnecessary. And they can be completely described by a mathematical function.
+Then in a sense, it's already known by the equation we've written down. And Bayes has
+discovered it through the implications of probability theory because Bayes is very clever.
+But let's get rid of these parameters now. Let me show you how. Okay. Here's the idea. So remember,
+I rescaled weight by dividing it by the mean weight and height by dividing it by the mean height.
+So it's that the mean weight is now one and the mean height is one as well. And so let's consider
+an individual at the mean weight and height. So I've replaced mu with one and height with one.
+And this is perfectly fine. We're just going to think about this equation for a moment.
+And now we can ask, under what values of the unknowns is this still true? Yeah. In fact,
+we can solve for k in terms of the other variables just by doing a little bit of algebra.
+And so if you solve the second equation on the screen for k, you get the third equation on the
+screen k equals one over pi p squared. And if we plot this function on the graph, well,
+lo and behold, it follows the posterior samples for the most part. There's a little bit of offset
+there due to the log normal error variance. But this is the sort of thing you get almost for
+free from scientific modeling is that there is a built-in relationship between k and p squared
+that must be true. This simply arises from the nature of the variables and the fact that we used
+a volumetric cylinder. It gets even better. So hang on. So again, on the slide there are three
+equations now. I'm going to work from the top to the bottom. The first one is just the thing we
+had before. We consider an individual of an average weight, that's the one on the left,
+and an average height, that's the one on the right. If we replace k with one over p squared,
+then we get the second line. But I've replaced the unknown with this kind of joint parameter
+theta, or another way to say this. Sorry, this is the better way to say it. k times p squared
+is some value. And whatever its value is, it needs to satisfy this equation. You don't even have to
+think about the k equals one over pi p squared anymore. It's just that there's a product k times
+p squared, and we're going to call that product theta. What does theta equal? Well, in order for
+that equation to be satisfied, it must be approximately one over pi, or pi to the minus one.
+Otherwise, the equation won't be true. Theta has to essentially get rid of pi in order for the
+left-hand side, which equals one, to be equal to the right-hand side, which also equals one.
+And so there are no parameters in this model. There are no free parameters to estimate.
+So let's estimate it that way. Here's a new version of the cylinder model of human weight
+and height. And you'll notice it has no parameters except for the sigma error variance in the log
+normal. But the expected value there, the exponentiation of mu, is just the cube of height. And that's
+it. Yeah, cube because it's a volume. Yeah. And we can fit this. And lo and behold, we get
+almost exactly the same curve as we got before with two free parameters. Yeah, two useless free
+parameters. Yeah, that were there simply because we hadn't thought hard enough about the equation.
+Or rather, I hadn't. Yeah, I don't want to put this on you. This is a really cool thing, I think,
+that arises from basic geometric relationships. It's a field called allometry. And lots of things
+happen. Once you get rid of the measurement units on things, there are these fundamental
+scaling relationships between quantities that emerge. And often you don't need any free parameters
+at all to create quite useful predictions about the relationships between these measurements.
+Obviously, we can do better here because we're still missing the kids. And there's more that we
+can do because we've left out some very reasonable biological assumptions like the proportions
+of the body change over time, the density might as well. But that's all good because we've already
+got pointers because this is a real scientific model and not just some cartoon regression.
+Okay, let me try to summarize this. I know this might have been a bit weird. Most of the relationship
+by which height influences weight is just the relationship between the length of some
+shape. Not exactly a cylinder, but something like that and its volume. So changes in body shape.
+We had some error in the posterior predictions and it's likely that changes in body shape
+will help us do better there. You might want to play around with that and see what you could do.
+The idea would be that the portality P changes with age. And the overall lesson I want you
+to take from this is not so much the details of this example, although those are worth studying
+because allometry is a very general phenomenon in lots of ways. It also applies to metabolism
+and other very important features of health and growth. But rather that when we think,
+when we postpone thinking statistically as long as possible, often we end up with a better
+statistical model. I'll say that again. When we postpone thinking statistically as long as possible,
+often we end up with a better statistical model. Yeah, and there's no way to do good
+empiricism without thinking theoretically about what you're measuring.
+Okay, let's take a break, review the slides here, jot down some things that might have been confusing
+or not. Go for a walk, take care of yourself. And when you come back, as always, I will still be here.
+Welcome back.
+In the second part of this course, I want to talk about a different kind of scientific model.
+And I want to introduce it by introducing the experiment to generate the data. So what you're
+looking at here is a cartoon version of a device developed by some mad developmental psychologists
+who are interested in how children learn from one another in particularly in low information
+settings. And so this device accepts tokens and dispenses toys. And there are three tubes,
+children are given tokens, and they can put them in any of the tubes freely of their choice.
+And all of them dispense the same toy, but the children don't know that.
+So put yourselves in the shoes of an observing child who is sort of the experimental participant,
+if you will, and your behavior is going to be measured. And what you get to see first before
+you interact with this device is a child come up and put a token in the red tube and receive a toy.
+And that child goes away and a new child comes up and also puts a token in the red tube and receives
+a toy. And then a third child comes up and puts a token again in the red tube and receives a toy.
+And then another child comes along and puts their token in a different color, let's say yellow.
+And then the same child, again in yellow and again in yellow. So this fourth child that you've
+observed gets three toys, yeah, all from the yellow tube. And now the question is, what do you do
+when you get your token? We give you a token and we invite you to insert it in one of these tubes.
+What do you do?
+Now, since the people that ran this experiment are psychologists, everything is counterbalanced,
+right? So what we wanted to think about is that the three kids at the top of this slide
+are the majority demonstrators. They're demonstrating the choice, the red tube,
+that the majority of children chose. And the child at the bottom is the minority demonstrator,
+yeah. But the total amount of evidence for both colors is the same, that is the number of choices.
+And that's an important feature of this experiment, yeah. But the minority demonstrator is not always
+after the majority demonstrators. This is also sometimes counterbalanced across kids because
+psychologists are good at experiments. And so a lot of kids were put through this experiment
+in multiple countries. And our job now is to try and figure out what strategies they're using
+to make their choices. That is how they learn, if at all, from the observations of the other kids.
+And there are three choices that can be made. And we're going to think about these colors in terms
+of the majority choice, whatever the majority color was. The minority choice, whatever that was.
+In my example, it was yellow, but it could have been blue in a particular experiment.
+And then there's the unchosen color, the color that was not demonstrated by any child. And these
+are the only three observations that can be produced by a single participant. But here's
+the cool trick. Our question is whether children copy the majority or the minority or ignore them,
+yeah. And there are lots of good scientific questions that pivot around this issue of
+majority choice. The problem is that we can't see strategy. Strategy is a latent variable that's
+unobservable. Now all we see is choice. And if a child is copying the majority, that choice will
+be consistent with other strategies as well. Yeah. For example, suppose a child chooses a random
+color. They ignore the other children completely and just choose their favorite color. And favorite
+colors vary among kids. Just by chance, they'll follow the majority a third of the time,
+which is not an inconsequential probability at all. Say they just choose a random demonstrator,
+one of the four kids. Well, three of them demonstrated the same color. So now they'll
+follow the majority three-fourths of the time, but they're not actually following the majority.
+They're just choosing a child at random to follow, maybe because they liked the barrette or hair band
+that they were wearing. And then another third example, just a random demonstration, right?
+There are six demonstrations of putting a token in a tube. Three of them were the majority choice,
+and three of them are the minority choice. So if you just choose a random demonstration,
+you would follow the majority half the time. So you see that there are lots of strategies
+that have substantial probabilities of looking like majority choice. And so how do we deal with
+problems like this? Well, we think scientifically, and we build up a generative model of those
+strategies. Here's just a simple simulation to reinforce what I tried to explain on the previous
+slide. We imagine that children choose a color at random. They completely ignore
+the demonstrators, and that's why I'm simulating on the left. And then I just,
+no, so what am I doing here? Sorry, half of the children choose a random color and half
+follow the majority. And we observe a total sample that is a mixture of these two strategies,
+and then I show you the simulated data on the right. And yes, there are more choices consistent
+with majority strategy, but a lot of them are just random choosers. And so the total evidence
+for majority influence is exaggerated. And this is not good, right? Because we'll reach the wrong
+conclusions. So we can't just use the choice as a proxy for strategy because multiple strategies
+produce similar choices, can produce the same choices. This is like in the very first lecture
+of this course, when I tried to emphasize that in any even moderately complicated scientific
+context, no models don't work very well. And that's because many different non no models will
+produce the same observations. Yeah, as no models and is one another. So in this case,
+the majority choice does not necessarily indicate majority preference. There are lots of other
+strategies that could also explain the same observation. So I want to develop a statistical
+model for you that deals with this as an example. And of course, there are lots of strategies
+you could dream up. This is part of the fun of scientific modeling. I'm going to consider five,
+which I know maybe sounds like a lot, but you could probably think of some more by the end of
+this section. The first is majority choice. That is the child follows the choice that was
+chosen by the greatest number of children. The second is the minority choice. That is the child
+follows the choice chosen by the minority demonstrator. That is the child that chose the
+other color. Third, I'm going to call maverick. What does that mean? Well, the maverick choice is
+you choose the unchosen color. You want to see what happens because none of the demonstrators
+chose it. Four would be the random color choice. This means you ignore the kids completely and you
+just choose the two bit random. What does random mean here? Well, as always in statistics, it just
+means we don't know what explains the choice, but it doesn't have to do with the demonstrators.
+Yeah, it could be favorite color or something like that. And then a fifth one is you just copy
+the first demonstrator. Whatever the first child chose, just copy them, and then you
+get bored and stop paying attention, and you just go with that. You can probably think of others
+like follow last, right? And you could try to program those by the end of this.
+Okay, how do we build a stat model like this? This is going to be what's called a state-based
+model. In a state-based model, there's some latent generative level that generates observations,
+but we start by thinking about the observations, and they come from a categorical distribution.
+The idea here is that there are three possible observations for each child. Either they choose
+the unchosen color, and we're going to code that as one. The majority, we're going to code that as
+two, or the minority will code that as three. And those are the only three possible observations.
+Those observations can be generated by different latent states that the children occupy, and in
+this particular model, those states are their strategies. These categorical distributions
+are parameterized by a vector, and this vector is of the same length as the number of outcomes.
+So in this case, theta is a vector with three probabilities in it, and each corresponds to
+the probability of each choice. So we have to model that vector. So here it is. I'm going to
+walk through this slow, so don't panic. Each element, j of theta, I mean j can take the values one,
+two, or three, is equal to this weird thing on the right, and I'm going to explain this to you
+step by step. Now what it means. The first part of it, this big sigma, is just a sum. What we're
+going to do is we're going to sum over all the possible strategies. And we do this because
+we're computing an average, right? So we don't know which strategy the child is using, and as
+always in probability theory, when you don't know, you have to average or marginalize over your
+uncertainty. And that's what this sigma is going to do. So capital S is just an indicator variable
+for a strategy, and it ranges from one to five, the five strategies from the previous slide.
+The next element of this equation is p sub s, which is the prior probability of strategy s.
+Yeah, the child uses it. And then finally, this pr y equals j conditional on s. This is the
+probability that choice j arises, or j is one, two, or three, assuming strategy s. Yeah, we don't
+know that the child is using strategy s, but we do know that if they did use strategy s, we could
+say what the probability is that this choice would arise. So this expression here is purely
+mechanistic, and we just get to write it in. We know it because we've defined that the strategies
+is not something to be estimated at all. That'll be a little bit clear when I show you the code,
+but first we need a prior. We need a prior over the vector p, which is the prior for the strategy
+space. And in this example, I'm just going to make it so that every strategy has the same prior
+probability. You'll remember in an earlier lecture when I introduced ordered categorical predictors,
+I introduced this Dirichlet distribution, which is a distribution for probability distributions.
+If you've forgotten that, you can go look it up later.
+This is just to say that I'm not assuming that any one of the strategies is more plausible
+a priori than the others.
+The data will tell a different story, though. Okay, this kind of model is extremely awkward
+to code. I'm sorry, it's just the truth, but there's a lot that you get from coding it,
+and this is, I think, the first model in the course this year that I'm going to just show you
+with raw stand code. You don't have to understand every detail. A stand model,
+that's what you're looking at on the left. This is the kind of code that my R package
+and the Oolong function generates for you. It compiles into a stand model and then stand
+as the sampling. And we're looking at the raw stand model. If you code stand directly, often
+it's much more expressive, and you can do trickier things more easily.
+And the thing about a stand model is you have to explicitly declare at the very top the data,
+and then the parameters. The data are the observed variables and the parameters are the
+unobserved ones. Yeah, and so you see right here we have this observed variable y, which are the
+choices of each child. These are values one, two, or three. And then the unknown thing,
+the only unknown in this, are the proportions of strategies in the sample of kids. And we
+start with a simplex. A simplex is a vector that sums to one. Yeah, so it's a probability distribution.
+And that's what we declare here, a simplex of length five, named p. And then we come down to
+the model block, which is the code that does the stuff you're usually used to. I declare this
+just essentially throwaway vector theta, which is not a parameter. It's just our linear model,
+right? And so it's a vector of length five. And here's the prior. Yeah, do your play prior.
+And then here's the action. And you don't have to understand every bit of this notation. I know
+it looks like a lot. I just want you to understand that all this code is doing is it's saying,
+for each observation, we're going to fill in the vector theta based upon the logic of each
+strategy. I'll say that again. For each element of the vector theta, remember the vector theta
+contains the probability of the observation for any particular child conditional on assuming
+a particular strategy. So there are five spots in theta. And all we do is we work through them.
+And we say, what's the logic of each particular strategy? What's the, and given that logic,
+could it, what's the probability it would have produced this observation?
+So the first thing there for majority, yeah, you see if y sub, yi, y sub i, and y sub i is the
+observation, if it equals two, which is the majority choice, then the theta for majority
+equals one, right? Because if the child is following majority strategy, the probability
+they will choose the majority color is 100%. And then similar for the minority strategy,
+just below it. In that case, it would be y sub i equals three, otherwise it's zero, right? And,
+and then the maverick is the final color. If y sub i equals one, that's the unchosen color.
+Maverick is guaranteed to choose it. Yeah. Remember, we don't know the children using
+these strategies. We're going to average over that lack of knowledge in a little bit.
+The random color there is one third, and that's what theta sub j four is, theta sub four.
+And then there's follow first. And follow first depends upon whether the minority or majority
+color went first, and there's a variable in the data set for that. Okay.
+And then there's the calculation. It's doing massive computer, and we have to do everything
+on the log scale. So we take this whole expression, and now we compute it on the log scale. Remember,
+multiplication on the log scale is addition. And so it's the log of p sub s plus the log of
+the particular theta sub j s that we needed. And this gives us the proper sum or the element of
+the sum. And, and then we add them all together at the very bottom with this thing called log sum
+exponent theta j. And then that theta j is fed into the top. Yeah. And that's the thing we update
+with, right? The categorical distribution is updated right there. And that's what the target
+on the left means. Okay. If you run that model, it samples just fine. It has no problem. And
+you look at the posterior distribution, the marginal posterior distribution of each element
+of the vector p. And this is what it looks like with 89% plausibility intervals.
+There's a good amount of evidence for majority choice, but you see that all the strategies
+remain plausible. There's just more evidence for majority and follow first and then for the others.
+And random color, that's what color means. Random color has a really wide
+plausibility interval. And the meaning of that is easier if instead we draw samples here, right?
+Because these, the elements appear correlated to one another. Yeah. And that's very hard to see
+in a static plot like this. But say I draw posterior, I do posterior draws for the vector p,
+and I animate them as I'm doing here. And you'll see that if you look at the color column,
+it varies a lot more. And if it goes up high, then the others have to get lower. And if it goes low,
+that probability gets reallocated to the others. But it has a much larger variance
+than the others. Yeah. And that's because it's random. It can always explain away. Random choice
+can always explain away the others. And the data are not sufficient to exclude it because the
+experiment wasn't designed to exclude random choices. That wasn't what it was probing.
+Nevertheless, the possibility of random choice haunts the experimental design, as you see here.
+Yeah. Then you can see the differences. The majority is consistently more plausible than
+minority choice in this. And there's lots of evidence also for following the first. That is
+whatever color the first demonstrator chose. Okay. Let me try to summarize a bit about state-based
+models. This has been a very specific example. And it's related to developmental psychology. And
+maybe you're not interested in that. But there's a really big space of models that have these
+same properties where the basic idea is the thing you want to learn about is some latent state.
+It doesn't necessarily have to be a strategy. It could be a location, wealth, all kinds of things,
+knowledge, intentions. These are unobservable things. But you have what is called in this
+business emissions from those latent states. Emissions are behaviors or any kind of observable
+variable. And even though more than one latent state is consistent with any particular emission
+and with any particular observation, if you get enough data structured in the right way,
+you can still learn things from the sample. And that's what we've done here. Yeah.
+Now, the alternative to doing this is just to analyze the data wrong. So what you can imagine
+doing is just running a categorical regression on the outcomes, majority, minority, un-chosen,
+and just saying every child that chose majority is following the majority. But that would be wrong.
+That would exaggerate the evidence for majority influence. So we have no choice once we're aware
+of this, but to do the right thing and use a state-based model. State-based models are incredibly
+common. They're applied to movement, learning, population dynamics. In fact, after the next
+break, that's what we're going to look at. International relations, family planning,
+all kinds of examples are state-based. So the last example, let me say a little bit more before
+the break, family planning, how is family planning a state-based model? Well, a particular individual
+or couple may have intentions about the size of the family they want, but pregnancy and child
+burying are, to some extent, stochastic. And so those intentions aren't always realized.
+And so any realized family size can be the product of multiple family planning strategies.
+Yeah. And so if you want to study how people are strategizing about the growth of their family,
+it's not sufficient just to count their kids. Yeah. Okay. Let's take another break
+and again review the slides. I know the first two sections of this lecture have been completely
+different from one another, and both of them have also been completely different from everything
+else in the course. I sympathize. So take a quick review and then take a break. Take care of yourself,
+and I'll be waiting here for you to come back.
+Welcome back. In this third and last section of this lecture, I want to show you another kind
+of state-based model, but this one is quite different because it has dynamics to it. It varies
+in time. Usually this kind of model is discussed as a population dynamics model, and there are many
+different applications, but I'm going to use an ecological example. So the classic ecological
+example going back a few hundred years now is the study of how species influence one another
+in ecological systems. Some animals eat other animals, and therefore they depend upon them,
+and the quantities of these, the numbers of these different
+animals vary over time, and they influence one another causally as a result. And so for example,
+the link on the right hand side of this slide does not eat grass. He's too proud. He does eat
+hairs and other smaller animals, and if there are fewer hairs, then the links go hungry, and there
+will be fewer links. Yeah, when there are fewer links, the hairs do better because they're not
+getting eaten, and they may increase in number. But as they increase in number, the links do better,
+and this leads to interesting reciprocal causal processes. So this will also be a chance for us
+to think about cases where instead of a directed acyclic graph, this process would be acyclic,
+but because we're going to model it in time, there are no cycles.
+There's a simply reciprocal causation feeding forward in time between the different species,
+and what we're interested in estimating is exactly how the different species influence one
+another, what their interactions look like, to what extent do links depress hair numbers,
+and for example. So here's the cartoon version of it thinking about it, and this is the sample
+we're going to use. This is a somewhat famous or infamous, depending upon your opinion,
+historical example from Canada. From the years 1900 to 1920, there are records of numbers of
+pelts that are recorded from trapping hairs and links in different parts of Canada, and I show the
+hair in trend in black. Remember, this is numbers of pelts. This is not the numbers of animals,
+and this is thousands of pelts, and then the links in red, and it sure looks like there's
+some relationship between these two things, and how might we explain this with a more foundational
+scientific model, and how might we learn something about the unknowns in such a model from these data?
+Well, the most basic and cartoonish, certainly not scientifically satisfactory these days,
+but you've got to start somewhere in this business. A process model of the relationships
+between a pair of species is the so-called latkevolterra, ordinary differential equations,
+and that's what I've put on the slide here, and let me walk you through these just to understand.
+These are very simple once you get used to them. The first thing to understand is there's one
+equation for each species, and each of these equations doesn't specify the number, but the
+change in number. I'll say that again. Each equation does not specify the number, the number of hair,
+or the number of links, but the change in number with time, and that's what the dh over dt is,
+and the up there, that's the change in the number of hairs with respect to time, and the dl over dt
+is the change in the number of links with respect to time. Then the next thing we have in these
+equations, so just look at the hair one for now at the top. We have the number of hair at time t
+times their birth rate, because hair only come from hair. They don't come from the soil,
+right? They don't sprout forth from lettuce. If you don't have any hair, you don't get any hair,
+and then they're removed from the population through death, and this is a fundamental fact of
+just how biology works, and we know it's true, and if there are no hair h of t, then they can't die,
+and so the change in the number of hair with respect to time is equal to that difference,
+and the same is true logically for links. Okay, now we start parameterizing it to
+putting causes of interest. Bursts are caused by lots of things, and deaths by lots of things,
+and we're going to focus on just a few things here. We're going to have some parameter b sub h for
+the birth rate of hairs, and we're going to make that independent of the links. The idea is that
+links don't depress bursts of hairs, but they do increase mortality, and that's what we have
+on the right-hand side of this equation. Now we have the number of hairs h of t times l sub t,
+which is the number of links at times sub t times m sub h, which is the impact of links on hairs,
+right? It's the sort of force of mortality that links put on hairs, yeah. Now obviously,
+this is not completely realistic, yeah, because this equation says if there are no links, then the
+hairs don't die, right? And you know that's not true, but put that away in your mind pocket,
+yeah, and let's continue with the lesson. Obviously, we can do more complicated models,
+but I'm trying to do something that is conceptually easy to grasp here.
+And then similar logic for the links. We want their birth rate to depend upon the number of hair,
+because if the links don't eat, then they can't get pregnant, and they can't nurse their kittens.
+Our baby link is called kittens, I hope so, and so it's l sub t times h of t times b sub l,
+or b sub l, is the spin to which the birth rate is proportional to the number of hairs.
+And then we subtract some natural mortality of links that doesn't depend upon the hairs,
+and there's just a constant m sub l for the mortality rate of links. Okay, a lot on the
+slide here. Hang on, I'm going to walk through it piece by piece again. We're going to have two
+vectors of observed variables, the numbers of hairs at each time t, and the number of links at
+each time t to explain, and we need symmetrical models for each of them. These are positive
+numbers of pelts, right? The little h sub t is the number of hair pelts at times of t,
+and the little l sub t is the number of links pelts at times of t, and these have observation
+error on them, and the log normal distributions express that. And the mean of these log normal
+distributions is, well, our theoretical model. It's the log of the true number of hairs capital h
+sub t times some parameter p sub h, which is the probability a hair gets trapped, essentially.
+Yeah, some proportionality. And it's logged because it's a log normal distribution. Yeah.
+And when the log normal distribution is parameterized for the normal distribution,
+you get by logging, and so there's logs everywhere. I know, it's not fun.
+But otherwise, that's the standard. Then I repeat the differential equations,
+those DHDT and DLDTs, and we get an expected value for the number of hairs or the number of links
+at any particular time t by integrating using that differential equation. So what does this mean?
+Well, it just means summing up in continuous time all the population changes up until that
+observation time. Yeah, and so that's what we get at the bottom here. The expectation
+for h at some time t is any initial observation h sub one plus all the accumulated changes
+arising from the population dynamical model. Yeah, and that's all that, that weird looking
+swing ds is. It sums from one to t using the changes DH over dt. That's all that means.
+Okay, let's do prior simulation before we fit the data. So this model is capable of producing a
+really wide range of population dynamics. And I'm just sampling from the prior here
+to show you that you have to do some prior predictive simulation to get this to do
+anything even remotely reasonable for real animals. They're biological parameters, right?
+So the birth rate for hairs needs to exceed their death rate. Yeah, for example,
+at least in the absence of links and so on. So here I'm just showing you this animation
+sampling from the prior distribution to show you that you get the time on the horizontal axis,
+this kind of feedback effect from this model quite easily where hairs reach a maximum and then
+links increase and links in red. And this leads to a decline in hair, then a decline in links,
+and then it repeats potentially forever. Again, a stand model and you don't need to understand
+all the details here. But I think it's nice to expose you to the idea of what's really going on
+inside the box. What goes on in this kind of model, which is called an ordinary differential
+equation model, is that you need some function that, well, returns the rate. That is, just
+computes the differential equations, the rates of change. And the way you use the stand is you
+write a sub function shown here at the top of this code block. And it feeds in all the data
+and the necessary parameters at the top. And then all it does is plug those into those differential
+equations, which are the ones we saw before. These may not look exactly the same to you,
+but that's just because I simplified them to reduce the numbers and multiplications that are
+necessary. I factored out H and L respectively in each of them because they're present in both terms.
+Yeah, but this is all that's going on here is just that.
+And then the action down here is to do the integration. So Stan has an ODE solver built
+into it, like all kinds of packages that let you do this kind of modeling. And you just need to
+tell it the function that contains the differential equations. And it'll do the cumulative calculation
+for you of the expected cumulative change from any one point, time point to another. And that's
+what's going on in this block. Again, the details you can learn later. Don't stress about it.
+I just want you to understand the conceptual function of this code.
+And then there's the observation model, where we deal with the fact that we haven't observed the
+number of hair and links. Instead, we've observed pelts. And pelts are not a perfect indicator.
+And that's what's going on in here with the log normal distributions. And each time T
+for each species K, we predict the number of pelts that were observed using a log normal
+with a particular air variance for each species and a different proportionality,
+different population predictions in POP. And that comes from the integrating ODE.
+And then a different proportionality P. That's like a trapping probability for each species K.
+Okay. And this is what we get. Now I'm showing you the data in the points or the data, red
+for links and black for hair. And I'm sampling from the posterior distribution now to do the
+animations. And you'll see, first of all, yes, you do get that pattern that looks like a feedback.
+That's what this model tends to generate. There's a lot of uncertainty, as you'll see,
+because the curve is not fixed to the observed points because of the measurement error that's
+assumed in the model, which is the right thing to do. We didn't observe hair and links. We observed
+their pelts. And so you get a lot of different dynamics that are consistent with this. But the
+dominant one is that, is this predator-prey interaction, as it's called. Okay. Many other,
+more complicated and much more realistic ecological models are possible here. And that's those
+those sort of things that ecologists work on. I don't think anyone really uses basic
+locovoltaire anymore. But if you want to do this sort of modeling, that's where you start.
+To say that real ecologies are much more complex. But we don't understand them by trying to confront
+all that complexity at the start. So what do I mean when I say more complex? Well, for example,
+there are other animals that eat hair. Hair are, it's sad to say it, but they are delicious. And
+many things will eat them. It's not just links. And so we may want to think about that as well,
+that their population dynamics are driven by other predators,
+including people. But the general point is, if you don't have a causal model,
+there's really not much hope of understanding ecological interventions. So if your goal is
+to manage the population so that you can hunt it sustainably, or to do some sort of conservation
+interaction, ecologies are complicated things. And if you don't think carefully about these
+things in a causal structure, not a generalized linear structure, but a real nonlinear causal
+structure, or this model is definitely not linear, you're unlikely to predict the consequences of
+interventions very accurately. Yeah. And this framework, this general framework, the details
+are different, but this general framework has been extremely successful in managing fisheries.
+So the idea that fisheries are managed poorly, but actually on average,
+they're managed extremely well and sustainably, right? Because what nations want to do is they
+want to keep harvesting fish from their fisheries forever. And that's how they manage them. There
+are fisheries that are managed badly, but by and large, professional ecologists, fisheries ecologists
+do a very good job using mathematics like this to set catch limits and so on.
+This basic kind of modeling is useful in lots of other ways too. This isn't just
+ecological dynamics. There's a whole branch of ODE modeling that's called pharmacokinetics,
+which has to do with studying how medicine diffuses through the human body. And it's extremely
+important in developing medications and understanding side effects.
+Okay, this has been a long lecture, and we started with a lot of disappointment thinking about
+generalized linear models. And what I've tried to do is show you not to generalize linear models
+are bad because there are square pegs that go in square holes, and that's what we should do with
+them. And sometimes just when getting a project started, it's fine to use generalized linear
+models as well. But eventually in mature sciences, we move beyond that. And we have bespoke causal
+models scientifically tailored to particular problems. We put our round pegs in our round holes,
+and this brings inlation. Every field has its own problems with measurement and its own source
+of complicated time dynamic phenomena that it's studying. And so every field is going to need
+its own statistics. But if every field is just using t tests and linear regressions,
+then they will never be able to live up to their scientific potential.
+Of course, it's true as well that it takes a long time for every science to develop those
+candidate tools. So if any particular science is having statistical frustrations,
+that doesn't mean it's hopeless. And if you were ever having particular statistical frustrations,
+that doesn't mean you have no hope. All right, this has been a strange trip.
+The three sections of this lecture are almost maximally different from one another,
+but I hope you've enjoyed the tour. And I hope I've convinced you that there's a lot of value
+that comes from postponing and doing statistics as long as possible and thinking scientifically,
+doing theory development with statistics far, far in the background.
+Epicycles can be extremely effective when you don't know enough about a scientific domain
+to really do any theory. But once you have some domain knowledge, you can do much,
+much better by just throwing the epicycles away. One of the ways in which scientific models are
+better is that when they're wrong, and they will be, they'll make bad predictions in some way,
+the nature of the wrongness, the nature of the mistake tells you something,
+because the variables and scientific models are meaningful. They're not just associations.
+This stuff is hard though. It's typically much easier to just boot up a multiple regression
+and get to work describing associations than it is to develop a real scientific model.
+But it's worth the effort, but you have to be patient with yourself. It takes time.
+You want to start by studying other people's models and build simple cartoonish models,
+like for example, that the human body is the cylinder to start, and then you scaffold your way
+up. You start with easy things and then eventually you're a master yourself and you teach your own
+students. As with all complicated things, I know I've said this almost in every lecture in this
+course. If it's complicated, that means you have to take it slow, and you have to work in a way
+that is safe, that you use tests, you verify that the code could work on synthetic data,
+and so on. And I apologize for not always showing that detail in every lecture because the lectures
+would be too long, but in your own research, it's really essential to do that. And the good news
+about doing that, it is extra work, but you'll feel much better. You'll have much more confidence
+that the code is working, and you'll gain a bunch of insight from the exercise of writing
+a generative simulation as well. Okay, that has been the 19th lecture of Statistical Rethinking
+2023. We've just got one more to go. And in the next lecture, I'm going to talk about a bunch of,
+well, sociological stuff that sort of envelops statistics in the sciences, and I hope you'll
+join me.

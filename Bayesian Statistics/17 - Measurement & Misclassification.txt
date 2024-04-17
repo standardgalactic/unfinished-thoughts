@@ -1,0 +1,903 @@
+Welcome to lecture 17 of statistical rethinking 2023.
+In this lecture, we're going to examine a topic that's usually considered advanced,
+and that is mismeasurement and misclassification.
+But actually, this is a foundational problem in statistics because most real-world data analyses
+have some kind of measurement error or misclassification in them.
+But it isn't until this point in the course that we've really had this statistical machinery
+to easily deal with these problems.
+And so, let's begin.
+About this time of year, in many parts of the Christian world, Christians burn palm fronds.
+Why? Well, most people have no idea why.
+And there are stories to explain why. Are those stories true? Who knows.
+But that doesn't matter. The explanation for the Shrove Tuesday tradition of burning palm fronds
+is that it is a ritual that marks the beginning of a cycle of rituals and feasts.
+And its function for binding the community together
+and helping people remember that they're part of this cycle does not depend upon its explanation.
+The explanation for the ritual is its function.
+There's really not much more to understand about it.
+The other thing that is burnt quite often on Shrove Tuesday are pancakes.
+In many parts of the English-speaking world, Shrove Tuesday is indeed called Pancake Day.
+It's the best thing about it.
+The pancakes aren't intentionally burnt, but if you're not careful, as everybody knows,
+it's very easy to burn them, especially the first one.
+So I want to use this to talk about probability theory
+and its connection to, well, rituals, like the burning of palm fronds.
+Here's a little classic logic problem in probability theory for you.
+And I'm going to walk you through the solution and draw out what I hope will be a useful lesson
+that you can generalize across lots of logical problems, especially in science.
+So suppose I've cooked three pancakes for you and one of them, the one in the foreground,
+I have burnt on both sides because I'm not very good at cooking pancakes.
+Then there's one that's only burnt on one side.
+And then the last one is perfect. I finally got one right.
+Now, suppose I serve you a pancake on a plate, a single pancake on a plate.
+And what you see is that the side up is burnt, but you can't see the side,
+the other side of it, the side that's facing the plate.
+And the question is, what's the probability that the other side of your pancake is also burnt?
+Now, I'll say that again.
+I've served you one of these three pancakes.
+These are the only three pancakes that have been cooked.
+And you see that the upside of your pancake is burnt.
+What's the probability the other side is also burnt?
+Now, of course, at this point you're asking, why would you eat this pancake in the first place?
+Why would you even ask this probability question?
+Just set that aside.
+This is how logical puzzles are.
+They never make much sense.
+It's like the trolley problem.
+The point is to figure it out given the rules that are stated in the problem.
+So how do we figure this out?
+This is a classic logic puzzle because most people using their intuition get it wrong.
+And so it's useful in the sense that it draws a contrast between intuitive reasoning
+and the correct way to reason about it, which is using the actions of probability theory.
+And getting problems like this right depends upon developing the discipline to suppress your intuition
+and not ask for some sort of story-specific explanation for the answer,
+but just to appeal to the general rules of probability theory to solve it,
+to abstract away from the irrelevant details of the story,
+like, for example, that these are pancakes because that has nothing to do with the solution.
+Let's solve this problem the disciplined way.
+So what we're asking for is the probability that the downside of your pancake is burnt.
+Conditional on knowing that the upside is burnt.
+So we write this as the probability is burnt down, conditional on burnt up.
+And the definition of conditional probability, we did this early in the course,
+is the ratio of the joint probability.
+That is the probability that both sides are burnt.
+Yeah, that burnt up and burnt down.
+That's what that comma means.
+Divided by the probability that any side, the probability that the upside is burnt.
+So now let's take the details of the story and fill these in.
+What we have so far is just definitions of probability theory.
+There's nothing specific to the problem yet.
+But we can fill it in.
+Okay.
+First thing we need is the probability that the upside of your pancake is burnt.
+What does that mean?
+Well, it's the probability that if I randomly served you a pancake,
+that the upside would be burnt.
+So there are three pancakes.
+That's three possibilities, and we just have to work through them one at a time.
+There's a one-third chance that I served you the pancake that's burnt on both sides,
+in which case there's 100% chance, probably one, that the upside is burnt.
+There's a one-third chance that I served you the pancake that's burnt on only one side,
+in which case it's a coin flip, or rather a pancake flip,
+or a 50% chance that the upside is burnt.
+Now, that's the middle of this expression.
+And finally, there's a one-third chance that I had served you the pancake that's burnt on neither side.
+Now, this didn't happen, and you know that because there would be zero chance
+that the upside would be burnt in that case.
+All together, there's a one-half chance.
+Now, one-third plus a half of a third is a half.
+So the probability of receiving a pancake that has the upside burnt is a half.
+We know the probability of burnt up and burnt down because it's one-third,
+because only one of the three pancakes has that property,
+that joint property of both sides being burnt.
+And so the conditional probability, the probability that the downside is burnt,
+conditional on the upside being burnt, is one-third divided by a half,
+which is two-thirds.
+Most people, inspector intuition, you probably did this on the previous slide,
+but I didn't want to bias you, most people would have guessed a half.
+Yeah, but that's not correct.
+And you can mess around with this story and try to retrain your intuitions,
+but I think that's a waste of time.
+It's a waste of time because in every special problem,
+you'll just have to retrain your intuition again.
+We shouldn't solve these problems with intuition.
+We should solve them with some sort of crude discipline.
+We just use the rules and apply them.
+This is part of my general story I brought up before.
+It's extremely important in the conduct of research to avoid being clever.
+We should not try to invent clever solutions and analytical strategies for our data analyses.
+We might get lucky because sometimes you really are clever,
+but most of the time you can't beat the laws of probability.
+Being clever is unreliable and it's also opaque.
+It's not enough to tell your colleagues that you had an intuition about the ways to analyze the data.
+You need to demonstrate that it's a good intuition,
+and that means falling back on the laws of probability anyway.
+It's better to follow the axioms.
+Trust the process.
+The process doesn't guarantee you're going to get the right answer
+because the inputs matter, but that is your assumptions might be bad.
+But if you follow the axioms, you trust the process,
+at least the intermediate part will be correct.
+You will process your assumptions correctly.
+That's extremely important.
+It's a huge victory in the conduct of research.
+Probability 3 provides solutions to difficult problems that are intuition
+is not up to the challenge of conquering,
+but you have to follow the rules, and so there's a certain amount of self-control required.
+People want to appear clever, and so there's temptation to use the clever route
+and come up with some trick for solving, for example, the pancake problem.
+But those tricks don't really teach people how to solve other problems,
+and so we should avoid them, I think.
+The final thing I want to say about this, if you'll indulge me,
+is that there's really nothing more to understand about the solution to the pancake problem
+except the laws of probability.
+The laws of probability demand that 2 thirds is a solution,
+and asking for an explanation beyond that, beyond the product rule and some rule of probability theory,
+you can invent some metaphor or something that will prime your intuition for the problem when you see it next.
+But that's not the explanation.
+The explanation is just the laws of probability, and I know that's kind of disappointing
+because as human beings, we often want something that is, well, more meaningful to use a loaded word.
+But in analytical work, this is just what it is.
+The explanation for results in probability theory is always and only the axioms of probability,
+and that's why it's important not to be clever and to trust the axioms.
+This is relevant to what we're going to do today because we're going to use those axioms to find solutions
+essentially automatically to measurement error problems.
+Without having to be clever, without having to invent anything on our own,
+the solutions have already been invented by the axioms.
+And when we're going to do this, you remember in the first part of the course,
+I introduced you to the four elemental confounds, the fork, the pipe, the collider, and the descendant.
+And I feel like I've kind of ignored the descendant for the most part.
+It's come up a couple of times, but the fork, the pipe, the collider have had celebrity status up to this point.
+So we're going to spend more time in the descendant this time.
+It's going to be incredibly important to us and show up in lots more dachs.
+And the reason is because it's quite common that in real studies, especially observational studies,
+the variables we have measured are only proxies of the things we're interested in,
+and these proxies are essentially their descendant for the things we would have wished to have measured,
+but they're measured with error.
+And this is nearly always the case.
+Usually we ignore this measurement error, and sometimes that's okay.
+But it would be nice if we could draw out those measurement assumptions in our causal models
+so that we could process those assumptions correctly,
+because sometimes measurement error is not harmless, and you really have to deal with it,
+and dealing with it gives you better answers.
+And there are many, many ad hoc procedures where statisticians and scientists have tried to be clever about how to deal with this,
+but we're not going to do that because we're not clever people.
+We're better than that.
+We're boring and principled.
+We're going to think causally and lean on probability theory and develop solutions using the generative model.
+Let me give you a couple examples.
+So there's this myth, for example, that measurement error only reduces estimates of causal effects.
+It never increases them.
+By reduces, I mean moves them towards zero, attenuates.
+Lots of people have been taught this, but it's entirely a myth.
+Measurement error can have lots of diverse and sometimes terrifying consequences,
+including increasing the apparent causal effect of a variable.
+Here's a simple example.
+Imagine that parental income influences child income through lots of mechanisms.
+It's very plausible, and we're trying to study this to estimate the size of this influence of parental income on child income.
+However, income is one of those variables that's really hard to measure.
+People don't even know their own incomes quite often, and incomes are highly stochastic.
+And often, income is measured through recall.
+So you might, for example, interview a bunch of people, ask them their incomes.
+They might know their incomes quite well because they get pay stubs.
+But they may not know their parents' income, what their parents' income was when they were kids.
+But they'll come up with some number, and this number will be subject to some sort of recall bias.
+And so it will be inaccurate somehow.
+So what I've tried to do on this dag is show you a representation of this idea.
+What we'd like to measure is the variable P, but that's unobserved, which is why it's got that dashed circle around it.
+And what we do get to observe is P star.
+This is the recalled parental income.
+The same sort of thing applies to things like diet studies.
+You ask people what they eat, people don't remember.
+You ask people how much alcohol they drink, they often don't know.
+So there's some error.
+This variable P star is caused both by the actual parental income because it resembles it somehow.
+It's a descendant of the real parental income, but it's also influenced by some error, E sub P.
+And this error could be influenced by other variables in the graph, like the child's income.
+For example, there's a recall bias.
+When you interview people, they tend to think that their parents are similar to them.
+Then this will move P star towards C, the reported child income.
+And there are many kinds of biases this way, which arise through the way the measurement is done.
+Here's a simple simulation you can play with to show the effects of this.
+This is just meant to really draw out that break this myth that the only thing measurement error can do
+is attenuate estimates of causal effects.
+They simulate 500 individuals who are interviewed, we've got real parental income there,
+and then the child's income, when just for the sake of the example to begin,
+I assume that there's no influence of parental income on child income.
+That's why there's a zero in the line where we generate C.
+And then we generate P star through observation.
+And I'm making it 80% mixture, convex mixture, 80% the parent's income and 20% the child's income.
+And that's the recall bias.
+And then we run a little linear regression to estimate the causal influence of parental income rather on child's income.
+And we get a posterior distribution.
+I'm sorry, I should have highlighted these.
+Here's the parental income, the child's income, there's the measurement.
+And what we find is showing you the posterior distribution of the estimate of parental income on child's income
+and you see it's almost all the probability mass is positive.
+And the real simulated effect is zero.
+And there's no mystery why this happens.
+It's what we assumed in the generative model.
+But essentially we've, what recall bias has done is created a ghost causal effect where none exists.
+We can change the effect so it's more realistic.
+Say there's a 75, the parental income instead 75% of it is causally influencing child's income.
+And rerun the thing and now what you find is the causal effect is attenuated.
+Yeah, like you would expect before.
+But what happens depends upon the details.
+And there's no general rule about what measurement error will do.
+That's what I want you to get from this example.
+Now let's do an extended example.
+We're going to revisit a data set from the first half of the course, this divorce data set.
+And remember we have estimates in each of the states of the United States of the divorce rate,
+the marriage rate, and the median age of marriage.
+These are measured with error and it varies by state because they were calculated for a specific time span in each state.
+And it's a finite sample.
+And so that means that we don't know with complete 100% precision what these rates are in each state.
+And as I'll show you in a second, the quality of the estimates varies dramatically from state to state.
+So this introduces two problems.
+There's an imbalance in the quality of the evidence and there's potential confounding through measurement error itself
+because measurement error is associated with other variables about the population, notably the population size.
+So let me show you.
+On the left, I'm showing you this data set again as this gather plot, but this time I've added the estimated standard errors.
+That is the uncertainties that the statistical bureau that collected these data included in the report.
+So the marriage rate on the horizontal and the divorce rate on the vertical.
+And you see that sometimes there's substantial uncertainty in this.
+But for some of the states, the bars indicating the standard deviations are much smaller.
+And that's because if you look on the right of this slide, for states with large populations, there's a lot more data.
+And so for any finite reporting period, you get a much better estimate of the rate.
+And that's what you see.
+The horizontal axis on the plot on the right is the log population size of the state.
+And then just putting divorce rate, but you could also put marriage rate on the vertical here to look the same.
+And you'll see that the error bars are much, much smaller for states with large populations because there's more data in any given year.
+How do we draw this sort of thing on a DAG?
+That's what we're going to do now.
+We're going to make some descendants.
+So let's focus first to keep things simple on divorce.
+And then I'm going to do the same thing to the other variables.
+And very soon it won't be very simple, but don't worry.
+Then we're going to back up to a simple example and develop some code so you can understand it.
+And then we'll layer in a little more complexity one step at a time.
+So the first thing to note is a variable like divorce rate is not observed.
+We only have an estimate of it, and that is D star.
+And it had some error, right?
+It's not the actual long run divorce rate if we had many, many, many years of data for each particular state.
+So D star is a descendant of D. It resembles it, but it's also influenced by the measurement process,
+which I'm going to represent with this little E sub D.
+The same is obviously also true of the other variables, right?
+We don't know the exact marriage rate.
+We only have an estimate of it, and we don't know exactly the median age of marriage in the state over the long run.
+We only have an estimate of it.
+So finite sample problems.
+So that's just the issue of not observing the actual rates and only having estimates,
+and there being imbalance in the quality across states is not in and of itself a confound.
+It's an efficiency problem.
+We'd want to weight the evidence from the states in proportion to the quality of the estimate,
+and that's the first thing we want to deal with when dealing with measurement error.
+The second thing is there can also be confounding because obviously the measurement process,
+in this case, is influenced by the population size.
+I showed you that on the previous plot.
+And if population size also influences things like, say, divorce rate,
+then you can get a backdoor problem where the measurement process actually causes confounding.
+And so dealing with measurement error is not only a nuisance.
+It can be a real threat to inference and lead you astray.
+But exactly what happens depends upon the causal assumptions and the diagram.
+So I'm highlighting here for you this confounding path.
+I know it looks complicated, but remember it's just the same old backdoor criterion as before.
+Measurement error, measurement processes themselves can be nodes in a graph,
+and we can analyze them, and that's the good news.
+Draw your assumptions and draw out an estimator.
+Okay, how are we going to develop an estimator in this case?
+The solution is to stop thinking like a regression.
+And what do I mean?
+Most of the examples in this course, and this is entirely my fault.
+And for most of the examples in this course, we've been using models which are generalized linear models
+or generalized linear mixed models.
+Things that are colloquially called regressions.
+These are single-equation linear models, often with link functions,
+but still they're single-equation linear models.
+These are really special case machines.
+The universe of statistics is much, much bigger than this,
+even though many researchers will never do anything else except use a GLM.
+The trouble with thinking like a regression is that it doesn't lead to good and useful solutions
+to many of these sort of commonplace problems like measurement error.
+What I mean by thinking like a regression is that you ask yourself at the start of an analysis,
+which predictor variables do I use?
+And so that's something for which, like say, the backdoor criterion is incredibly useful.
+You're looking for an adjustment set, and you're going to put that adjustment set on the right-hand side
+of your linear model.
+And there are lots of problems where that works really well.
+But you can't always think like a regression because of the block solutions.
+It's better to think like a graph.
+And what I mean by that, model the whole network of causes.
+This is an approach that I've sometimes jokingly called full luxury bays.
+Let me give you an example.
+So here's the graph we had before.
+I'm going to simplify this so we can work on an easier problem to start.
+Let me delete all that population stuff.
+And let's just focus on the measurement error for one variable for the divorce rate.
+So divorce rate is now observed.
+Instead, we have d star, which is the estimate of it.
+And that's also influenced by the measurement process, e sub d.
+What I want you to see is that there are sub models, little sub regressions
+implied by this graph.
+And you're used to this idea if you think about the idea that every DAG
+implies multiple estimates, and each of them might have a different adjustment set.
+But what we're going to do now is think about this as some kind of decomposed generative model
+where the graph has little sub models.
+And the first one is with different outcomes.
+And the first one is the model for d for the divorce rate.
+It's influenced by marriage rate and by agent marriage.
+The next is the model for d star for the observation.
+And the observation is influenced by the true divorce rate, d, and the measurement process, e sub d.
+And then there's the model for marriage rate.
+Marriage rate is influenced by the agent marriage.
+Why?
+Because these are the assumptions of the DAG, and you can equivalent with the DAG.
+But the important thing to learn is the method for using any DAG to do an analysis like this.
+And that's what I want to show you.
+So the sub model for divorce rate, that is the true divorce rate, which we haven't observed, remember,
+is if you're going to make it a regression, it would be the red regression at the top left of this slide.
+It's just an ordinary linear model.
+d sub i is a normal distribution with mean mu and standard deviation sigma.
+And in the linear model, we have its influences.
+That is agent marriage, a sub i, and the marriage rate, m sub i.
+And then the observation model for d star, that is the divorce rate we get to see.
+It is, deterministically, d sub i plus some error.
+And then we assign those errors some normal distribution.
+And we're going to assume that this is an assumption.
+It's a measurement model.
+We're going to assume that the mean of that normal distribution is zero.
+That is, our estimate is not biased.
+But if you had a bias measurement process, you would try to model that bias here.
+And what we do have is the standard deviation of that estimate based upon the sample that we have.
+And that is s sub i.
+And that's a variable that I've supplied to you as data in the divorce data table.
+And we're going to use it right there inside the error model to improve our estimates.
+It's a nice feature of normal distributions that we can just move both of those variables right into the normal distribution.
+And so we can get rid of e sub d entirely and not muck around with it.
+Because the assumptions I just had imply that d star sub i is also normally distributed with a mean d sub i.
+That's its mean.
+That is the true value.
+It's centered on the true value.
+And it has the standard deviation of s sub i, which is something that is a property of the measurement process.
+Okay, let's take a break.
+I want to take a break multiple times in this lecture because I think this is a cognitively demanding lecture and you should give yourself multiple breaks.
+So I'm going to suggest that you already take a break, review the material so far.
+It's purely conceptual, but it's new concepts and they're worth reviewing.
+And then, yeah, really take a break.
+Take care of yourself.
+Go play in the snow if you're lucky enough to have some.
+And when you come back, I will still be here.
+Welcome back.
+Before the break, I had showed you conceptually.
+I think about decomposing a single DAG that includes measurement processes into multiple regression models.
+Now, what's the point of this?
+What do we get out of this in the first place?
+Well, we're going to use these simultaneously.
+This is the thinking like a graph idea that I mentioned before the break.
+We want to analyze the whole graph at once in the same model.
+Models are not necessarily single regression, so we can combine them at the same time.
+And so here's the solution.
+And to our measurement error problem, and it comes from not being clever, but simply taking the DAG and expressing it as a probabilistic model.
+And then all that's required of you is to trust the axioms of probability to do the right thing.
+If your assumptions are bad, then the answer will be bad, but at least in the middle, you haven't screwed up your analysis by trying to be clever.
+To use the code to do this, we want to express two simultaneous regression models.
+The first is the model for the observation, and this is the single line here that you see on the right where D star,
+what I call D observed in the code, is normally distributed with a mean that is the true value of D.
+What is that?
+It's a parameter.
+Because remember, in Bayes, the distinction between a parameter and data is that a parameter is unobserved and data are observed.
+I'll say that again.
+In Bayes, the distinction between a parameter and data is that a parameter is unobserved and data are observed.
+And so when there's something that is in principle observable, like the divorce rate, but haven't been observed, we make a parameter for it.
+So this is what we've done here.
+We want to estimate the true value, which is the mean of the distribution of the observed values.
+And then we have D SD, which is the standard deviation.
+This is data that is supplied from the statistics bureau, and they calculate this using the size of the sample.
+Now, where do the D trues come from?
+Well, we just make a vector of parameters for them.
+And this is going to look exactly like a regression, though, except the outcome variable is a vector of parameters, one for each state.
+And this might be a little mind-blowing, maybe not.
+Maybe by this point in the course, your mind is already blown, or maybe I failed to blow it at any particular point.
+But this is the kind of thing that you're free to do in Bayes because it's permissive.
+So you get these automatic solutions to difficult, unintuitive problems like this.
+Just follow the graph, right?
+Don't question it.
+So D sub i happens to be unobserved, but it's still a regression model, and we're going to write it like a regression model.
+It just happens to be a vector of parameters.
+And so each D true for each state has some mean mu and some standard deviation sigma.
+And then we model the rest exactly as before.
+Mu is a linear model that includes median-agent marriage and the marriage rate.
+And then the priors are the typical ones for standardized variables.
+I introduced them in the first half of the course.
+So when you run this, you get a posterior distribution for every D true.
+And they vary quite a lot.
+You can tell by glancing.
+Yeah, these are the posterior distributions of the true divorce rates in each state.
+We still don't know the uncertainty.
+The solution to measure an error is not that it reveals the truth because that can't be done, right?
+We don't have the data to get these down to be precise.
+The goal is to do better than ignoring the error, and that's what we've done here.
+So let me show you the effect of this analysis.
+Here are the raw data, ignoring measurement error.
+Just the association between age of marriage and divorce rate.
+And you know if you think back to the first time I introduced this example,
+these are very strongly related, not only in the United States, but in many parts of the world.
+What has happened to the consequence of modeling measurement error on the y-axis variable on divorce rate?
+Well, here's the sort of regression envelope, ignoring measurement error.
+This was the trend that connects the two that we talked about before.
+When we introduce measurement error, what happens is the estimated true divorce rates in the states shrink towards the trend line.
+Why?
+Well, let me talk you through this graph for a moment.
+So the black points again are the observed divorce rate values, ignoring measurement error.
+The red points are the posterior mean estimates of the true divorce rates in each state.
+And then the pink lines just connect the ones that are for each state.
+And then the pink bowtie trend there in the middle is the new one for the new regression,
+and the thin-dashed bowtie near it is the estimate for the previous.
+And you'll see that the estimate has changed only a little bit.
+I'll say I want you to examine it with your eyes and see how it's changed.
+I'll talk about that in a moment.
+But notice that the reason it's changed is because a lot of those estimates have moved towards the regression line,
+because they were extreme and there wasn't much evidence in those states.
+That is, they had big standard deviations on the estimate.
+So this is, yes, your friend, partial pooling, appearing again, happening automatically.
+And you got it for free without having to be clever and realize anything about the need for it,
+just because you obeyed the laws of probability, you drew your DAG, you took your assumptions,
+and you expressed them as a probabilistic model, and you get this sort of insight for free.
+Okay, let's also do the same thing for marriage rate, which is also measured with error in this data set.
+And I've also given you the standard deviation on that estimate as well.
+We can put them in the same model, and we're going to, again, we're going to get a solution to that
+by resisting any urge to be clever.
+You don't have to be, you just be ruthless and use the laws of probability and click a graph.
+We've got a series of submodels.
+What I'm highlighting here on the slide are the two previous ones.
+That is, we have a submodel for the true divorce rate.
+We have a submodel for the observed divorce rate.
+And now we have a submodel for the true marriage rate in greenish blue there, right?
+It's influenced by agent marriage.
+And then finally, we have a submodel on the left for the observed marriage rate.
+This is analogous to the observed divorce rate, right?
+It's centered on the true marriage rate in sub i, and then there's some standard deviation,
+which I've written here as p sub i to avoid any confusion with s sub i.
+So now we have four, yes, four regression models,
+and we're going to express them all simultaneously in the same Markov chain.
+And it's all fine.
+Probability theory abides.
+So at the top, repeating what we had from before,
+we've got the observation model for d star, the observed divorce rate.
+We've got the causal model for the true divorce rate, which is unobserved.
+So d true is a vector of parameters, one for each state.
+We've got the observation model for marriage rate,
+analogous to the observation model for divorce rate.
+And finally, we've got the causal model for marriage rate.
+Which is influenced by age and marriage.
+So what's going to happen when you run all these models together is that they share information.
+And the implications of that information will do the right thing for using the estimates of measurement here.
+And there's no need for you to be clever or intuit what should happen or anything.
+And the explanation for what's going to happen, and I'll show you in a moment what happens,
+but the explanation for what's going to happen is only, and nothing more than, the axioms of probability.
+So what happens?
+Well now we get drainage in both directions.
+There's a regression trend that connects marriage rate and divorce rate in these data.
+They have a correlation.
+And again, the black points are the observed values, ignoring measurement error.
+And the red points are the posterior means of our new estimates.
+We don't know for sure they're in that location.
+I want you to see is in the vast majority of cases, there's shrinkage towards the trend line that associates these two things together.
+And that's because the points farthest from the trend line are of the lowest quality.
+Yeah.
+Also they're extreme and so they tend to shrink more, just like the partial pooling from earlier in the course.
+And what happens to the posterior distribution of the coefficient describing the effect of marriage rate on divorce rate?
+Well, it increases actually.
+So that's what I'm trying to show you here.
+Up top, I have two posterior distributions there.
+In gray is the posterior distribution when we ignore measurement error.
+And then when you include measurement error, it attenuates it for the effect of age of marriage, right?
+It gets closer towards zero.
+But the opposite happens for marriage rate, which was, as you see on the bottom right of this slide, when you ignore measurement error,
+it looks like marriage rate really has almost no effect at all.
+It's centered right on zero and it doesn't get very big in either direction.
+But now when we consider measurement error, we see that most of the mass moves above zero and it's consistent with quite large effects.
+Indeed, bigger effects than age of marriage.
+So to some extent, it might be true that our previous conclusions about age of marriage being the most important variable are an artifact of measurement.
+We're not prepared to conclude that, but we should keep it on the table as a possibility.
+This is one of the ways in which measurement error is consequences can be quite unpredictable.
+You shouldn't try to guess them or use myths like it only attenuates causal effects.
+Because as you see here, that's not true.
+And it's especially not true in analyses with multiple plausible causes.
+Okay, let me try to sum up this example.
+When we include error on marriage rate, it increases evidence for an effect of marriage rate on the force rates.
+Counterintuitive, right?
+Yeah, well, don't trust your intuition.
+Intuition is a devil.
+Yeah, it's always going to trick you.
+The reason this happens, make an effort here after I've told you for some time now that the explanation for things like this is just the axioms of probability.
+Well, yeah, but in any particular case, sometimes you can get insight by thinking about the properties of the sample and why actually the probability resulted in the particular outcome.
+And in this case, it's because some of the states, the ones that were affecting the trend quite a lot, are unreliable.
+And when you include information about their reliability, the model downweights them automatically in the proper way.
+There's no reason to think about what the weight should be.
+It just happens automatically.
+And you get an improved estimate, at least in principle.
+So measurement error, including it in your model, can hurt or help.
+But the only honest thing to do is to include it.
+Yeah, not to ignore it.
+This is the kind of principle that you should behave in the same way when you analyze your data as you would like your colleagues to do when they analyze theirs.
+And that means doing the best you can, scaling up and putting errors in.
+Okay, let's take another break.
+This is the second and last break of the lecture.
+I think you should review the code solutions to this now, because again, this is a conceptually unusual lecture.
+But this material is extremely important because this kind of problem is really common.
+And then, yeah, take a real break and go for a walk.
+And when you come back, I will be here.
+Welcome back.
+The last part of this lecture, I want to talk about misclassification.
+I'm going to introduce it with an ethnographic example.
+This is Guneine in the Calco delt in Namibia.
+This is an arid region, which is mainly populated by cattle, with some people who push the cattle around and milk them.
+And the most numerous of these people is a Bantu group called the Himba.
+The Himba are fairly typical Bantu agro-pastoralists in many ways, meaning that they farm and they keep cattle.
+They're polygenous, but they're unusual in their kinship system, which is why they're particularly interesting to people like me, to anthropologists.
+Their population is very sparse.
+There are 50,000 people spread out over a 50,000 square kilometer region of the Calco delt.
+And their kinship system is something called bilineal or bilateral.
+Bilineal descent means that you track descent both through your father and your mother, and you get privileges and benefits through both.
+You essentially belong to both kin groups.
+This is a very unusual kind of kinship system in human societies.
+Although it's increasingly common in Europe and the West, actually, that people track descent equally through their mothers and their fathers.
+But still worldwide and historically is quite rare.
+And the way it's instantiated among the Himba is that there's matrilineal material inheritance.
+So who your mom is determines your wealth when you come of age, which in this society means cattle.
+But who your father is determines other kinds of status, in particular religious ritual status and other symbolic things.
+They're patrilocal, which means when a woman marries, she moves to where her husband lives.
+And there's lots of polygyny, like in most pastoral systems, men often take multiple simultaneous wives.
+And women often express a preference for this kind of marriage arrangement because those men are wealthier and the households are more comfortable.
+What's unusual about the Himba, although not totally unique worldwide, is that they practice what we would call open marriages.
+That is that neither the man nor the woman has any right to forbid their partner from having extramarital relationships, boyfriends and girlfriends.
+And the Himba practice this quite enthusiastically.
+So my colleague at UCLA, Brooke Shelza, has been working with the Himba now for almost two decades and has collected a bunch of data on their kinship and relationship systems.
+I'm showing you some of her data on the right of this slide.
+In every age group among the Himba, majorities of both men and women report extramarital relationships.
+And again, this is totally in the open because it's normative among the Himba.
+So the problem we're going to look at today, the scientific interesting problem, is just to estimate the proportion of children fathered among the Himba by extra pair men.
+Yeah, so what does that mean?
+Well, because women have boyfriends for most of their marriages, some of their kids may be fathered by their boyfriends and others by their husbands.
+And there's this hypothesis actually that the boyfriends don't father very many of the kids.
+And so demographically, they just don't matter that much.
+But we'd like to estimate it.
+And so what Brooke and her colleagues did was they got some DNA and they did some paternity testing.
+And so they could assess for each kid in the household who the father was.
+This was done in a way so that privacy was maintained.
+And I give you the citation at the bottom of the slide here.
+In fact, it was done in a totally double-blind fashion, such as the statistician, which in this case was me.
+It was the only one who saw the combination of the actual identities of individuals and the results of paternity testing.
+And nobody else involved in the research saw the conjoint set.
+So how do you analyze data like this?
+Well, you can't take the results of paternity tests at face value because there's a 5% false positive rate for assigning extra paternity.
+That is, sometimes a man is actually the father, but the DNA test doesn't work.
+And this is just a well-known fact about how these tests are.
+And this is a statistical phenomenon called misclassification.
+It's when you have a categorical variable and there's measurement error.
+So if the rate of extra paternity is small, dealing with this misclassification error is extremely important because the actual rate could be of the same order of magnitude as the error rate.
+I'll say that again.
+If the rate of extra paternity is small, it may be on the same order of magnitude as the false positive rate, like 5%, in which case you really need to deal with this.
+There are lots of classification problems that have this problem.
+Studying mutations in DNA is one.
+Mutation rates are small, yes, but the machines also have error rates.
+And these days the machines are really good and you can do the sequencing a bunch of times to deal with this.
+But when gene sequencing got started, the machines were less accurate and the error rates would sometimes dwarf the rates of mutation.
+And it was very difficult to study mutations.
+We can do better if we think about statistical process in the right way and don't ignore those error rates.
+So how do we do this?
+Well, you probably know by now what I'm going to say.
+We use the actions of probability.
+So let's start with a simple DAG, just a primary imagination about this example.
+So what we've observed is some, well, not what we've observed yet.
+We'll get to observation in a second.
+There is an extra pair of paternity of a particular child.
+I'm going to call that X in this graph and that's a 0-1 variable.
+And then we have a social pairing between what's called the social father among the himba.
+The husband, the one who has a duty to provide for all of the women's kids, whether he fathered them or not.
+And they do among the himba.
+And then the mom.
+And there may be features of these individuals because they're paired with multiple individuals that affect the extra pair of paternity rate.
+And then there's the relationship between the social father and the social mother that has a dyad.
+And I've drawn this at T, a social tie, remember the social network lecture.
+And it may be that their multiple kids from this dyad have higher or lower extra pair of paternity due to the nature of the relationship between these two.
+Brooke talks about there being love matches that some of the marriages among the himba are spoken of as love matches where the dyad is very special and very close.
+And there are other cases where the extra pair relationships are the love matches.
+And we might expect that to have a big effect on the extra pair of paternity rate or not.
+But we can measure.
+We don't get to see X because the certainty test has an error rate, a number of 5% error rate.
+So instead we have, yes, X star, which is our measured value.
+It's free to tell me zero or one.
+And there's a measurement process there that I've abbreviated as these have X that might flip it from its true value to might flip ones to zeros through zeros to one.
+So that's what we need to model.
+And again, we're going to think like a graph.
+We're going to express this graph as a probabilistic model.
+And we're going to read the implications off the posterior distribution.
+So the first part is the generative model of the true value of X sub i.
+And we can model this as being a feature just to keep things simple, not put everything in for the sake of the example.
+As of property of the mom, that is some women are more inclined to have more boyfriends, right?
+In which case more of their kids will be started by extra pair partners, which again is totally normative among the HEMBA.
+No one's cheating here.
+And then features of the dyad, which I call delta.
+This is a parameter.
+It's a property of the dyad, much like we had reciprocity as a property of a dyad in a previous lecture.
+And then there's the observation or measurement model where we explain X star.
+And I'm going to spend a couple slides explaining this.
+So I'm going to go slow.
+So hang on and bear with me.
+And if it doesn't make sense the first time, you can back up and look again.
+I think you'll get it.
+So the thing to realize here is that X star is going to resemble the true value X in some way.
+But it's not going to be an exact copy of it.
+So here's one way to think about this.
+We need to model the probability that it equals one conditional on some true probability and or that it equals zero.
+And how do we get that?
+Well, remember piece of I comes from the generative model.
+It's a feature of the unmeasured things about the mother, like how many boyfriends she has and features of the dyad.
+So it's kind of, you want to think of it as a long run probability that children from this mother and this dyad are extra pair of paternity.
+And we use it now in a tree to think through the logical possibilities.
+This is exactly like the garden of working data from the beginning of the course.
+And drawing out possibilities like this is the un-clever, careful way to draw out the implications of assumptions.
+And so the first thing to think about here is the first split.
+There's a piece of I chance of extra pair of paternity that X of I actually equals one.
+Yeah, the other possibility is that X of I equals zero.
+That is, was fathered by the social father and that happens with probability one minus piece of I.
+But then we're not done. We have to add the observation layer.
+If the social father is the actual father, there's still a chance that the testament classifies him.
+Remember, there's a 5% of false positive rate where positive here means assigning extra pair of paternity.
+And so we have another subtree here that branches off from X of I equals zero.
+And then there's a chance F, which is the error rate, which is going to be 5% in our example.
+But it could be any value, depending upon the nature of the test, that we observe instead X star equals one.
+One minus F at a time, there's not an error.
+That'll be 95% in our example.
+But again, it could be any number.
+And in that case, we observe the true value X star equals zero.
+Now we can use this whole tree to write the expressions that I have at the top of the screen.
+So I'm going to use this little tree here to justify the expressions at the top.
+So to write the expression for the probability that we observe X star equals one,
+I've written this expression as PI plus one minus PI times F.
+And I want you to see that this comes only by following the branches in the tree.
+So the first split is P sub I at a time where the true value is going to be X I equals one,
+in which case we will always observe X star equals one, because there's no error in that direction.
+But the other thing that could happen, and this is where we add, because it's an or, yeah, or X sub I actually equals zero,
+but we observe an error, right?
+So it's one minus P times F, and that's going down the upper branch.
+And so there are two terms in this probability expression.
+This is just following the axioms, right?
+Just flipping the pancakes.
+And then for the other expression, same method, don't be clever.
+What's the probability we observe X star equals zero?
+Well, the only way to observe X star equals zero, the only branching pass they're going to give us that,
+is to follow right and then right again.
+We have to actually have X I equals zero, and then have no error.
+And that only happens one minus P sub I times one minus F of the time.
+Okay, so again, thinking like a graph, we've got two sub models.
+We've got a generative model for X I, the true value, which we haven't observed.
+And we've got our observation model.
+And we can put them into the same model here.
+And that's what I've done on this slide.
+Programming this is a little bit trickier because what I'm going to do is average over the unknown X of I.
+We don't actually need to estimate it, so I've got no parameter for the true X.
+We don't need it.
+Instead, I just express the observation models atop here using a little bit of custom notation.
+That little pipe there means the distribution of X conditional on X equals one.
+That means that if X equals one, use this probability statement.
+And then the one right below it, X conditional on X equals zero, use that probability expression if X equals zero.
+And that corresponds to our observation model on the right.
+And then custom in Hulam just lets you put any arbitrary distribution statement you like.
+Yeah, but it should be on the log scale, which is why they're logs.
+Because we model things with log probability using Hamiltonian Monte Carlo.
+And so I just take the log of those probability expressions there.
+And then, before I move on, and then that logit p line is just below them.
+That comes from the Bernoulli trials there.
+But the X Bernoulli line doesn't need to appear.
+It has no work to do because we're not estimating the X device.
+Okay, this form of the model works.
+There's nothing wrong with it.
+However, we can do better.
+When you do arithmetic in a computer, it's not real arithmetic, which I know sounds strange.
+But computers are binary, right?
+So to represent real numbers like probabilities, real meaning continuous, real numbers like probabilities,
+they have to use some sort of abstraction.
+And the abstraction that most computers use is something called floating point arithmetic.
+And floating point arithmetic does not have infinite precision.
+And so this affects us in probability theory because probability calculations tend to have numbers that are really close to zero.
+And if they get too close to zero, you run out of computer precision and they actually underflow to zero.
+They eventually round to zero.
+This is catastrophic.
+In Bayesian analysis, zero is an absorbing state.
+You can never escape it, right?
+It doesn't matter what you multiply by zero, it's zero.
+So it blows up your whole analysis.
+Probabilities can also overflow in round one.
+This is also bad.
+It's not as bad, but it's bad.
+The solution to these underflow and overflow problems is to simply do everything on the log scale.
+I say simply, but you try to transform all of your probability expressions so that it's log probabilities instead.
+And then there are some special purpose functions which are numerically stable.
+I call them here the ancient weapons, like log sum x, log 1m, log 1m x.
+What are these things?
+Well, I'm not going to explain them in detail in the lecture here because I don't want to break the rhythm.
+Instead, there's a bonus.
+And if you indulge in the bonus after the end of the lecture, I'll tell you a little bit more about these weapons.
+All I'm going to do right now is show you that there is a translation of this model, which looks much worse, but is much better.
+Now, in this case, it's simple enough that you could use the simple form without this log sum x and log 1m x and so on, all these ancient weapons embedded in this thing.
+And it will work fine.
+But I feel this duty to tell you about this fact right now because if you stay in this business for very long, eventually you'll have a statistical model where you really have to do this.
+You'll try it on the non-log scale, and your model just won't run, and you won't be able to figure out why.
+And it's because you need to convert everything to the log scale.
+So this is something to bookmark in your brain when you encounter a problem like this.
+Again, I'm not going to explain this code. I explained it in the bonus.
+I just want you to know about the existence of this.
+This is like sketching and layering the owls feather when you're drawing the owl.
+You just have to know about these things because it's part of the responsibility of doing the research right.
+Okay, you run this, and you can inspect the posterior distribution.
+We get to the end.
+There's very little difference between the model that accounts for misclassification and the one that doesn't, although as you'll see there in the middle, the misclassification model, the posterior distribution,
+the probability of extra-perpeturity in the community is a little bit lower, but they're both basically 50%.
+And this is what the himba know, and we'll tell any visitor is that about half the kids in any household were fathered by boyfriends of the woman.
+And this has now been confirmed by the testing.
+Now, so there's no misunderstanding. It's very important to make clear that in this cultural context with the himba, this is not cheating.
+These are sanctioned relationships.
+A husband has no right to deny his wife a boyfriend, and a wife has no right to deny a husband a girlfriend.
+Nevertheless, the social father, the husband, materially provides for all the women's kids, and the society functions perfectly fine.
+This is an unimaginable situation for many people, basically all European societies, but hey, people are interesting.
+Okay, there are lots of things you can do with Measurement Error that don't always look like Measurement Error, but solutions are available by following the same source of strategies.
+Don't be clever, draw out your assumptions, include the measurement model as part of your DAG, and then think like a graph.
+So, for example, remember we talked about the wines, that was actually an example of, well, not quite a Measurement Error problem, but you can call it that.
+But rating and assessment tasks like people taking tests or judges tasting wines, you get noisy measurements and you're trying to estimate some underlying true quality of, say, the knowledge of an individual or the quality of a wine.
+And when I showed you the wine tasting data set, I think I said that this was an example of something called item response theory.
+It's also a factor analytic model, and these are inherently measurement models.
+There are things called hurdle models where you have a situation where you're trying to detect something, whether it's in a solution or in nature, and there's some threshold for detection.
+So if it's present, but it's present in very small numbers, you just don't detect it.
+But once it exceeds some threshold, you will essentially always detect it and you can measure its concentration.
+These models are called hurdle models, and they're useful in all kinds of fields as well.
+And then for the ecologists, no doubt you've heard of these models called occupancy models.
+They're a real workhorse of ecology, especially applied ecology, just because you don't detect a species.
+It doesn't mean it isn't there, and so we have to deal with misclassification of this sort, and that's what occupancy models do.
+Okay, I hope you found that interesting, and in the next lecture, we're going to look at missing data, and I'll have many of the same interesting features to it, but also some new exciting ones, and I hope to see you there.
+Thank you.
+Thank you.
+Are you still there? Here's the bonus.
+So in the main lecture, I promised I'd explain this log probability scale adjustment that makes numerical calculations more stable.
+So the background to remind you is that computers do everything in binary, so they don't have a direct way to represent continuous values.
+And there's this system called floating point arithmetic, which is used to represent continuous values, but it has a finite level of precision.
+And as a consequence, it can sometimes have trouble representing really small numbers, and they will underflow to zero, round to zero, or extremely large numbers, which might overflow.
+When we do probability calculations, there are lots of small numbers, small probabilities, and if these round to zero, or they're involved in some operation that rounds to zero, or inversely to one, then we'll get the wrong answer, or the code just won't work at all.
+So the solution is to try and do as many calculations as possible on the logarithmic scale, working with log probability rather than probability directly, and all the standard functions in R or STAN do this.
+They do their calculations on the log scale, and then if they return a result on the probability scale, it has been exponentiated, which is the inverse function of log.
+When we manipulate probability expressions to put them on the log scale, there's a big advantage in using special purpose functions, what I call the ancient weapons on this slide, like log sum X, log 1M, log 1MX.
+So in this bonus, I want to take a little bit of time to explain these things, how they're used within the example from the main lecture, and also how they're derived, where they come from, and what they're based on.
+So here's one of the probability expressions from the misclassification model in the main lecture.
+I'm going to take this expression and put it on the log scale, and all that means is I take the logarithm of both sides.
+So now we have log probability, and log probability to remind you is what Hamiltonian Monte Carlo uses anyway.
+So this is what's done internally in STAN.
+Now we're going to manipulate the right-hand side using the rules of logarithms, and I know all of you learn these rules at one point, and maybe you're a little rusty, don't feel bad about that.
+You have better things to do in your life than to remember the rules of how logarithms work.
+But that's okay, logarithms are simple.
+They just convert multiplication to addition and division to subtraction.
+They're essentially operations on exponents.
+And so the log of the product of 1-pi and 1-f is log 1-pi plus the log of 1-f, because that multiplication becomes addition.
+And then we have the log of each of them.
+The problem here is that some of these terms can be numerically unstable under floating point arithmetic.
+So let's take this expression, isolate it, and think about the term like the logarithm of 1-pi.
+If p sub i is close to zero, then there's a risk that it will under float to zero, or that the difference 1 minus p sub i will round to 1.
+And the log of 1 is zero, and that's not the right answer.
+The log of 1-pi for any pi greater than zero is not zero.
+It's a number close to zero, but it's not zero.
+Here's an example of what I mean.
+You can just do this in the R console.
+Compute the log of 1 minus 0.01, and you get a number that's extremely close to minus 0.01.
+But not exactly.
+If you take the log of 1 minus 1e to the minus tenth, this is this exponential notation, it's 1e to the minus tenth.
+Yeah, close to zero, but not zero.
+If you take the log of 1 minus 1e to the minus 90th, here you get the rounding error.
+It's not zero.
+It should be minus 1e to the minus 90th.
+There's a special purpose function in R and almost every other programming language that is used to do math called log 1p,
+which computes the logarithm of 1 plus some number that you input.
+So we can use this instead and get the right answer.
+So log 1p and you enter minus 1e minus 90.
+It computes the logarithm of 1 minus 1e minus 90.
+So it's adding a negative, and then we get the right answer.
+There's another function, log 1m, which is log 1 minus, and log 1p and log 1m are really the same function.
+It just depends upon whether you put a negative in front of the input or not.
+So when p is small, it's better to use this function, log 1p or log 1m, to do the calculation.
+Okay, but what is log 1p?
+Is it just a magical function and you can't know its secrets?
+No, it's incredibly trivial to derive these things.
+So think about log 1px or log 1mx.
+When x is substantially bigger than 0, say 1e to the minus, bigger than 1e to the minus 4,
+there's no reason to worry.
+In that case, the ordinary floating point arithmetic is perfectly accurate.
+It's sufficient. It has plenty of precision.
+It's when x is small, it matters.
+And when x is less than 1e minus 4, you start to get rounding error.
+So in this case, what we need, the first thing log 1p does is it asks if x is greater than 1e minus 4,
+in which case it just returns the log of 1 plus x in this case.
+But when it's below that threshold, it uses instead something called a Taylor series approximation.
+And if you had a course in calculus, then you probably encountered Taylor series approximations.
+A Taylor series is a way of representing any continuous function using an infinite series of terms, an infinite sum of terms.
+And you can truncate that series at any point to produce an approximation at a known accuracy.
+So we can do this for the logarithm of 1 plus x as well.
+So the logarithm of 1 plus x, where x is close to 0, is equal to this infinite series.
+I'm only giving you the first three terms.
+But x minus x squared over 2 is the second order approximation of this for x near 0.
+And since x is small, the remaining terms are of order x cubed and higher.
+And those will be very, very small numbers.
+So this is a quite accurate approximation when x is small, close to 0.
+So all log 1p does is return x minus x squared over 2.
+Yeah, and that gives the right answer when x is small.
+And that's all there is.
+And all of these special purpose functions are doing some trick like this based upon Taylor series approximations.
+So there's no magic to it at all.
+Okay, there's another term in our misclassification model which brings us to this magic weapon called log sum xp at the top of this slide.
+This is an incredibly useful function, one of these special purpose tools for doing calculations on log probability scales.
+And it's incredibly useful because we often have terms like this one where we want the logarithm of a sum of terms.
+And each of those terms would be more accurate if those terms were expressed on the logarithmic scale, but then we can't add them.
+Yeah, so let me show you what I mean.
+So on the slide so far, I've taken the logarithm of both sides of this probability expression p sub i plus 1 minus p sub i times f.
+There's nothing we can do right away to the expression inside the log because logs don't modify addition, they only modify multiplication and division.
+So there's nothing to be done there.
+But we can actually re-express this whole thing using this function called log sum xp.
+I'll explain what that means.
+Log sum xp is the function that just does what it says on the sticker.
+It returns the logarithm of a sum of terms that have been exponentiated.
+I'll say that again.
+It returns the logarithm of a sum of terms, each of which has been individually exponentiated.
+And so the arguments you give it are a series of log probability terms.
+And then it exponentiates each of those, adds them, and returns the log.
+But it does it in a way that avoids underflow, preserves precision.
+And so that means we give it a log of p sub i.
+And then that second term, 1 minus p sub i times f, we want the logarithm of that.
+And now the multiplication becomes addition and we have the log of 1 minus p sub i plus the log of f.
+And of course you know what I'm going to do next.
+The log of 1 minus p sub i is at risk of underflow, and so we use log 1m instead log 1 minus,
+which is that Taylor series of approximation from just before.
+And I know this looks monstrous, but actually this is a secret weapon.
+Stuff like this is how you get complex models to run.
+It's just part of the implementation of dealing with the silicon.
+Here it is in code.
+Let me walk you through it.
+So the first one, here's the log sum x trick.
+We give it the log of p and log of minus p plus the log of f.
+And then log sum x will give you the logarithm of the sum of the exponentiation of each of those.
+And so it gives you that expression at the top.
+But it does it in a numerically stable way.
+There's log p, and here's log 1 minus p plus log f, and that gives you 1 minus p i f.
+And log sum x gives you the sum.
+And then the other term, we have two log 1 minuses, log 1 minus p plus log 1 minus f.
+Hopefully that's less complicated for you.
+We can do a little bit better though.
+The reason is because in the previous version, we were taking logs of things and never needed to be on the natural scale anyway.
+If we're only working on the log scale, why ever express a probability on the natural scale?
+And the probability we're talking about here is p sub i.
+We don't need p sub i on the natural scale.
+So if you look at this model, you'll see that there's this line, halfway down the model, where it's log p is the linear model.
+And so p is the inverse logit of that linear model.
+But we don't need p on the probability scale.
+We need log p.
+So let's just compute log p directly, and that's what this version of the model does.
+You'll see now that line has been replaced with log p.
+And the inverse link is now the log inverse logit, which is like inverse logit, but it avoids the very last step of putting it on the probability scale.
+And this reduces the number of operations, and fewer numerical operations is better.
+But this is the same model. It's just more accurate.
+And then in the code, what we need to do is swap log 1m for log 1mx, which means you get the logarithm of 1 minus, but it first exponentiates the argument you passed it.
+Now we're passing it log probabilities, so it needs to exponentiate them, and then do 1 minus, and then return the log.
+And I know it seems like a lot, but this is really worth it.
+This stuff makes a huge difference in complicated models.
+And this model, you can get away with it, ignoring it, as I said in the main lecture.
+But there are lots of models where you just can't.
+Okay.
+That's all I wanted to say about that.
+Really, there isn't much more depth to this topic.
+You gain some experience with it, you get used to it, and it seems pretty natural.
+But at the minimum, you should recognize these things in other people's code when you see them, because they're incredibly common in data engineering.
+And there's a bunch of other functions as well.
+All the standard ones are built into most math libraries.
+And if you want to look at the URL at the bottom of this slide, that's the stand documentation, which shows all of the built-in functions of this sort, which are used for numerical precision of operations.
+You don't always need these things, but they're a good habit to get into, and just use them compulsively when you can, because sometimes you need them.
+And there's just nothing to do except use these tools.
+Okay.
+I hope that was useful.

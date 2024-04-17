@@ -1,0 +1,437 @@
+Hello everyone, welcome back. So it's my pleasure today to introduce Professor Richard McElriss.
+He's a professor of anthropology and the director of the Department of Human Behavior, Ecology
+and Culture at the Max Mach Institute for Evolutionary Anthropology in Leipzig. He also
+wrote a very popular Bayesian statistics textbook. His research interest lies in integrating
+theory with data analysis and study design. He thinks that too many researchers treat
+research like a hobby and that actual professional standards are needed. For instance, today we'll
+argue how we as scientists can learn from other professions like software engineers.
+So Richard, thank you for accepting our invitation. I know many attendees are looking
+forward to your ever entertaining presentations. All right, thank you and thank you all for
+coming to hear me say some hopefully interesting analogies. And I'm going to try to get through
+this at a good pace. So maybe we have a little bit of time for questions at the end. I know we
+have time constraints. So yeah, I want to draw some analogies between science as a profession
+and other professions, specifically software development, but also cooking. So let me get
+to that too. So what I study, yeah, I'm an anthropologist. What I study is why people exist.
+Yeah, which I think is a deep puzzle that still is unexplained. When the context of this problem
+as a scientific problem goes is really terrible. It's kind of the worst possible scientific problem
+you can study because it's empirically really intractable thing. So here's the big overview
+of why my occupation is hard. So this is life on earth measured in gigatons of carbon,
+which is not how you usually evaluate life, but this is how much it weighs, right? And carbon
+is the main thing that we are, right? Stardust. And most life on earth is plants. That's what
+you see in this diagram from this 2018 paper on biomass distribution. And then the little gray
+triangle in the corner is animals, of which there's just two gigatons of carbon in total.
+And then if you zoom in on animals now on the right of the slide, you'll see that humans aren't
+even that much of all the animals, right? Insects and fish dominate. But here's the amazing thing
+about people. Humans and our livestock are essentially all of the mammals on earth. Essentially
+all of the mammals on earth are humans and our livestock. We're just completely weird dominant
+sort of species. Do you expect any kind of species to dominate earth? Do you expect a plant or an
+insect, right? This is a weird thing for us to do. And trying to figure out what produced this
+weird kind of ape that gives online lectures, right? As a profession, we have this very integrative
+and difficult empirical problem of figuring out the history of where we came from and our ancestors
+and then how we peopled the world and so on. And this is a big interdisciplinary project that
+involves all kinds of messy evidence and modeling, right? Because we can't do experiments. We need
+dynamic models to make any sense of the data at all. And this is, I love this. It's an absolutely
+wonderful sort of problem, but it's very, very difficult. And why am I telling you this? This
+is not an anthropology lecture. Well, I like to remind people that anthropology exists and maybe
+you should do some. But also that this is a kind of scientific problem that exemplifies the large
+scale version of what all scientific problems have is that in science, we're trying to generate
+some knowledge about the world, explain why it is the way it is, and maybe just for the sake of
+explanation, but potentially to do interventions in the future. And to do this right, we need to
+somehow integrate our work with the work of other people into some common body of knowledge
+that we can agree on and we can audit and justify. This is this process of continuous
+integration of updating of scientific beliefs. And the way this is done in science is usually
+almost entirely chaotic, right? This is the thing that philosophers of science will tell you is that
+there is no scientific method. It's sort of like chaos reigns. And nevertheless, it's amazing that
+we learn things, right? But there are professions who have an analogous problem and they have
+professionalized this process of continuous integration in a way that science has not.
+And I'm not going to argue that we should have some strict formalized version of how we do this.
+What I am going to argue is that we could do a whole lot better by looking at other occupations.
+So the primary analogy I'm going to look at is software development.
+One reason to focus on this is because a lot of contemporary science
+involves software development. This is not a, this is a thing that I think shocks a lot of
+people when you get into science. You're fascinated by some scientific context and then you learn you
+have to code, right? It's terrible. It's like a bait and switch, right? To get interested in psychology,
+now you have to learn R. Sorry, but this is just the way it's going to be from now on.
+And so this software development is now a routine part of being a professional scientist. And even
+if you don't code yourself, you're using software and you have a responsibility to understand how
+it works. And software development is a profession that has lots of professional tools about how to
+do continuous integration of code and working teams. So I'm only going to be very light on these
+things because you can read about these things on your own later. But teams of programmers have a
+very professionalized culture about how they work together. And when you train as a software
+developer, you train to learn a common stack of tools so that wherever you end up working on
+whatever project, you can work with people. And you can work with people in a way that does quality
+control. And this whole ecology is something called continuous integration. And it involves
+code development and testing and lots of detailed things like separation of different kinds of
+edits, things called branches. And it's very professionalized now. And it's actually also
+quite new. I would say really the last 20 years have been a period of very rapid professionalization
+and tool building in software development, software engineering. And research software
+engineering is the side of this that's just getting started where we take some of these tools,
+not necessarily the whole package that I have on the screen here. We're not interested in copying
+them, but we're interested in borrowing the things that we need. So version control and testing
+are things that are becoming more common in the sciences but are still incredibly rare.
+I'll try to convince you of that as we go. Maybe you don't need convincing.
+To give you a specific example, here's a project that I've invested a lot in myself.
+This is the Stan Math Library. And we use this to do statistics, arbitrary models. And this is a
+project where the people at the core of it are professional software engineers. And they keep
+it all integrated together. There are dozens of programmers making contributions to Stan at any
+particular time and at different levels. And this all has to work in the end. And the thing I want
+to emphasize to you that is a really stark contrast to how science is done. And think about the code
+for a second, but it's just the whole ecology of data and hypothesis testing and the relationships
+between hypotheses and statistical models. The really stark contrast here is that most of the
+code in the Stan project is code that exists only to test it and guarantee that it works as planned.
+So that's what I show you here. This is old. If you went and looked, there'd be even more code now.
+But there's 3.6 megabytes of library code. That's the code that you should actually run if you use
+Stan to do a project. And there's 7.6 megabytes of testing code, which is the code that is there
+for quality assurance. And this is quite typical of professional software projects, especially in
+the open source community, is that you'll have twice to three times as much testing code as actual
+deployed code. And that's necessary, though, because this is a profession and they want to know
+that it works. Let me do another analogy and then I'm going to run through some examples that are
+closer to science and really about science if you're not so interested in software engineering.
+So this is a great old article, kind of lost article from Cosmopolitan magazine from 1967
+called The Computer Girls. And I only bring this up, but it's a weird historical case. But
+there's this fantastic quote from a very famous computer scientist named Grace Hopper. I can
+zoom in on it here. Grace Hopper is a real legend in computer programming. She developed the first
+linker, which is like a compiler. It's not exactly like a compiler, but she was really a big deal
+early on in making the modern world as we know it in computing. And she was an admiral in the
+Navy in the United States Navy. And so there's a great quote, they got her the quote for this
+article in Cosmo, which is a real, really something says, they're talking about programming and what
+it's like and back then lots of women worked in software development still do, but the proportion
+was higher back then. And she says, Oh, it's just like planning a dinner, explains Dr. Grace Hopper
+now a star scientist in systems programming for Univac. You have to plan ahead and schedule
+everything. So it's ready when you need it. Programming requires patience and the ability
+to handle detail women are natural as a computer programming. So this analogy to cooking is a
+really nice one because programming is a lot like cooking. If those of you who'd like to do
+cooking and Dr. Hopper's analogy is very apt, I think. But it's also apt in the same professionalism
+sense, right? That cooking as a profession is also very organized and streamlined. It has
+really strict regiments for how people work together in kitchens. If you just cook at home
+and you're a bit sloppy with it, and you know, you're just using feeling, right, as Uncle Roger
+would say, those of you know, Uncle Roger, right, just use feeling. This is not, this is not how
+professional kitchens actually work. And professional kitchens are professional. There are a bunch of
+rules about how you stand at stations and how you move through the kitchen and how everything is
+processed, where you leave your knives, anybody who's worked in a kitchen, you know this stuff.
+But all of this is necessary for making the kitchen run smoothly and things can fall apart.
+This isn't exactly the same as continuous integration and knowledge, but it's continuous
+integration of the meal, right? And there's an assembly line here that has to produce
+a lot of food at exactly the right time. And they start in the morning and they make it work.
+Yeah. Okay, so just say there's nothing special about software development as the analogy. It's
+just that there are professions and where there are lots of culturally evolved rules for making
+the profession work better. And unfortunately, I think science is not one of them. I am a
+scientist and I love science, but come on, it's kind of a mess in here, isn't it? Here's my favorite
+about this. This is from the previous editor-in-chief of The Lancet, which is the most prestigious
+medical journal in the world, I think, or at least it used to be until this quote came out.
+So Horton was at a kind of closed door meeting of heads of granting agencies and journals in the
+UK back in 2015. And after that meeting, he couldn't share any exact quotes because it was
+closed door, but he wrote an editorial in The Lancet about this meeting and lots of the shocking
+things that had been reported on. So this is the quote. If you'll indulge me, I'll read it.
+The case against science is straightforward. Much of the scientific literature, perhaps half,
+may simply be untrue, afflicted by studies with small sample sizes, tiny effects,
+invalid exploratory analyses, and flagrant conflicts of interest together with an obsession
+for pursuing fashionable trends of dubious importance. Science has taken a turn towards
+darkness. Yeah. The only thing I disagree with here is the end. I think we've been in darkness
+for a long time. I'm going to make that argument later. This is not a new set of problems,
+even though the details are perhaps different because the incentives are constantly changing in
+science. It's never equilibrium. But these sort of dark problems have always been around,
+and we still learn things. So this isn't an argument that science doesn't work. It's an argument
+that we could do a whole lot better and that we are currently violating the public's trust.
+And I think this is a deep ethical problem, the lack of professionalization in our field.
+Okay. So people who are enrolled in this summer school, this stuff is not going to shock you,
+right? There are still scientists who've never heard that science has problems,
+but not the people who are enrolled in this. Yeah. They're here because you're interested in trying
+to do better. P-hacking is this great term. It's a terrible practice, but it's a great term that
+has done a lot, I think, to draw attention to some of these problems. And it's a fairly famous case
+now. There are even online guides to show you how it works. And this has gotten a lot of attention.
+But my opinion is that there's a bunch of stuff in the stream of integration of how we do science
+that is quite different than p-hacking in the sense that it has more to do with unintentional
+error than intentional error. And the unintentional kind of errors can be much more devastating
+in principle. And I want to show you some examples of those things today and talk about how analogies
+to software engineering or, if you prefer, working in a professional kitchen can help us
+do better over time. So let me try to back this up. Here's this article from Nature in 2016 where
+they're talking about the replication crisis and such. And they asked a bunch of scientists
+about various vaguely unethical practices or kinds of mistakes they make. And at the top here,
+we've got the things that I would classify in using Dante's Inferno kind of categories as greed.
+We've got selective reporting, pressure to publish, low statistical power, poor analysis.
+So there's things where scientists are conscious of these things, at least in the periphery of
+their consciousness. And they know it's not quite right to do these things, but they do it because
+of professional incentives. And then there's this middle category, which I call sloth. And this is
+what I like to focus on. It's the sloth problem, right? The lack of professionalization.
+People don't even remember how to replicate their own work. Yeah, this often happens in labs.
+And they didn't take detailed enough notes and no one can get the thing to work again.
+Or you don't have your code, right? Your code doesn't run. Insufficient oversight, methods
+codon available for experimental designs, not having the data and so on. And lots of problems
+like this where people aren't trying to be bad, right? It's just that there isn't this kind of
+professional training in a set of norms for doing better. And that's what I want to talk about.
+Let me give you a few specific examples. You'll indulge me here. So these are famous examples.
+Apologies if you've heard them before. Pre-set phase of my life where I'm telling the same story
+over and over again. I need you to do better about that. But so here's this example from economics.
+Two, I think Harvard economists, Reinhart and Rogoff in 2010 published this paper. It was a
+preprint at the time, growth in a time of debt. And this came out. Remember, there was this recession
+in 2008, right? And there were a bunch of international debates about public spending
+in order to stimulate the economy and so on. And this paper made the argument based upon this
+single graph that public debt is bad for growth, that there's a negative correlation between the
+the debt to GDP ratio, which is on the horizontal axis, and the percent growth in GDP.
+And so this is the whole paper, basically, is this graph. And this paper actually had a big
+impact in parliaments and in the U.S. Congress. And the U.S. Congress was actually waived on the
+floor of the U.S. Congress in a debate about public spending. Anyway, it turns out the data
+were wrong. The analysis was just wrong. It was just an Excel error. And here's Thomas Herndon
+pointing at the error in Excel spreadsheet. These are the unsung heroes of science, the people who
+actually look at the detailed analysis and figure out how the results work. And in this case, Thomas
+saw that there was just a formula error. And they had failed to include some countries that went
+against that trend. And once you actually drug the formula down all the way in the Excel sheet,
+the result vanished. This is the actual spreadsheet. You can see that if you know how Excel works,
+first of all, apologies. I'm sorry that life has done that to you, that you have to use Excel.
+It's a terrible tool. But that blue bounding box that you see is where the formula input ranges.
+And you'll see that they just excluded some countries down below. And those go against the
+trend. So it's an error. But lots of policy was made on the basis of this paper before the error
+was discovered. This is sloth. This was not an intentional deception either because the authors
+provided the spreadsheet. They weren't trying to cover anything up. They wanted to get this right.
+This is the kind of thing that arises from a sloppy way of working and using a tool like Excel,
+which is not designed for scientific analysis and provides no or say very few tools for quality
+control and inspection. It's designed to be convenient and visible. And that's exactly what
+you don't want in a profession like this. Okay. I'm going to pick on Excel. Sorry. But
+Excel does lots of other terrible things because it's not a tool designed for science. It's a tool
+designed for business people to make tables. That's what it's for. And it does a bunch of stuff
+without your consent. It'll just convert data. Everybody who's used this knows it likes to find
+dates in things. Excel is like that annoying guy who thinks everything's a date. And it converts
+all kinds of stuff to dates. And so gene names, this is the famous case. There are various
+gene names, and these are abbreviations, and they get converted. So like Septin 1 keeps getting
+converted to September 1. And this is terrible because a huge proportion of published genomics
+papers have these errors that are introduced by Excel. And this is a significant problem in the
+genomics literature. And so for a long time, biologists have tried to get Microsoft to do
+something about this behavior, but Microsoft just doesn't care about the scientific community.
+Again, they're marketplaces, business people making tables. And that's what Excel is for.
+So eventually, the biologists decided they would just change the abbreviations of the genes.
+So this creates another problem is you've got old papers that use the old system and have these
+errors and you have new ones. And it's a never-ending cycle. It's a snake that eats its own tail.
+But the problem is the tool and the fact that there's no professional standard for what tool
+we're supposed to be using. This is the... Using Excel is like the equivalent of just
+leaving your knife out in the kitchen or something like that. Yeah, these are things
+you're not supposed to do. The consequences of things like this are really serious. And again,
+a lot of you know about this, but these audits of reproducibility, research findings are quite
+depressing. So here's just one from 2012 that helped snowball some of this concern in biology.
+A buyer tried to replicate a bunch of published results and only about 25% of them could be
+validated. This is a serious problem. This is a waste of public funding when the public is paying
+for it. Yeah, not only 25% of supposed discoveries can even be validated in any sensible way to
+be pursued further. And these are serious issues. And again, this is probably not news to you.
+This is sign of old news at this point. But these things are arising in teams where no one's
+trying to get away with anything, or at least I don't think most of this is fraud. Most of this is
+flaw and professionalization will help. Okay, very quickly, I said something earlier that I don't
+think that darkness is new. This is a fantastic history of science book called The Lost Elements.
+And I just want to advertise it to those of you like history of science. It's a history of all
+the elements in the periodic table. And there was a lot of false elements there. This book catalogs
+more false discoveries of elements than real elements that currently exist. So it isn't like,
+I mean, now when we teach the periodic table, we teach it like this immaculate thing that sprung
+forth from the forehead of Athena or something, right? And we just got it right. But that's not
+what it was. It was a mess out there. Because it science wasn't professionalized then either.
+It's more professionalized now than it was then. So maybe we're doing better. I don't know. But I
+want to say this is not like it's some new problem that's caused by late 20th century capitalism
+or something like that. Okay, I have complained about things like this for some time. And I've
+unfortunately developing a reputation for this. So this is this natural selection of bad science
+paper comes up again. And I only mentioned it say that this the same point is that I think
+it's easy to focus on deliberate attempts to get away with things like like thinking about
+people doing fraud and such. And those things matter. And there's probably more fraud than we
+know. But I think that the norms in science have sort of evolved to satisfy particular
+careerist ends rather than reliability ends. And that's the basic problem is this cultural
+evolutionary process where we're incentivized to get promotions. But it's very hard to know if
+you're right in science. And most of us will probably die before we know if we were right about
+what we study, right? And I'm starting to get this feeling, but I'm going to keep doing it. I
+think it's this feeling that's summarized by this slide that I'm standing around discussing science
+reform quite calmly all the time. And meanwhile, science is just like flipping out in the background.
+But this is just what it's like. And we have to nothing's an equilibrium and the ideas for
+communities like the ones that I'm a member of and many of you are too, we need to keep discussing
+these things even though it's not clear how we're going to fix the whole system right now,
+because we need to be ready with serious policy recommendations when the opportunity arises.
+And it will arise because governments are getting really interested in that flipping out car in
+the background. And when I talk to people in high level leadership, they've all heard about this,
+people in government, heads of granting agencies. The moment is coming when communities that are
+interested in open science and science reform are going to be able to have a big influence,
+especially in Germany, which is where I know people I talked to about this, but also in the UK,
+which has gotten really serious about it. This is the hopeful message, right? You focus on the car,
+but there will come a time when we will have safety standards in place.
+Okay, so this is the argument about the natural selection of bad sciences. Science as a profession
+does a really good job of making successful scientists, right? And it's sort of how it is.
+Professors make professors, right? And so the professors who train their students to be good
+at being a professor, those are the sorts of traditions that will propagate. And so these
+are skills like how to get funding, how to get published, how to get cited, how to get credit,
+which is also a thing that helps you professionally. And research skills themselves, the professional
+aspects, the continuous integration, the testing, the programming skills, if you will, the kitchen
+etiquette where you leave your knife, how you avoid cutting your thumb off, things like that.
+These things are in most contexts, informally transmitted. People learn them at the bench
+with their colleagues in the lab sciences. They learn them from published papers in behavioral
+sciences. There isn't a lot of professionalization about how these skills are taught. People just
+kind of pick up coding, right, from their peers or from online tutorials. We could do a lot better.
+The things that are rarely taught, but are essential professional skills for the sciences,
+broadly defined are things like how we organize our data, how we curate it, how we do testing of
+our procedures, which I think is almost never done. People hardly ever test their code at all.
+How we manage distributed contributions, this is the continuous integration analogy.
+And then this point at the end that I'm going to focus on a bit
+strongly for the remainder of my time here is the logical connections between hypotheses
+and data analysis. And I think this is a real dark hole in the sciences, broadly defined. I don't
+think there's a single science currently doing a good job at this. Even though in the stats
+community, there's been a lot of work on this over the last 800 years, it's not the sort of thing
+that is really focused on, instead we sort of focus on null hypothesis testing. But the logical
+connection between scientific hypotheses, not null hypotheses, but the actual hypothesis
+and data analysis is something we could do a lot about desperate need to professionalize this more.
+So a couple of things about slots. So you all know that there are these audits
+of the replicability of studies. And this is just to talk about the curation side of this
+before I pivot to the logic. So here's something that a student in my department did a few years
+ago, Rihanna Minooker did this big audit of the social learning literature in humans and animals
+and just tried to figure out in what proportion of papers the result could even be reproduced.
+This isn't about whether it's right or not, but can we reproduce it at all? So this was a huge
+task of emailing a bunch of people and trying to get raw data and then trying to actually take
+the data when it was available and reproduce the result. This is a basic quality control thing,
+right? And at the end here, there's a bunch of details here, but at the end, the reproducibility
+combined from being able to get the data and then being able to understand the data processing
+procedures as documented is only about 24% in this literature. Now I ask you, if any other profession
+you heard a number like this, what would you think? There's a bunch of products being pushed out
+and in only about 20% of the cases, can we even understand how they were produced and
+know that they're correct? Yeah, this is not acceptable. And the social learning literature
+is not special in this regard. Here's a great paper from Antica Chilna and colleagues in 2020
+doing something very similar in ecology, trying to see just the availability of code,
+346 articles randomly sampled and only about 20% is even potentially reproducible.
+We've got to do better. This is the curation and professionalization of data management,
+code management, right? This should be easy. We just need the will and the standards and
+say that it's not okay that you don't have code and so on. There's other detailed procedures
+that are closer, more closely related to software engineering that we need training for. And the
+training is a serious thing that people like me have to commit to provide. So at my Institute,
+every year we have a week-long intensive course on these skills to help out students. But I know
+in a lot of programs, there isn't an annoying person like me who's going to force that to happen.
+But this is a professionalization thing, a campaign that I'm committed to, things like version control,
+being very serious about controlling our documents and understanding the edits.
+This is like track changes in Microsoft Word, but for code. It's a very important aspect of
+being professional about code development. And then testing. You know your code, you want your
+code to be able to do something, you should write code to test it. And that's part of basic
+quality control as well. And as anybody who's coded knows, no matter how long you do it,
+you will make mistakes. And so the testing is not optional. And I, any of you who've
+watched my stats lectures know this, I test the data analysis by making synthetic simulations
+of the scientific hypothesis. And that's also a kind of testing that's unique to science that
+you wouldn't see in software engineering, but is also necessary is to say, can my data analysis
+pipeline, even in principle, get the analysis right? And we should prove that before we ever
+introduce real data to our pipeline. I think now, of course, I'm a strict and annoying person.
+I know I recognize that. But I think that's a basic professional standard that I would like to
+lobby for documentation. Can we understand what people did? I've talked about continuous
+integration. I think this is a positive message because there's this occupation called software
+engineering, which has lots of training materials and has been professionalized and we can borrow
+a lot from them. We're going to have to adapt it to the way we work. I'm not saying we become
+software engineers, God forbid. I like being a scientist. I don't want to be a software engineer.
+But there's a lot we can benefit from here. We don't have to develop it ourselves like they did.
+Yeah, they had a really hard job doing this stuff. Okay.
+So, yeah, okay, so this is about, I should have put this up when I talked about version control.
+Copying documents and renaming them is chaos because future you is going to be very confused
+by your folders, right? Version control solves this quite a lot. How do you learn these things?
+So, if I mentioned at my institute, we teach a workshop on this every year and say you're
+interested in doing this yourself, you don't have to invent it yourself. There's this great
+organization called Software Carpentry and they have a branch of their materials called Data Carpentry
+which is really focused on scientists and essential skills for organizing data and having
+pipelines and managing projects with version control. And we use these materials at my institute.
+We modify them a little bit. We tune things, but these are excellent. It's really professionalized
+and they'll train instructors too. You can send a member of your team to their instructor training.
+We've done that here. It's really great. I hugely endorse this. All the materials are free online.
+You can go through it on your own at home with a bottle of wine if you like. It's really great
+stuff. So, we're living in the future. We have benefited a huge amount from all the professionalization
+in software engineering and the culture of things like this of Data Carpentry and Software Carpentry
+and we can use these things to lift ourselves up now. I work a lot with ecologists and so
+there's a whole module for ecologists actually and there's a module for psychologists so it's
+even getting customized now to the different kinds of data needs and cleaning problems that you have.
+So, I hugely endorse this and I think this is the kind of thing, this kind of basic
+Data Carpentry certification is the kind of thing I'd like to see as a professionalization of being
+a scientist who works with data which is basically all of us, right, is to be able to say, yes,
+I've done this. It should be. So, on our CVs, it's not that, you know, oh, I can use Microsoft Word.
+Well, of course you can, but no, you've gone through Data Carpentry and you've got the certificate.
+That would be a minimum kind of professional standard, I think.
+Version control for big projects requires bigger tools and I just put this slide up
+to advertise that those tools exist too, but you need other specialists to help that work. So,
+in my department, we have this kind of continuous integration of distributed databases with
+different people contributing data from different aspects of the project and this has to be managed
+as well and we do all this with database, with version control on a database and it's very
+essential to do this kind of stuff too. This would be impossible for an individual to manage
+without specialized training. So, this is the, we need teams where we have support staff who
+are focused on these sorts of things and at MoxPunk we can afford this and I appreciate it in other
+places you don't, but this is, again, just part of the professionalization and research institutes
+that want to be taken seriously in the future, I think, will have to provide services like this.
+Okay, let me pivot to the logic and then I'll stop and take some questions in the last few minutes.
+I'm very big on the idea that we need to prove logically that our data analysis
+could work in principle and even in principle, that is, given some stated set of assumptions
+about our scientific hypothesis, what we think is going on, would it be possible even in principle
+for our data analysis pipeline to work to show whether the hypothesis was true or not or to get
+the estimate that we want? That's usually how I think of it and I think the standard way that
+data analysis is done in the sciences does not address this at all. People have quite vague
+heuristics about how they develop an estimator for things and there's no testing of any kind
+anyway. And so, I put up this screenshot of you to Pearl's book because this is really the core of
+it is about causal inference, which is most of scientific research is about inferring causes
+and maybe you want to argue with me about that later on, but I defend that point quite strongly
+and there is a science at this about being able to logically connect a generative model
+of a natural phenomenon to an estimator that is a statistical procedure for studying it
+and that's what Utapurl, Utapurl's probably made the largest contribution to this of any
+single person, but there's hundreds of mathematical statisticians and computer scientists who work
+exactly on this issue and we're living in the future again and we just need to disseminate
+these insights. So, a couple quick examples and then I'm going to stop. So, here's a version of
+this that I was involved in personally with my colleagues where people are doing data analyses
+which are wholly unjustified. There's no logic that connects their statistical procedure to the
+supposed scientific problem they're trying to solve and so that they're just publishing
+irrelevant estimates and in cases where it's provable that what they've done doesn't make
+sense. So, there was this period years ago where I got involved in this policing, biased
+policing debate about whether police, mainly in North America, tend to shoot minority individuals
+and there were a bunch of papers on this trying to analyze administrative data and so on and
+there's a bunch of statistical problems with these sorts of papers which is how I got pulled into the
+vortex but also it's a very important civil rights issue and when you have statistical
+knowledge I think you have an obligation to work on these things when the opportunity arises but
+so here's a paper that came out from Cesario and colleagues who are really trying to get things
+right. These are serious people who really care about the civil rights issues and they're doing
+the best they can but no one trained them in how to do this logical connection between the
+scientific hypothesis and the estimator so they do this adjustment. They recognize that there's
+this problem with the administrative records and they do a statistical adjustment and then they
+report on what happened with it but their adjustment and statistics could mean anything.
+It just means including some variable and the particular adjustment they did just does not
+work and so my colleagues and I, Cody Ross and Bruce Winterhalder have this follow-up paper
+where we are we nerd out basically we like to do algebras kind of kind of people we are
+and we prove that the estimator that Cesario and I all used just doesn't work it doesn't solve the
+problem at all in fact it can actually give you exactly the wrong answer in these cases.
+Now I don't mean to pick on Cesario because this is just a case that I was involved in right but
+this kind of thing goes on a lot so let me give you one more example. So this is one maybe a lot
+of you've heard of the hot hand effect so there's this weird North American sport called basketball
+and back in the 80s some psychologist Gilovitch of Alona Tversky published this paper arguing
+that this thing called a hot hand doesn't really exist but basketball players believe it does the
+hot hand is the belief that players get on the streets and when they're on a street the coach
+is supposed to recognize this and direct other players to pass the ball to them and that will
+improve your your odds of winning the game. So they did a data analysis of some data from
+professional games and and said that the hot hand is a myth players and coaches believe in it but
+there's no statistical evidence of it. This paper was hugely influential and it was part of a big
+industry of arguing that people are irrational and and so on. Okay the paper is completely wrong
+totally wrong it's garbage never teach it okay no here I am teaching it only teach it as a lesson
+of like how not to do data analysis so the problem with the the Tversky paper is that their data
+analysis procedure was completely ad hoc they didn't have any kind of generative representation
+of the hot hand phenomenon and then derive an estimator or anything like that they just said
+hey what if we just looked at sequences of three shots and looked at how many streaks there are
+in there and it turns out that this is a procedure that gives you deterministically the wrong answer
+and there's this great paper I show you on the screen from Miller and Sanjuro I think this came
+out in 2018 or 2017 where they studied this estimator that Tversky had all used and it is always
+bad I mean it's and it's especially bad in the way that Tversky and his colleagues used it
+and when and Miller and Sanjuro then went on to derive an actually good estimator unbiased
+estimator and they find that the hot hand does exist and the coaches and players were correct
+yeah I love this story so there's real value in in professionalizing this ability to connect
+scientific models to data analysis as well and its obligation of people like me to produce the
+materials and the training materials to help you do that because this is not you're not on your own
+here we're all in this together we are there we we all sink or float together right and I think
+in the simple version of this this is a schematic we have this four step plan to success we want to
+express a theory as a probabilistic program and in code and then prove that a plan analysis
+could work using that probabilistic program then we can step three we test it on synthetic data so
+we have the quality assurance and our colleagues can believe that the estimator at least will work
+in principle this would have saved Tversky right and then we can run the thing on empirical data
+there are additional problems after that of interpretation and model rejection and maybe
+we go back to step one and sure everything is flow and I don't think this is a linear sequence
+but getting the quality control in here is really important and the tools exist we know
+how to do this in as a community we just need to disseminate it and democratize it
+there's a bunch of detail in work real workflows which is like chaos I'm not going to work you
+through this but there's this great paper called Bayesian workflow by Andrew Gelman and his colleagues
+where they they problematize all the little sub flows that are in real scientific data analysis
+problems and there's a bunch to do here they they identify a bunch of areas for future research
+to say this is a really active area of thinking about scientific workflow in a detailed way
+and good things are going to come is what I want to say okay I'm going to stop there
+sorry if I run right to the end I guess science is about continuous integration
+and we should be professionals about this we should not be ashamed to show the public
+how we produced our results or our work folders and I guess that's my only message
+thanks for your indulgence thank you so much
+you're getting a lot of applause is here and online apparently oh yeah there's things floating on
+my screen that's kind of haunting okay I've heard a version of that presentation a while back but
+I got again very motivated so I hope the new listener got inspired as well I see there are
+several questions already in in a Q&A box but we will also take did I stop the recording

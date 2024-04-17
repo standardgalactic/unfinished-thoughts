@@ -1,0 +1,625 @@
+Welcome to lecture 7 of statistical rethinking 2023. In this lecture we're going to focus more on the
+details of estimation and all the problems that arise after you have an estimator in place.
+This is a little cartoon that I showed you in an earlier lecture of the Earth orbiting the sun
+and Mars also orbiting the sun and this is a cartoonish explanation of this phenomenon called
+retrograde motion that is from the perspective of an observer on Earth Mars and the other planets
+appear to zigzag in the night sky. Figuring out why this happens was a major drive in previous
+centuries and the Ptolemaic model that was geocentric used epicycles to do it. But this fellow
+Mikolaj Kopernik, Nicholas Copernicus is usually called in English,
+decided that another way you could explain retrograde motion is by putting the sun at the
+center of the solar system, the so-called heliocentric model. This turns out to be a clever
+move because the actual structure of the solar system does have the sun near its center. The thing
+that's not often appreciated about the Copernican model or heliocentric model the Copernicus used
+is that it still uses epicycles. The major problem is that the orbits of the planets
+are not actually circles and the sun is not at the center of them. It's offset. Copernicus
+realized that was true but he thought that everything in the celestial sky was made of
+circles. So the circles were still his building blocks. Epicycles were not in ill repute yet
+and so he used them. And this is simplified compared to his actual model which had even
+more epicycles but you can get a pretty good elliptical orbit that is closer to what the earth
+actually does by putting one circle on another like this and get many of the features of the
+orbits that you need. Copernicus's actual model had a bunch of epicycles. Now what's distinctive
+about it though is that it had fewer epicycles than the the equivalent predictively equivalent
+geocentric model. So remind you on the left the geocentric model like the Ptolemaic model again
+just is just a simplified cartoon. You put circles on circles and you can explain retrograde motion
+this way. Copernicus explained it through a heliocentric model but he still needed epicycles
+to get a prediction of the positions of the planets in the sky because he didn't realize
+the orbits were ellipses. Both of these so both of these models were exactly equivalent. At the
+time that Copernicus made his geocentric model it was no better or worse at predicting the positions
+of objects in the night sky than the Ptolemaic model. So why prefer it? Well Copernicus's argument
+skipping a bunch of details was basically that it's simpler. The heliocentric model requires
+fewer circles. This principle some people call it parsimony or Occam's razor comes up a lot
+in sciences. The idea that we should prefer simpler explanations. But the problem is that in almost
+any realistic modeling context we're not choosing between a simpler and more complex
+explanation of a phenomenon both of which make equally good predictions. Typically we're trading
+off simplicity against accuracy and there's unfortunately no good justification for
+preferring simple things anyway. What we care about is why simplicity should be related to
+accuracy at all. And we're going to think about that today in this lecture. But I want to come into
+it from a bit of a sideways direction. The problem that stands for us at this point in the course
+is that there for any given sample of course there are many different causal models that could be
+compatible with it. And when we design our estimators from any particular causal model telling
+us how we should use the sample to get an estimate we still face a lot of engineering problems in
+estimation because the sample is finite. And the due calculus doesn't tell us how to cope with that
+at all. How to get an efficient estimator. And there are different estimators for any given task
+and some will be better than others. There are better and worse ways to use data.
+So you can think of this as two related struggles. Both of which are happening at the same time in
+all of our scientific data analysis projects. The first is the struggle against causation.
+How do we use causal assumptions to design estimators? And contrast those alternative
+causal models with one another. That is which kinds of observations that we could use in estimation
+will distinguish the models at all. That's something I talked about in the first lecture
+of this course. The second struggle is the struggle against data itself and its finite
+nature. How do we make the estimators work? Just because the DAG and the due calculus tells you
+an estimator is possible doesn't mean that it's practical and useful. Existence is not enough.
+And so we need to think hard about the engineering aspects of how we deal with estimation and that's
+what we're going to talk about today. Let me give you a really simple data analysis example to build
+up the story for you. I want to talk about different things that we might mean by prediction.
+So sometimes what we're interested in doing is figuring out what function describes some points.
+So I'm going to work with the example on this slide which is an example of just a few data points.
+One, two, three, four, five, six, seven data points each of which is some hominin that is human
+relative body mass against its brain volume. So the point near the top is us humans.
+We're not the heaviest but we have the largest brains and there seems to be some
+extremely vague positive relationship among these points. If we were going to find a function
+to describe these points what should it be? And this kind of question is not necessarily
+a question about causal inference but it's just as interesting and useful. You can think of this as a
+it's about curve fitting or compression that is instead of just describing every point can we get
+relatively accurate compression of them through some mathematical expression and that's often a
+very valuable thing to do in the sciences. Another kind of thing we might be interested in doing
+with data is asking what function explains the points and that's causal inference and that's
+what we were focused on last week. Another thing we might ask is what would happen if we
+changed a point's mass? This is also related to causal inference. It's about intervention
+and causal inference but it's distinct from the inferential part and requires different kinds of
+tools and different detailed problems arise in coding and implementation. Finally, what we're
+going to spend the time in this lecture up to the break on is what we call prediction
+in the most typical sense. What is the next observation from the same process? Some process
+that is generating these points we're not trying to infer that process we're not doing causal inference
+but we'd like to be able to accurately predict the next observation we might sample from this
+process. There are lots of legitimate tasks in science and outside of science that are of this
+kind. You're not necessarily interested in inferring the generative model but
+you'd like to be able to have a good expectation of what will happen next. This is the absence of
+intervention just like in the first lecture I talked about causal inference as being defined by
+interventions in one heuristic sense of defining cause but if you're not going to intervene in
+a system you can do a lot with statistics to predict what will happen next. It's intervention
+that requires causal inference. Okay so let's think about this and there's lots of different
+functions we could use that we could fit to these data these these seven little data points
+to try and predict the next point we might sample and we don't have more than seven well we do in
+anthropology have more than seven but let's say we only had these seven. One thing we can do to get
+an idea of how good any particular function is at predicting the next ones is to drop one point
+at a time fit the function to the other six points and then predict the point we dropped as if we
+blinded ourselves to it. So let me walk you through this procedure and this is a procedure known as
+lead one out cross validation it's incredibly common in machine learning it's common in some
+parts of the sciences as well but it's a it's a task you use to assess the predictive accuracy
+the expected predictive accuracy of a statistical procedure. Okay so first we drop one point the
+red point on the right is the point that I'm going to drop the first one and then we fit the line
+there to them that's the the red line there then we're going to predict the drop point and what
+and what we're going to assess is its distance from the prediction line right which is the little
+vertical dashed line that I've added to the plot this is in a sense the prediction error right because
+we if the line predicted the drop point perfectly the drop point would be on the line I'll say that
+again if the fit curve that is the line here had predicted the drop point perfectly the point would
+be on the line since it's not on the line we measure the vertical distance that is the badness
+of the prediction is the length of that dashed line segment we then repeat this procedure with the
+next point so point two we can do the same thing we can fit a new line in this particular case just
+by coincidence the left out point is below the prediction line this time yeah and it's a little
+bit better and we can do it with all the points in turn and we will end up with seven different
+regression lines seven different errors and we sum up those errors and that's the expected
+accuracy of using a line on all seven points and that's this blue line
+and the way we talk about this is there's two scores there's the score in and score out the
+score in is the fit that is how well the function fits the sample we have and this is what we do when
+when we run quap in this course or if you just run an ordinary linear regression you use least
+squares you minimize the least squares you're minimizing the errors in the sample that's the
+end score and the fit is always better than the predictive accuracy right because we haven't been
+able to train the function on the points we haven't seen yet and so what we when we compare functions
+in their predictive accuracy we don't want to compare them on the end score on their fit to
+the sample we must never do that what we want to do instead is compare them on their scores out
+and one way to do that is through cross validation so let's consider other functions so you can see
+what that means oh before I move in into the other functions I want to mention of course we're basians
+in this course we're good basians and like good basians we don't use points we always use distributions
+estimates or distributions points or decisions right estimates or distributions
+points or decisions and we're not making decisions in this course if you want to do
+decision theory that's fine but usually in research what we want to do is communicate the estimate
+and let our colleagues make up their own minds about what decisions are implied
+so we're going to use the whole posterior and so when we assess the fit both in and out of sample
+we use this thing called LPPD the log posterior point wise density and for the cross validation
+sort of task I just showed you on the previous slide it's this sum of sums
+let me take just a moment to explain this this horrible looking expression to you to demystify
+and the point of this explaining it to you is not because you're going to have to write the
+code for this or such it's already built in to the software it's so that you can start to understand
+these expressions and read them without any sort of angst there's a structural language to these
+things that you get used to very quickly the more time you spend at this business okay the LPPD is
+the log point wise predictive density the point the predictive density part is that we're trying to
+get the predictive distribution for some particular model that's when density is related to probability
+distributions it's point wise because we're considering each point independently in the
+cross validation that is we're assessing the accuracy of each point and it's log because
+in statistics everything is done on the log scale typically because it's more numerically stable
+okay all the junk on the right the n is just a number of data points in your sample
+and s is the number of samples we draw from the posterior this could be arbitrarily large
+to get our approximation of the LPPD and then this thing so the two sums all they do is they
+for each data point we take the average over all the samples that's what the one over s is
+in there and then for each sample we compute from the posterior distribution we compute a prediction
+and that's what this log probability is it's the log probability for each observation i
+computed with a posterior that omits point i so that's the cross validation yeah so we're we're
+asking a posterior distribution to predict a point it hasn't seen and so it hasn't been updated in
+light of and that's the cross validation idea but we have to drop each point separately and so
+if we have in data points we end up with in posterior distributions it's a lot of computation
+oh yeah and so the whole thing here is just an average okay it's a lot of computation but you
+can automate it and i've done that i'm going to show you some animations just looking at posterior
+means here for simplicity on the left i'm repeating the linear estimation for these seven points and
+the score in is 318 bigger numbers are bad because their distances right their total errors
+and the score out is 619 so it's about twice as bad out of sample as in for the straight line
+on the right of the slide i'm fitting a parabola now in a previous lecture i told you not to use
+parabolas and i'm still going to stick with that advice but lots of people do use parabolas to fit
+data so i'm going to use this as a simple example uh and and it's also an example we can extrapolate
+by just adding more and more polynomial terms so the second order polynomial on the right the parabola
+can be fit to these same seven points and you'll see now it bends to accommodate
+right and we end up with a final parabola in the sample it has a better score it fits the data better
+because it's more flexible than a straight line at 289 but it's it's score out of sample that is the
+error assessed by summing over the points that are dropped one by one is worse than the straight
+line 865 and this general pattern that more flexible functions do better in sample and worse
+out of sample is very general at least for simple statistical models of the sorts that we've seen
+so far in this course when you get to statistical models in which the parameters are hierarchically
+embedded in one another like we'll see in multi-level models in the second half of the course
+this relationship no longer holds in this way uh nevertheless the intuition you're going to get
+from this lesson does hold because you're going to learn something about how flexibility works in
+models in and out of sample so let me show you the extrapolation now let's consider even fancier
+stuff so on the left i'm just repeating uh the straight line and the parabola from the previous
+slide and now the larger curve here is a cubic function third order polynomial and it's even
+better in sample we're down to 201 now we're getting a pretty good fit you see it bends twice
+unlike the parabola but it's it's error out of sample is astronomically worse now it's
+astronomically worse now because that flexibility in sample um uh is uh let's it bend really far
+away from points that are dropped and you'll see the the gray curves which are the independent
+curves that are estimated for each drop point vary a lot more they're much more different from one
+another than the different parabolas are or the different straight lines are the different the
+gray lines in the upper left of this slide are for the most part most of them aside for just one
+are very similar and the parabolas are quite similar aside from that just one which bends the
+opposite direction but the cubic curves uh on the right are all over the place and that's the
+variance uh it's it's susceptible to varying uh all over the space um when you drop any particular
+point this continues we can go we can add a fourth order polynomial uh and the same pattern it gets
+better uh every time we add another polynomial term the curve fits the sample better but it has
+even worse out of sample performance uh and until we get to the fifth order polynomial here on the
+far right of this slide which um fits the data set almost perfectly has a an error in sample of
+only seven but out of sample it has a really extraordinarily bad performance which means again
+it's it's very bad at predicting any particular point that's dropped
+so let me try to summarize some of that for simple models as the sort of models we've seen so far
+in simple models parameters aren't conditional on one another they all have a direct role functional
+role in computing the probability of the observation there are no parameters in these models which are
+gives you probabilities of other parameters that'll come in the second half of course so for simple
+models of that sort there's this relationship is very reliably true that as you add more parameters
+you improve it to the sample but you may also do worse out of sample that flexibility in sample
+is often a curse out of sample but it's a trade-off there's no Occam's razor here because we still
+must assess accuracy we want a model that is most accurate out of sample and it just turns out that
+models that are most accurate out of sample purely for the purpose of prediction remember we're not
+doing causal inference we're not after mechanism here trade-off flexibility for accuracy and it's
+important to understand why that's the case this phenomenon is called overfitting try to
+illustrate it with the graph on the right for this toy example with the seven data points
+the blue trend there is the relative error in the sample this is what people might call the fit
+and with every polynomial term we added in the example the the error in sample declined the fit
+got better but the opposite happened out of sample every polynomial term we added increased error
+out of sample yeah which makes it seem like the line is the best and in this particular example
+with only seven data points that's true but that's just a feature of this example let me show you
+an example in the same context but now with more data points again we're looking at math on the
+horizontal against spring volume on the vertical for a bunch of fossil hominin species and we're
+going to fit the same set of functions to them with the same cross validation but now there's more
+points okay but the same idea and we're going to do the same assessment of in and out of sample
+we're all the way up to a six degree polynomial on the right you can see this is a very flexible
+function it bends all over the place and then on the left is the least flexible one the first
+degree polynomial well the least the least flexible one would just be an intercept I mean no slope at
+all but I haven't showed you that one so in this particular example the the function that gives you
+the best predictions by the cross validation score that is dropping each point one at a time
+measuring the prediction error for that one left out point and then summing those those errors
+together the best one is the polynomial as I show you here because the again the blue trend always
+declines every time you add a polynomial term it goes down but the red goes down meaning it gets
+better before going back up again at cubic and you'll often see this in data analysis in prediction
+problems that there is some optimal complexity or another way to say this some optimal flexibility
+of the model which allows the model to learn the important or we say regular features of
+the process from the sample and then it can use those regular features to make good predictions
+so let me highlight this issue I'm going to drop this explore the polynomial so we can
+see the graph on the right a little better and and I've drawn this black loop around the polynomial
+and you can see its error in sample is not the best right the fifth order polynomial does a lot
+better in sample but it is the best out of sample of all the functions that are considered in this
+example it trades off flexibility for accuracy so as I as I said the idea is to have some function
+which is regular that is it it can learn the regular features of the process that's generating
+the points so that it makes good predictions in the future and being regular means not being too
+excitable about the sample because not every feature of the sample is regular I'll say that again
+what's important is not to be too excited about every point in the sample because not every
+feature of a sample is regular that is it doesn't represent the long run expected value of the
+generative process so in in Bayesian modeling we have a really nice tool for dealing with this
+making models less flexible and that is priors we can use skeptical priors that regularize
+inference that down weight extremely unlikely observations and so when a sample arises that
+has those observations the model is less excited by them and it can make better predictions in the
+future cross validation measures predictive accuracy but it doesn't do anything about it
+regularization is the procedure of designing a model that that produces good predictions
+because it will or has a good cross validation score they go hand in hand I'll say that again
+cross validation by itself does nothing to produce good models you can use it to compare models and
+and choose one that will make good out of sample predictions but for any given model you can make
+it even better by using regularization using skeptical priors that down rate extremely unlikely
+observations skeptical models tend to do better let me show you what this looks like so we're
+going to take the same idea in and out of sample the same polynomials the same data set and we can
+think about repeating that whole set of animations I just did don't worry I'm not going to show you
+the animations again you've seen enough of those the dancing curves I'll do this in the background
+and I just want to show you the results in the terms of the blue trend in sample and the red trend
+out of sample now I'm going to excuse me I'm going to use different priors in what the examples I've
+used so far I use these extremely broad normal 010 priors that's a normal distribution with a
+variance of 100 which is essentially flat there's no prior information for the slopes
+within the reasonable range but we can constrain them and see what happens so the first thing to
+do is try a normal zero one a much better choice I think and what I want you to see is that on the
+blue curves it actually makes things a little bit worse I know this is hard to see but there's two
+blue curves there and one slightly above the other the normal zero one blue curves is has
+worse prediction error for every polynomial model than the normal zero 10 and that's because priors
+hurt your fit in sample and so narrower priors give you less ability to fit the sample perfectly
+yeah if your if your goal was simply to encode the sample to basically compress it then you
+don't want tight priors right you want loose priors but that's not our goal our goal is not to
+simply compress or encode the sample using a model and our goal is to make predictions at least
+here it is so we get the opposite phenomenon for the red curves so the blue curve got worse when
+we made the prior titer the red curve gets better that is the the red trend for normal zero one is
+below the trend for normal zero 10 which is better because remember smaller numbers mean less error
+and we can keep going we can use something even narrower beta normal zero um with a standard
+deviation of a half does even better notice that it's noticeably worse in sample because it's less
+flexible the curves can't no matter the number of polynomial terms um models with this narrower
+prior cannot bend as much and so they fit the sample less well and you see that on the blue
+curve now is higher but again we've gotten a uniform systematic improvement out of sample for
+every polynomial model by constraining the flexibility through it through these priors
+this is regularization it's the idea that we want to choose skeptical priors that allow the model to
+learn regular features but not learn irregular features that is the random variation that
+doesn't have to do with the long-term expected trend of the process you can make priors too tight
+so if we make the if we use normal zero point one priors here um then the end sample gets quite
+worse and so does out of sample prediction it gets quite worse in this case the sample size is too
+small and these priors are too constraining and so the model is extremely skeptical if you fed it
+more data eventually it would overcome the skepticism and these priors wouldn't be bad
+but for this sample size this is too skeptical so how do you choose to whistle your prior then
+well if we were engaged in a causal inference task as in many of the examples in this course you use
+science you think about and is what we did in previous weeks when we thought about like human
+height you know the impossible and possible ranges of these sorts of things and for most scientific
+data analysis you always have enough domain expertise to say something about that to put
+to put good regularizing bounds on your priors what sorts of slopes are possible
+for pure prediction you can actually tune it using cross validation you can find a prior
+that in simulation gives you good data sample performance and this is often done in machine
+learning in practice in research most tasks are a mix of inference and prediction for any
+given causal inference tasks there are going to be choices of functions in those models in the
+generative model that are not purely determined by our background causal theories and we will need
+to be skeptical of overfitting in those cases and so in practical use we're always doing causal
+inference and dealing with overfitting and regularization at the same time
+people are often quite anxious about the choice of priors because it feels
+well like it's hard to justify in a particular case so if it relaxes you one way to put this is
+the worst possible prior you could choose is a really flat one if you made it a little bit narrower
+be better in almost every case and we're not trying to be perfect the success of your analysis
+does not depend upon having the perfect model structure not the perfect prior not the perfect
+combination of terms or predictors we just want to do better than the worst case default and that's
+easy to do and again one of the reasons i'm spending so much time in this course teaching you to
+write generative simulations of your models is so you can address these things in simulation you
+not left guessing and making up stories and hand waving at your colleagues about your choices
+okay that's been a lot let's take a break i encourage you to go back and review the slides
+in the first half of this lecture collect some questions and try to answer them for yourself
+or bring them to me in discussion at the end of the week and then you should take a walk relax
+have a cup of coffee and when you come back i will still be here
+welcome back in the second half of this lecture i want to take the foundation from the first half
+about overfitting and regularization and their relationship to priors and talk about some very
+useful metrics that actually assess the expected out of sample accuracy of a particular model
+so remember the blue and red curves from before the break the blue curve is the in sample error the
+fit it's sometimes called smaller numbers are better so the fit is always improving with model
+complexity in this example and then the red curve is out of sample this is what we really care about
+we only want to compare models on their out of sample performance for prediction and the distance
+between the blue and the red for any particular model is the penalty if you will of trying to
+make a prediction and what i want you to see having drawn these black bars is that the penalty gets
+bigger as we add complexity to the polynomial so if we just take the just the the vertical
+lengths of those black bars on the left and draw them on this new graph on the right you'll see
+that as the as the polynomial models get more complex the out of sample penalty gets bigger and
+bigger so the problem with cross validation but cross validation is fantastic no complaints about
+in general and it's a wonderful method and for small samples you can just do it like i've done
+in these cases if you've only got 12 data points it's no big deal to fit the model 12 times it goes
+really fast but for really big samples this can be and and by the end of this course we're going to
+be fitting models that can take a half hour to fit it's not such a big deal but at that point you
+don't want to fit the model 12 times or it would be more like a hundred times or hundreds of times
+because there's hundreds and hundreds of data points in these big models and it just be cross
+validation becomes prohibitive so wouldn't it be nice if we could estimate this out of sample
+penalty for any particular model from a single posterior distribution just by fitting the model
+once and for once the universe is benign and not hostile to us because there's good news you can't
+and there are multiple methods that are quite accurate for the for the simple task of prediction
+in the absence of intervention which is what we're talking about in this lecture
+i want to talk about two of them and the first is important sampling approximation of cross
+validation or Pareto smoothed important sampling psis is what i call it in the book and in these
+lectures and um an information criterion the w a i c many listeners will have heard of a i c the
+aca ec information criterion uh a i c is only of historical interest now you should never be using
+it because it is eclipsed by w a i c w a c is much more general to many different kinds of models
+and more accurate and gives you a standard error so you can assess its accuracy in any particular
+case both of these tools try to do the same thing they try to estimate the out of sample
+accuracy of a model and they essentially measure this penalty and then add the penalty to the
+in sample fit they're both very accurate and in most cases they give you the same answer
+so if you're interested in in the details of how psis and w ast work i refer you to the book
+but uh in the lecture here i want to show you how they're used and talk about
+things you shouldn't use them for so it reminds you on the left we've got this graph that's going
+to be burned into your nightmares now the blue curve going down and the red curve going up
+and on the right i show you how psis the purple curve and w i c the new red curve
+do in estimating this leave one out cross validation score you see they don't get it
+exactly right but they get the trend right they understand um how the trend works they get the
+right inflection point so if you selected a model based upon psis for example you would get the you
+would get the quadratic model again which does best and it's estimated it's out of sample accuracy is
+quite good um so tools like w a i c and psis and cross validation if you if you've got the computing
+time to do it measure overfitting remember they don't do anything about it they they estimate
+the out of sample performance and that's like a way of measuring overfitting through the penalty
+term um regularization manages it and uh uh neither of these tools although they're they're
+important components of any scientific project neither of them directly address causal inference
+so what you should never do under any circumstance is choose a structural model um uh and a causal
+estimate by comparison by comparing w a i c or psis or cross validation scores it should never be
+done because it's it's simply these are predictive metrics they're about prediction in the absence
+of intervention and remember causal inference is about um knowing what would happen being able to
+predict the consequences of an intervention and that simply requires different tools uh
+uh one of the things uh so w a i c and psis and related measures are are extremely useful for
+understanding how models work even if you're not going to use them uh so uh because you understand
+more about the estimation part that is you've got some DAG and you design an estimator but that whole
+intellectual exercise is sort of done in the imaginary realm of infinite data we don't live
+in that realm we live in the realm of finite samples and so we need tools like this and we need
+regularization to actually get estimates and underfitting and overfitting are both bad we want
+to get something in the middle um i want to spend some time hammering home this point that i just
+made about uh w a i c and psis and cross validation not being legitimate ways to choose causal models
+to choose a causal estimate and i want to hammer this because you see it done you see uh publications
+where people will have a bunch of uh alternative models with different predictors in them and
+they'll fit them all and then compare them with w a i c or psis and and uh then choose the one
+with the best uh predictor performance as the explanatory model and this is uh just
+logically incoherent uh w a i c and psis are just ways to approximate the cross validation score
+that's what they're for they're pure predictive tools uh they this is not prediction in the
+presence of intervention which is what causal inference is about these are predictions in the
+absence of intervention and uh so what happens if you do do the wrong thing well uh you very often
+you will end up uh doing the worst thing possible which is choosing a confounded model confounded
+from the perspective of trying to get the right causal inference and the reason is because predictive
+criteria prefer confounds uh confounds and colliders um uh conditioning on post-treatment
+variables all those things will actually improve your predictive accuracy out of sample i'll say
+that again uh conditioning on colliders including post-treatment variables which create misleading
+bias um all those things actually do help you in prediction in the absence of intervention
+causal inference is about prediction in the presence of intervention and these are just
+different tasks uh so you can't switch the tools let's go back to an example from uh last week
+you may remember it the plant growth example and carry through with this we're going to
+do the wrong thing so you can see uh how uh w a i c and psis and cross validation will
+prefer the confounded model so we're going to just remind you how this experiment works
+there's a treatment t and uh the the treatment is some antifungal
+compound and it's applied to a bunch of replicate plants um these plants had some height h sub zero
+when at the start of the experiment when the treatment is applied the treatment may have
+a direct influence on the growth of plants uh at at the end of the experiment which is h sub one
+but it also has an indirect effect on growth through suppressing fungus which is f in the
+graph there f mediates the effect of treatment on plant growth and what we want to do in this
+experiment is assess the total causal effect of the treatment both its direct effect and its
+indirect effect because that tells us its value yeah um and what you saw last week is that if you
+condition on the fungus f you block the effect of the treatment in fact and you make the wrong
+inference about the experiment and so this is called um uh conditioning on a post treatment
+variable is very often a bad idea and so the model on the left of this slide is the one where we
+stratify by fungus we condition on the post treatment variable it's the wrong adjustment set so if
+you took the dag in the middle and used the backdoor criterion uh with the estimate of the total
+causal effect of treatment you would not end up stratifying by f because there are no backdoor
+paths in this dag yeah it's an experiment it's not confounded you don't need to stratify by fungus
+yeah um and then on the on the right we have the the proper model for assessing causal inference
+and but i didn't show you last week uh because we didn't have the tools yet is that the model on
+the left the wrong model from the perspective of getting the right causal estimate that is that if
+you use the model on the left you get the wrong estimate of the treatment you end up including
+the treatment doesn't work but the treatment actually does um what i didn't show you is that
+the model on the left predicts better if your goal was to predict plant growth um then the model
+on the left is the one you want to use so let me show you that in just in terms of posterior
+distributions we fit uh you can go back to the code in the book or from uh the lecture last week
+and fit these models and reproduce these posterior distributions for yourself the model on the left
+which is i'm going to call it the confounded model because it includes the post treatment variable
+that is the fungus is a consequence of the treatment uh this is uh wrong it's biased the true causal
+effect is about point one the total causal effect of the treatment but when you include fungus it's
+about straddle zero right stratifying by fungus essentially cancels an observable effect of the
+treatment and on the right when we don't stratify by fungus which is the right thing to do we get
+the correct estimate now we can compare these models using Pareto smooth important sampling
+which is usually my preference for reasons we'll talk about in the next example but if you did this
+for a i c or w a i c rather you get the same values they're they're um functionally equivalent
+for this example and in most examples actually uh so this graph that i've showed here is the
+comparison and it's a bit confusing so let me uh label each point one at a time so you understand
+what's going on uh each row is a model and the horizontal axis there is the deviance but you
+can think of this as badness is the sum of errors yeah so big numbers are bad small numbers are good
+we want models on the left the filled points are the score in sample that's the in sample or the fit
+the in sample error so you can see in sample uh the model that includes fungus is better um
+and there's a penalty it's the open points are the score out of sample the expected score out of
+sample after adding the expected penalty and that is always higher um and then there's this bar which
+is the the standard error of that score and one of the nice things about about predispose important
+sampling and w a i c is that you can get an approximate standard error uh to uh to understand
+when in when models are distinguishable at all on statistical grounds the standard errors are just
+approximate because they require uh reasonably sized samples uh but uh it's better to have some
+guidance than none then this little triangle thing with an interval is the contrast which is how we
+actually want to compare the models uh contrast than its standard error and so uh this contrast is
+not um uh get anywhere near the the vertical um gray bar in this graph and so uh the model with
+fungus is substantially better at prediction uh by this this metric than the one that omits it
+which is far on the right this makes sense let me try to help it make sense to you when I say it
+makes sense it makes sense that the model that is confounded that includes fungus is better at
+making predictions than the one that leaves it out the one that leaves it out was not designed
+to make predictions it was designed to make the proper causal inference uh when you include fungus
+though you make better predictions because the fungus is a better predictor let me show you that
+in terms of the data so here I've just plotted for a particular simulation of this experiment
+um the fungus status of the plant on the uh horizontal axis we've got two categories and
+I've jittered the points just so you can you can see how many plants there are in each category
+and then I've colored the points red and blue for treatment and control respectively and on the
+vertical we've got the growth of each uh plant that is uh h1 minus h0 how much it grew during the
+experiment um and you can see that uh it's easy to distinguish um the plants with fungus from those
+without because the ones with fungus are a lot lower they had a lot less growth because fungus
+inhibits the growth of the plant right the fungus is a parasite uh and in contrast treatment is way
+less diagnostic of the growth of the plant so we can we can sort of rotate this graph uh take the
+treatment out of the color and put it on the horizontal horizontal axis and and put fungus
+status in the color so the plot on the right now red indicates fungus on the plant blue indicates
+no fungus notice that the red points are all lower uh I mean or for the most part are lower
+because fungus is bad um but knowing a plant was in the control or treatment group isn't nearly as
+distinguishing of growth as the fungal status right the treatment does affect the growth of
+fungus because notice that there are fewer red points in the treatment group now say that again
+notice there are fewer red points red points indicates fungus in the treatment group on the
+far right um so the treatment works uh as we learned from the model that omits fungus um
+but for predicting growth what you'd really want to know is the fungus not the treatment yeah because
+it's a more proximate cause of growth okay what's the point of all this do not ever in your life
+use predictive criteria to choose a causal estimate okay that's all it's a very simple rule always
+follow it you'll do fine for causal tools for causal tasks use causal tools uh like daggers
+or generative models backdoor criterion uh do not use predictive tools for predictive tools
+do not use causal tools it works the other way around too these tools are all fantastic
+they're great achievements uh they're they're signs that the universe is sometimes benign to human life
+but you have to use them in the proper circumstances and again why am I getting
+exercised about this because you can see in the best journals in all the fields people using
+predictive criteria to choose among different causal models and that's bad okay in reality
+most analyses are some mix of these things we there are aspects of our models which are
+involved estimating functions and the shape of those functions is not completely determined by
+the background science and so we end up having a mix of causal tools and predictive tools at the
+same time so you need to learn how to use them both and respect them in their proper ways
+okay another example uh of how we might use these predictive criteria that's extremely useful in in
+in some sense outside of what you expect them to be is that they provide diagnostics of things
+like outliers so there are some points in any particular sample which are more influential
+than the others um and what do i mean by influential they have a bigger impact on the shape of the
+posterior distribution than the other points and typically for most model types the the sorts of
+points that are more influential are the ones that have low probability or way out in the tails of
+the distribution they're extreme points sometimes people use the term outliers for such points
+these are observations in the tails of the predictive distribution okay they're sort of
+surprising from a statistical sense and surprising things in statistics in lead to large updates
+to the posterior distribution so outliers have a big influence sometimes called leverage on the
+inference one of the thing about outliers is that if you give if they have a big influence it
+may indicate that your model is mis-specified it's missing key points you probably don't want to
+drop the outliers this is what people often do the outliers are information yeah but there are
+things we can do um to our models to make them more robust to these things so they don't get too
+excited this is like a kind of regularization that is done structurally uh through changing uh
+the expected distribution of the observations let me show you what i mean
+the basic problem is the model uh is too excitable it's not sufficiently skeptical
+just like narrower priors can often help wider predictive distributions can often help
+in in in making good predictions so dropping outliers i just said is a bad idea the they didn't
+commit any crimes it's the model that's wrong not the data yeah dropping outliers just ignores the
+problem your predictions of your model are still going to be bad i'll say that again dropping the
+outliers doesn't fix anything it just ignores the problem your predictions will still be bad
+the model's wrong not the data so the first thing we want to do is quantify the influence of each
+point and it turns out this can be done using uh uh cross validation or using the the intuitions
+that come from cross validation that is the the influence of each point on the posterior
+distribution how much does the posterior distribution shift um when we uh drop or include
+each observation um that quantifies it and then we can identify outliers in a principled way not
+by calculating standard deviations or eyeballing in a complex model uh with lots of variables that
+won't work anyway because it's not some simple bivariate thing um uh so we've got we get a
+principled measure and i'll show you that on the next slides and the second thing we can do is use
+a better model some kind of mixture model or robust regression and i'll show you in the context of
+linear regression what that would be like and then in the second half of the course when we use
+non-linear models there will be non-linear versions of robust regressions uh as well
+so let's go back to a previous example so i don't have to teach you a whole new example
+remember the divorce rate example uh and uh agent marriage is strongly negatively related to divorce
+rate in the different regions of the united states and for the most part the states cling quite
+tightly to this trend there's really seems to be some strong and causal influence of agent marriage
+at least demographers think um the demographers and divorce counselors uh or say marriage counselors
+there's no such thing as a divorce counselor is there um on divorce rate and uh but there are two
+states which really defy this trend and uh in different directions the first is main
+which has a quite high divorce rate um in this particular year that these data came from it was
+the second highest in the united states uh for everything else about it it's very unusual uh other
+states like it um uh in all the other ways have much lower divorce rates uh and then Idaho in the
+other direction uh Idaho has a very early average agent marriage um but uh one of the lowest divorce
+rates in the country what is the influence of points like this uh on the inference about the
+relationship between agent marriage and divorce rate well we can begin by uh actually quantifying
+the statistical uh influence of these outliers on the posterior distribution remember we don't want
+to just eyeball them and sentence them to death uh that's not what we do with outliers first of all
+we need some principled way to say that they are outliers um what I would recommend is that you
+use the the Pareto smooths important sampling a k statistic uh this is uh part of the output of
+using it and I show you in the book how to do this it's something that gets calculated automatically
+in the calculation of the cross validation score uh WAIC provides a penalty term which
+is very uh strongly correlated with this case statistic as well so you if you if you really
+want to use WAIC you could do it by looking at the penalty of each point and the and the points
+that have big penalties are the ones that are inducing the most overfitting and those are the
+outliers um yeah just to show you this scatter plot again so Idaho and Maine have big k values from
+PSIS and big WAIC penalty scores and they're the ones that are defining the trend they're
+influential points and the and the uh cluster distribution is influenced by these two points
+much more than the than by any other point uh in the sample
+so one thing that's almost certainly going on in examples like this is that there are
+lots of unmodeled sources of variation that is the the error distribution around the trend is
+is the homogeneous Gaussian distribution but different regions of the country in different
+states have lots of other influences and so there's no reason to really think that this error
+distribution should be constant and uh one of lots of things can happen when we say that error
+distributions are not constant across the whole sample um but one of the things that that we can
+do the cope with this is to assert that this population uh the different regions of this
+country are actually a mixture of different Gaussian distributions um all all kind of piled
+together and so what will happen when you mix Gaussian distributions with the same mean but
+with different variances is that you get a thicker tail uh you get something from the
+so-called student t family of distributions that you may have heard of from the t test that's common
+in in in all sorts of biostatistics and also psychology uh so here comparing a Gaussian
+distribution to a student t distribution with I think two degrees of freedom I think that is
+um you'll see that uh the tails are thicker that is it's the student t is higher than the
+Gaussian out in the tails the Gaussian distribution has very thin tails it's extremely skeptical
+of anything um outside of two two standard deviations and the horizontal axis on this graph
+is in standard deviations the student t distribution in contrast um is not so skeptical and and as a
+consequence not so surprised by extreme observations and then as a consequence not so influenced by
+them so the student t distribution will not be perturbed by outliers nearly as much as the
+standard Gaussian distribution is and this is what makes it robust to these kinds of inhomogenous
+samples that are under theorized uh with all kinds of unmeasured sources of variation in them
+how do you fit the student t model well you just swap out normal for student and that's
+so you can see the the code on the left here this is the the linear regression that we did in
+chapter five for the divorced rate example you see d d tilde d norm that is the the divorce
+rates are modeled as uh Gaussian as normal distributions and then in the bottom model the
+t version we just replace that with d student which is the student t distribution and I've chosen
+two degrees of freedom to make the tail stick in this case and let's compare the posterior
+distributions for the coefficient of interest the coefficient of interest here is ba remember the
+influence of the effective agent marriage on divorce and you'll see that in the more skeptical
+student t model the the posterior distribution shifts down it doesn't think the relationship is
+is as strong as in the other oh sorry it gets even stronger it gets further from zero than the other
+the the outliers were actually um uh making the uh posterior distribution closer to zero
+in that case could go the other way there's nothing about outliers that has any consistent
+effect one way or the other it depends upon where they are and how far they are from the trend
+okay let me try to summarize that so the the basic problem is there's lots of
+unobserved heterogeneity among the cases uh in these sorts of studies uh sometimes that
+heterogeneity is associated with things we have measured but we have no hope of figuring out what
+and in these sorts of cases what you end up with is a kind of mixture of Gaussian
+error in your observations and thicker tails for the observation model will often protect you
+against overly confident estimates essentially makes the thick tails means the model is less
+surprised right it signs more probabilities to extreme observations it's it's uh less confident
+that everything should be close to some regression relationship and so it's it's tugged around less
+by Idaho and Maine in this particular case okay in the previous slide i just chose two degrees of
+freedom for the t distribution and maybe that bothers you good if it does bother you it just
+shows you're paying attention um we can't really estimate uh the the thickness of the tails in most
+applied regression examples where we want to use robust regressions we just have to choose the the
+thickness of the tails and that's what the degrees of freedom term in a t distribution does it adjusts
+how much probability is in the tails we just have to choose it based upon well some sort of risk
+assessment of a pal skeptical we want to be about things or we can try a range of values
+and see how it changes the estimate and then report them all to our colleagues that would
+be the principal thing to do the reason we can't usually estimate the degrees of freedom
+is because there aren't enough extreme values i'll say that again the reason we cannot usually
+estimate the degrees of freedom in the student t distribution is because there aren't enough
+extreme values that's why they're called extreme outliers should be rare all right most of your
+sample can't be outliers um and as a consequence empirically it's just not plausible uh for for
+most samples that we're going to be able to estimate the size of the tails now of course in a really
+long run if we had tons and tons of data measured with fine enough precision we could do so because
+it's just an empirical problem but the the thing about processes that have thick tails is that
+the extreme values are still rare and they could be very very large and so for any particular finite
+sample we will not have observed the really extreme samples that will have big effects on the long
+term mean of the process so this is just how it is this is the universe we live in lots of people
+think and i tend in this direction that student t regression is a very good default actually
+for under theorized domains because of gaussians um a single homogeneous gaussian distribution
+really does have really thin tails and it really is extremely skeptical of extreme values and in
+many cases that's going to do damage to our estimates here's an example um of a sort of real
+world situate situation of great importance where um thinking about extreme values is quite useful
+so this is a graph that uh you know more than five years ago was shown on lots of media sites
+because it it was the focus of an academic debate um and that debate is not necessarily
+interesting thing it's the statistical principle at the heart of that debate that is valuable to learn
+so the horizontal axis in this graph is decades but you can see it's by years in each decade
+and then the bars on the vertical axis this is um battle desk worldwide battle desk per 100 000
+people so this graph is meant to give you an empirical overview of the lethality of armed conflict
+in human societies uh from the middle 20th century into the start of the 21st and the debate here is
+whether there's been an outbreak of peace as you can see that the 40s were bad there was a certain
+war then yeah uh world war two uh then and then of course uh the 20th century saw lots of other
+conflicts um and uh with lots of fatalities as well but not as extreme as world war two
+and then the 90s and 2000s have seen fewer and now the debate is going forward
+is that do can we expect this trend this declining trend to continue and if you believe in the idea
+that um there are thick tailed distributions uh and that this may be one then this sample tells us
+nothing absolutely nothing at all and the reason is because in the long run um battle desk of people
+is is mostly determined by rare really big conflicts like a world war and not by the
+relatively more peaceful inter-world war periods and so you can't say anything from a
+short-range sample like this one about long-term trends because uh whether you fit a regression
+line to this graph and whether it goes up or down is meaningless because it just has to do with the
+presence or absence of some particular rare event like a world war uh which happens to
+fall at the beginning of the century in this case um wars are almost certainly a thick tailed
+distribution or we should say the lethality of armed conflict is a thick tailed distribution
+because they're autocatalytic right as they run away with themselves world wars happen because more
+and more combatants join them and they get bigger and bigger for a while until they're resolved
+that sort of process produces thick tailed distributions and so this is yet another chance
+for me to advertise the importance of making generative models if you wanted to model this
+process you would need to think about um that sort of autocatalytic effect and the fact that
+uh uh wars last more than one year and so the years here are not independent of one another
+right they're carrying on because there's a bunch of geopolitical forces that are flowing
+through this graph
+there are many other examples of thick tailed distributions out there the most famous one
+of course being um investments stock prices are also very thick tailed they don't um
+engage in big fluctuations from time to time and so investors are keenly aware of that problem
+okay this lecture has been about prediction prediction is just as important as inference
+and in most uh applied research both inference and prediction problems are present and it's
+important to realize that they require their own tools even if you use them together in the same
+project uh it there's some good news here uh if our goal is to predict the next observation
+for some process that we have a sample for there are some uh handy tools already on your computer
+to help you do that to help you calculate the expected out of sample accuracy of a range of
+different models uh ways to assess um how narrow your prior should be to optimize that predictive
+accuracy and so on and these tools like predispose is important sampling are real achievements
+in applied statistics that are in active use every day both in the sciences and in industry
+so you should make good use of them okay that has been uh uh your lecture on overfitting
+next lecture this week we're going to talk about mark our chain money carlo
+as a and that's going to be important for helping us fit more kinds of models more effectively
+going forward in the rest of the course because that's what we're going to turn to next i'll see you
+there

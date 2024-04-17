@@ -1,0 +1,954 @@
+Welcome to lecture 10 of statistical rethinking 2023.
+Oh, in this course, I think it's my duty to prepare you for the fact that most of your science is not going to work.
+Science is not some magic show where every research project turns out, as we hope, to the cheers and shocked applause of the audience,
+but scientific journals often make it look like that.
+When I teach you methods, I need to teach you to design your analyses responsibly and not be too disappointed with things don't work out,
+because that's just how things go. What's important is that you document and justify the procedures that we use.
+We break the magicians code, we show all the tricks, and we write them down, and that's the only responsible way forward.
+Let me remind you where we were last time. We're going to continue that story, and we're going to add some new scientifically realistic features.
+I had introduced generalized linear models as a flexible way of dealing with more kinds of outcome variables.
+That is, we can use the basic linear combination of parameters and predictors that you had learned for Gaussian models as a way to stratify,
+to get the adjustment set that you learned from your DAG into your regression model, and you can blend that into other kinds of outcome distributions, which are not linear.
+The trick is to use something called a link function. This adds some cognitive friction. I anticipate that, and I just ask that you be patient, and it will come in time.
+The Bayesian updating part of generalized linear models is, however, identical to the Bayesian updating part of linear models.
+Bayes don't mind, and once you've programmed the model definition using a tool like My Rethinking Package, or PiMC, or TouringJL, or RawStand, or any other, it all works the same way.
+It's the interpretation that's different, not the computation. I'll say that again. It's the interpretation that's different, not the computation.
+In a generalized linear model, the expected value is only some function of the additive combination of parameters, and so the expected value is not simply an additive combination of parameters.
+It's a non-additive combination of parameters as a result. This means that some uniform change in a predictor is not realized as a uniform change in the prediction.
+So all of that marginal effects or stimulation of causal effects stuff that we had done in previous lectures is absolutely essential now, and we're going to do more of that today.
+The consequence of this is that everything interacts. Everything moderates anything else because of ceiling and floor effects.
+You'll get comfortable with this in time. Again, think about flow. It all comes together eventually.
+Let's return to the example from the previous lecture. We're talking about college admissions at UC Berkeley in the 1970s.
+We had a historical data set, and we were probing the causal implications, or the inferential implications of different causal assumptions, I should say.
+We had three variables to start with, the gender of an application, the department the application was sent to, and whether or not it was admitted.
+We were dealing with this basic mediation problem of how we can statistically estimate the direct effect of gender on admissions, which we might interpret as bias or gender discrimination, and the indirect effect, which could also be interpreted as discrimination,
+which is a different type and requires a different sort of policy approach.
+Today we're going to be focusing on confounds, which nearly always exist in these sorts of administrative data sets.
+It is implausible that there are no unobserved common causes between choice of department and admission.
+The most plausible one in this literature is ability to speak vaguely, that is, qualities of the candidate which are difficult to observe and measure, which influence both which department they choose and their probability of admission.
+You might think, oh, we know their test scores and so on, but those are all imperfect measures of the underlying ability, and they could be subject to cascading sorts of unobserved problems like the one I'm illustrating here.
+So let's approach this step by step in a rigorous fashion, and you know me by now, so I'm going to write a generative simulation, because that's what I do.
+I know there's a lot of code on the screen, but I'm going to walk through this line by line, so just hang on.
+I've moved the DAG up to the upper right, and you'll see I've added that lowercase u, that's an unobserved common cause of choice of department, and admission probability, and we're going to write a generative simulation that obeys that assumption.
+So the first thing, the top of this, of course, I set a random number seed so that you can replicate my numerical results.
+I choose a sample size, we're going to do 2,000 applications, and then I simulate the gender of the applications, and I just do a random sample for these anonymously labeled genders 1 and 2, and get 2,000 of them, approximately balanced.
+And then I sample some unobserved confounds, u, which I'm encouraging you to think about as ability, and in this case, they're Bernoulli variables, so 1 indicates high-ability applicants who are exceptional.
+They're the upper 10%, only 10% of applications have that status, and the rest are just average. There's nothing wrong with them, they're just average. Average people are good, yeah, most of my friends are average.
+Oh, yeah, that's this line, sorry, I should have highlighted it.
+And then we simulate choices of department. We need both the gender of the applicant and the quality, the hidden ability of the applicant in order to simulate choice of department.
+And what I'm assuming here, I know this is an awkward line of code, but all it does is it says if gender equals 1, then there's a perfect split by department, depending upon quality.
+So gender equals 1 individuals tend to choose department 1 if they're average, and they choose department 2 if they're exceptional.
+And this is an extreme simulation, it's meant to be didactic and illustrative point, but it reflects a common sociological phenomenon, at least we think it's common, that individuals anticipate discrimination and they avoid contexts in which they will be discriminated against,
+but if they are exceptionally capable, they may be willing to put up with the discrimination, because they can push through it.
+And so that's the idea here, is that gender 1 individuals anticipate discrimination in department 2, but if they're exceptional in the top 10%, they will apply anyway.
+And then gender 2 prefers department 2, that's the department where they're a majority, and there's a tendency to discriminate against gender 1, and 75% of them end up there.
+Okay, now we're going to simulate acceptance, and this requires a little bit of awkward coding, because the way I've done it, I've defined a matrix for each ability level of applicant for each gender in each department.
+So each matrix is 2 by 2, and the rows are genders, not necessarily labeled still 1 and 2, and the columns are departments.
+And the code that defines these is weird, it's just the way R does this, it fills the matrix going down each row, and then goes across and fills all the rows, so I've displayed the matrices at the bottom of the slide to make this a little easier.
+All you need to understand is that for applicants of average ability, that is, U equals 0, that's in the bottom left.
+For department 1, that's the first column in this matrix, there is no discrimination, both genders have the same 10% probability of admission, right, that the PhD programs are picky.
+But department 2, that's the second column, discriminates against gender 1, it's a discriminatory environment.
+Yeah, there's a much larger probability of acceptance for gender 2 in that department.
+But for individuals of exceptional ability, that is, U equals 1, we look at the other matrix, the probabilities, and then for department 1, again, that's the first column.
+Still, there's no discrimination, it's a 30% chance for both genders, but also for department 2, there's no discrimination.
+So the exceptional ability overcomes the discrimination.
+And then we simulate acceptances using Bernoulli trials, nothing fancy there.
+Okay, now we need statistical models. At this point in the course, I like to think that you're comfortable with the idea of the backdoor criterion, we've done these mediation analyses before, you declare an S-demand, and then you figure out an adjustment set.
+So for the total effective gender, we do not stratify by anything except gender.
+We do not include department because that would block a pipe, right?
+And you remember, part of the total causal effective gender is through departments, and so we don't want to remove that when addressing the S-demand, the total effective gender, and that's model M1 on this slide.
+Yeah, where only gender appears.
+And these models are structured just like the ones in the previous lecture, we're using typical index variable categorical, and the parameters are on the log-odd scale.
+The second model does stratify by department, just as we did in the previous lecture, and this is so that we can separate the direct and indirect effects.
+This is the mediation analysis.
+And this is the thing that's going to be confounded now because we've added a common cause of department choice and admissions probability, and that's ability, which we simulated on the previous slide.
+So if you run these two models, you won't have any trouble.
+I encourage you to practice inspecting the trace plots and trink plots, and look at the R-hat and NF values in the precy output so you get comfortable understanding Markov-Tay and Monte Carlo diagnostics.
+But that's not the hard part.
+The hard part is interpretation.
+These tables are of log-odds, and they're really weird, right?
+But, you know, negative values in log-odds mean less than a half, and the smaller it is, the closer to zero it is, just not in a linear way.
+So what you can see from this, even if you're not viewing log-odds in a native way yet, is that gender one has a lower overall, and that's in the top precy output, a lower overall probability of admission across all departments.
+Then gender two, yeah.
+So the total causal effect of gender is negative for gender one.
+When we do the direct effect, this is confounded, and it's much harder to see from just looking at these numbers.
+But if I make a plot for you, we take these log-odds things and put them back on the probability scale using the inverse link, the inverse logic link, and that's what the code in the upper left does.
+All I do is extract the samples from the model, and then for all the samples for each of the log-odds parameters A, remember there are four of them, I just inverse logic all of them.
+And so we have a distribution of probabilities, which is the posterior distribution of probabilities of admission.
+I'm going to say that again because I know it sounds crazy.
+We have a posterior distribution, the posterior probability distribution of the probabilities of admission.
+So yes, it's a probability distribution of probabilities.
+Hey, there's nothing that says you can't do that.
+We're modeling probabilities, and so we have, and the probability is uncertain, and so we have uncertain probabilities.
+We have a probability distribution of probabilities, and that's what I'm displaying on the slide.
+And so the blue curves at the bottom, those are the department one estimates for gender one in the solid curve and gender two in the dash curve.
+And these were equal in the generative simulation, but you'll see that the model has inferred that they're slightly different,
+and that is that gender one is being slightly discriminated against, you might think, in department one.
+But that's because exceptional individuals of gender one don't apply to department one.
+I'll say that again.
+Exceptional high ability individuals of gender one don't apply to department one, they tend to apply to department two.
+And that means on average, the ability of gender one individuals in department one is lower, or rather I should say of applicants is lower.
+And that's what accounts for the separation of the two blue curves, not discrimination, but sorting by ability.
+That's the confound.
+The confound has a different effect in department two where there really is discrimination.
+We know that because we programmed it in.
+And in department two, the posterior mean probabilities of emission are the same.
+You'll see that there's much more uncertainty for gender one than for gender two, but their centers are in the same place.
+In a sense, and why does this happen?
+It's because the gender one individuals are on average higher ability among the applicant pool in department two.
+Remember, that was the sorting effect.
+They're rarer, there are fewer of them, but the ones that do apply to department two are higher ability and so they have higher acceptance rates.
+And so the effective acceptance rates end up being the same even though there is discrimination in the causal process in department two.
+This is this kind of masking effect.
+Sorting can mask a lot of things in the human sciences and we should always keep that in mind.
+Okay, so why does this happen?
+Well, you probably anticipate that I was going to explain this as an example of collider bias and you're right.
+This is my hobby.
+Once you learn collider bias, you will see it everywhere.
+It is, it just permeates human life.
+So what happens?
+Well, when we stratify by department, this opens a noncausal path through the unobserved ability variable or case U.
+You can see that in the DAG over there on the right of the slide.
+As a consequence, we can estimate the total causal effect of gender.
+But this isn't usually what we want because you can't really design any policy interventions on the basis of a total causal effect.
+Because we know everybody agrees that there are different components, different paths that require different interventions.
+You could do real damage otherwise.
+But we can't easily estimate the direct effect either of departments on admission or of gender itself on admission in this example.
+There's maybe a more intuitive way to explain the collider bias example.
+You're still getting used to the idea of collider bias, which I totally get.
+It's weird.
+What's happening here is that high ability gender one individuals apply to the discriminated department anyway.
+They're not intimidated.
+They know they'll be discriminated against, but they're high ability and they're going to punch through.
+Gender ones in that department are higher ability on average than the gender twos.
+So you get this weird sorting effect where the discriminatory context, the individuals who are discriminated against are on average of higher ability.
+Because those are the only ones who will last.
+So the high ability compensates for discrimination.
+And this is the thing about collider bias is you get these compensatory effects.
+That's one of the cues about how it happens.
+Remember the restaurant example from previous lecture?
+Why can good restaurants survive in bad parts of town?
+Because their food is good enough to keep them in business.
+Why can bad restaurants survive in the center of town?
+Because there's enough tourist foot traffic to keep them in business.
+Those compensatory effects, that's a hallmark of collider bias.
+And in this case, I've designed the simulation so it ends up masking the evidence of discrimination.
+Unfortunate lesson of this is that from administrative records like this in the absence of strong assumptions,
+you can neither conclude the presence nor the absence of discrimination because of these unobserved compounds.
+Okay, all of this has been prepped to talk about these two papers that I introduced very briefly in the previous lecture.
+These were published last year in 2022 and they use basically the same population
+and they come to different conclusions about the presence of gender bias in the National Academies of the United States.
+So the paper on the left looks at who is elected to the National Academy of Sciences as well as the American Academy of Arts and Science
+and finds that women are advantaged between three to 15 times more likely conditional on citations and publications as men to be admitted.
+I'll say that again, they're three to 15 times more likely conditional on which means stratified by publications and citations.
+This is going to be important in the explanation of what's going on here.
+But the idea was that they find an advantage for women.
+The paper on the right analyzes the same population, members of the National Academy of Sciences,
+but looks at people who are only elected, who have been elected and studies their citation patterns and finds that women are cited less than men
+and substantially less over their scientific lifetime.
+Okay, how can both of these things be true?
+Well, we don't know what the right answer is, but we need to sort it out by thinking and neither of those papers has a transparent causal framework.
+The basis of the discussion I'm going to present to you, I lift from this great paper here,
+Causal Foundations of Bias Disparity and Fairness.
+If you're interested in this topic, I really encourage you to go read this paper.
+It's clear and it's incredibly helpful.
+Okay, so let's think about the first study, the study of citation networks.
+Citation networks of members of the National Academy of Sciences means you harvest data for the many, many members of the National Academy of Sciences
+and you look at who cites who.
+And you can look at the lifetime number of citations of each individual member as well,
+and try to figure out mechanistically what's going on with citation patterns and who's likely to be cited and if there's any evidence of gender bias.
+And so what they find is women are associated with lower lifetime citation rate if you look at citations and an individual's gender.
+Okay, the other study looked at membership who gets elected, elections to the National Academy of Sciences,
+and it found that women are associated with between three to 15 times, depending on the field, higher election rate,
+but only when you control for citations.
+Obviously the data in these two studies are related, they overlap.
+It's the same population, these papers were published in the same year.
+So now we've got a dag on the right, where we've got all three variables, we've got gender, we've got the citations, and we've got an NAS member.
+Let me fold these two studies together.
+I don't know what's true.
+I don't think anybody does.
+But the story I want to unravel for you is we've got to be more transparent about our causal assumptions when we do studies like this,
+because in the absence of strong causal assumptions we can't conclude anything from administrative observational data of these kinds.
+And a lot is at stake, so we really need to get this right.
+Okay, it's very plausible, at least I think so, that there are strong quality differences among members of the National Academy
+and among people who are going to be elected to the National Academy.
+But often these quality differences are hidden.
+They're not the same thing as citations, right?
+Many of the criteria we use to judge the success of researchers are merely proxies, and often they're quite bad proxies,
+because as soon as you make the proxy important, people will address the proxy,
+and it will become a worse and worse indicator of the underlying quality of the research.
+Okay, let's talk about the study that examined citation practices and observed that men were cited more often.
+I want to give you a counterfactual re-explanation of the study assuming that the other paper is correct.
+All right, so the other paper found that women are more likely to be elected as an AS member, so there's a bias against men.
+Okay, I'm not claiming that's true.
+I'm just trying to reconcile these two papers so that they can exist in the same universe, okay?
+So in that case, assuming that's true, if men are less likely to be elected to the National Academy of Sciences,
+they must, in order to be elected, they must compensate somehow.
+They have to be even better.
+They have to be higher quality, and this means on expectation they will have even more citations because they're producing better work.
+Citations are not a perfect indication of quality, I believe that very strongly, but they're an imperfect one.
+And so once we examine the association between gender and citations, conditional on an AS membership, we've conditioned on a collider.
+We've created this ghost causation effect where in effect gender is not causing citations, but since there's discrimination, again,
+counterfactually against one gender to become members of the National Academy, they have to compensate by having more citations.
+Yeah, but that citation difference is caused by the stratification.
+It's caused by the filtering effect by election, the process of electing.
+Okay, now let's flip the script.
+Think about the other paper again.
+This is the one where we control for citations, but we haven't selected on being an AS member because we're examining election to the National Academy.
+Remember, this is the paper that found that women appear to enjoy an advantage, sometimes quite substantial advantage in getting elected.
+In this case, I want you to think about gender is the treatment variable.
+In quotes in this, this is not an experiment, but we're doing causal inference.
+So gender is the treatment, we're examining the causal effect of it.
+Notice that citations is a post-treatment variable.
+And in former lectures, I warned you against stratifying by post-treatment variables.
+I didn't say never do it.
+You should draw your dag, draw your assumptions, and make an argument.
+But it's very dangerous because it can lead to problems well like this one.
+If you condition on a post-treatment variable, you can very easily activate a collider problem or another kind of bias, some sort of non-causal path.
+And in this case, again, the hidden quality differences are activated by conditioning on citations because it's a collider on the path between G and Q.
+And therefore, we do not get a proper unbiased estimate of the causal effect of gender on election because it is biased by the citations.
+So think about it this way.
+As I say on the slide, if women are less likely to be cited because there really is bias, then women are more likely to be elected because they have higher quality as indicated by their citations than indicated by their citations.
+Right?
+The citations are misleading.
+They're elected anyway because they've compensated for the bias and citation by being awesome.
+I'll say that again.
+They're elected anyway, and they appear to enjoy an unfair advantage stratified by citation rate because they're awesome.
+They're more awesome than the average man who has the same number of citations and isn't discriminated against in citation.
+Yeah, I hope that makes sense.
+We'll have to back up and go through these two slides a few times.
+It is a complex story.
+What I want you to get is both of these things can't be true at the same time, at least not in a strong sense.
+Yeah, it is possible that there can be both gender bias in citation and in election, and they could go in opposite directions, but it's not from these data we can't figure it out.
+I'm going to return to this saying from philosopher of science Nancy Cartwright, no causes in, no causes out, that I introduced I think in the first lecture or the second lecture of this course.
+This is always true.
+If you want causal inference, you must make causal assumptions.
+In observational contexts like administrative records of hiring or promotion or citation, often the causal assumptions have to be quite strong, and the more detailed the stratification you want to do, the stronger assumptions are required.
+But this is not hopeless.
+We have to face this reality and be honest about it.
+What we should not be doing is publishing every year hyped papers with vague estimates and unwise adjustment sets that are meant to influence policy.
+What we don't want to do is design policy through collider bias.
+We're better than that.
+I think, this is me showing my anthropologist bias, I think qualitative data are extremely useful in these contexts.
+The testimony of the protected statuses, the people who experience discrimination are the best evidence that discrimination happens and their detailed evidence.
+The problem is you also can't study it in a representative way because the victims of discrimination often don't want to talk about it.
+So it's not perfect data, but it's great data, and it should be used in cooperation with the administrative records that we have that feel all quantitative in science.
+Both have laws.
+Neither is perfect, but together we can make a better world.
+I don't want to stop there.
+I've become sensitive about this lecture because it feels kind of hopeless.
+I've showed you, I hope that in those sorts of situations and many mediation analyses, the thing we can estimate plausibly is the total causal effect, but that's not what we want.
+What we want is some direct effect or mediation effect, and we can't estimate those things because there are probably sort of confounders.
+But that's not the end of the story because we can do something called sensitivity analysis.
+So what does that mean?
+Sensitivity analysis is an analysis that aims to understand the implications of the things we can't measure, and that's a credible and important scientific method.
+And what this means analytically is we're going to assume the confound exists, like with the dag on the right.
+We're going to model its consequences for different strengths and kind of influence.
+And one of the things we can answer with this kind of counterfactual analysis is how strong must the confound be to qualitatively change the conclusions.
+And that's something worth reporting in a paper, and it's much better to do that than to pretend the confound doesn't exist.
+Here's a worked example for the Berkeley Gender Discrimination playground we've been in for a while.
+So the dag we've drawn has some models in it.
+So up to this point, we've been thinking about predicting admissions, and we have this Bernoulli model that I show you on the screen.
+And what I've added to it is this unobserved ability variable.
+And I've done it additively in general and linear model fashion.
+There's a parameter beta sub G sub I. That is for each gender G.
+There's a different coefficient that is the influence of their ability on their admissions probability.
+But there's another sub model, which is the process by which individuals choose departments to apply to.
+So imagine, for example, there's just two departments to keep the story simple.
+So we'll model the probability of applying to department two.
+And remember, in my playground story, that was the discriminatory department.
+And likewise, there's some base-rated mission rate delta for each gender.
+They may or may not be different.
+There may or may not be discrimination in a particular department.
+And then there's the effect of the unobserved ability, use of I, of applicant I, as well.
+And that's measured by that gamma parameter.
+And again, that can vary by gender.
+And so we don't know the use of I values.
+Remember, we haven't measured them.
+We could simulate them, and we did earlier, but we can't measure them in most studies.
+But what we can do counterfactually, and this is the sensitivity analysis,
+is imagine that the effects, these beta and gamma parameters, were of different strengths.
+And so we're not going to treat them like parameters.
+We're just going to plug them in as data.
+Yeah, I'll say that again.
+We're not going to treat them like parameters.
+We're just going to plug them in as data.
+And we're not doing that because we're trying to trick anybody,
+but we're trying to explore the consequences of assuming that those parameters have different sizes,
+which means that the ability differences have different effects,
+both on the choice of department and on the probabilities of being accepted.
+And so here's just an example.
+For the beta parameters, I've assumed that they're strongly positive.
+That is, in both departments, I mean, sorry, for both genders,
+being of high ability gives you a big boost in your probability of being admitted.
+That seems plausible.
+And then for the department choice model,
+I've assumed that only gender one is affected by latent ability.
+They know their ability, and they're more likely to apply to the discriminatory department,
+which matches the generative model that we simulated the data from.
+At the very bottom of this Oolong model,
+or I should say this Oolong model has both models in it.
+Yeah, this is this thing that I place we call full luxury bays,
+where we can put multiple regression models in the same joint posterior distribution
+and run them all at once, and they can share parameters.
+And we get one big joint happy posterior distribution.
+The parameters that are shared between these two models, as you'll see,
+are the latent ability parameters used to apply.
+These are unobservable things, unobserved things,
+so they become parameters.
+Remember, in bays, a parameter is just an unobserved variable.
+Yeah, and a datum is an observed variable.
+We declare a vector of these used at the bottom, normal zero one,
+because the measurement scale is arbitrary, and there are n of them.
+What does that mean? In this case, it means 2,000.
+There are 2,000 parameters unobserved.
+But don't worry, Hamiltonian Monte Carlo can handle it.
+Okay, let's look at those, the change in estimates that arises from including,
+from doing the sensitivity analysis.
+Similarly, in sensitivity analysis, you would vary the betas and gammas,
+or whatever other parameters that you need to assume for the strength of the confound.
+I'm just going to show you one example here to keep it simple.
+On the top part of the slide, I'm just repeating what we had before.
+This is from the synthetic simulation where we know that there's discrimination
+in department two against gender one, but that's masked by the sorting, by ability.
+That gender one individuals of high ability tend to apply to department two,
+which compensates for the discrimination.
+In the bottom, it's the code I just showed you, and these are the posterior distribution estimates,
+the probability of admission for average ability applicants,
+and now the discrimination can be seen.
+Yeah, because you'll see that the red solid curve is below the dashed red curve,
+and that's correct because the assumption about the strength of the confound is approximately correct.
+In a real study, you wouldn't know what is approximately correct,
+but what you could do is show how big the effect of the confound would need to be
+to reverse qualitatively the findings.
+And that's a very important thing to show because sometimes you would know from scientific background
+that the confound can't possibly be that strong, or you might have other information
+by which you could estimate how strong it might possibly be.
+And that's better than pretending the confound doesn't exist.
+Okay, let me try to sum this up, and then we'll take a break.
+Sensitivity analysis is a really important sort of thing to do,
+and most often in observational studies, we can't eliminate the possibility of confounding,
+and so it's better to admit it and draw out your assumptions and do a sensitivity analysis.
+Sensitivity analysis is a little weird because it lives in this realm somewhere between pure simulation and pure analysis.
+The goal is to vary the confound strength over some range and show to your peers how the results might change or not.
+This is just the honest sort of thing to do, and it seems to be becoming increasingly common in a number of fields.
+And remember, this is essential because a lot of the most important science that we need to do,
+especially in the human sciences where we address human welfare, cannot be done experimentally,
+either because it's impractical or because it's unethical.
+So we need to be mature about this and skill up and learn things like sensitivity analysis.
+Final technical point, as a Bayesian, I like to start about a bit once in a while.
+If you count up the number of parameters in the sensitivity analysis model that I just showed you,
+you will find that there are 2,006 parameters, but there are only 2,000 observations.
+How is this possible? You may have been taught in an earlier non-Bayesian course that you can never have more parameters,
+more free parameters, more unknowns than data points. That is false.
+That is only true in the simplest sort of flat little models, but there is no law of probability that makes that true.
+Now remember, the minimum sample size for Bayesian data analysis is 1.
+Well, I mean 0, you can simulate from the prior, but you can update with one observation.
+And in those cases, obviously, you can have more parameters than data points.
+So there's nothing weird about this, and you just have to expand your mind and move past that previous training.
+Okay, I recognize at this point in the course we are deep in the Bayesian machinery,
+and it might seem a little bit overwhelming, but I promise you will not get stuck in the gears,
+and we will be making good progress from here on out, because the hardest parts of the automation,
+like the Hamiltonian Monte Carlo, are done for you. They're largely black boxed away,
+and we are going to be focusing on interpretation and design, as I hope it was clear in the previous lesson there.
+Now let's take a break. You've earned it.
+Really take a break. Go do something else for a while.
+Go easy on yourself, and then come back, and don't move forward, but go back, and look at the first half again.
+There's a lot of content there, and maybe even go back to the lecture before this one, because they're a pair, and they walk together.
+And then when you're ready, we're going to go forward with some new types of modeling,
+and when you decide you're ready, I will still be here.
+Let's go.
+Welcome back. For the second half of this lecture, I'd like to introduce another way to model count variables,
+count variables that are a little bit different than the ones we've seen before.
+In the beginning of this course, I brought up the fact that the Earth is mostly covered in water,
+and this is the wettest side of it, the Pacific Ocean.
+But even here, we find people, many diverse people, the peoples of Oceania,
+and anthropologists and other human scientists study these people,
+because the Pacific is a kind of laboratory of cultural evolution.
+One of the aspects that is interesting to us is the historical development of technology.
+Humans as a species, especially as an ape, are extremely reliant on technology.
+This is unusual for a primate, much more ordinary for a bird even,
+who birds use tools more than monkeys do.
+So the ways in which human societies develop technology and how long that development takes,
+and the variation is a primary matter of research for anthropologists like myself.
+What I want to do is explore a new kind of count model for you through the lens of this particular data set
+that comes from one of my colleagues, Michelle Klein, on the technological development of oceanic societies.
+So we're looking at here is a set of data that I'll show you in a moment,
+which is on the diversity of unique tool types in different historical oceanic societies,
+and we're going to be interested in the question of how or whether the technological complexity
+is the diversity of tools is related to population size.
+There are many different scientific models by which technology evolves, evolves culturally,
+and all of those models implicate population size in some way,
+and so measuring that association is critical to testing the theories against one another.
+There's also an implication in most of those models that social structure,
+independent of population size, also matters.
+It's not just the number of people, it's how they're connected.
+You can find this data set in the rethinking package and data Klein with a K on the front.
+The estimate will be the, we're going to try to estimate from these data the influence of population size
+and contact with other societies, that's the social structure issue,
+because the gaps between oceanic societies are large and full of water and the monsters therein,
+but oceanic societies have always been very good sailors and have never been isolated from one another.
+So contact is also important, and we'll be using those things,
+estimating the association between those things and total tools.
+This is what the data set looks like, it's quite simple.
+There's only 10 rows, because we have high quality data for 10 historical oceanic societies,
+from Micronesian Yop on the far west to very large and relatively isolated Hawaii in the far east.
+There's a wide range of population sizes spanning two magnitudes,
+and then a contact variable, simply coded as low and high.
+It's hard to know what the historical connections were between islands,
+because oceanic societies did not have writing,
+but people have done the best they can to code these variables as high and low,
+and then we have a total tools variable, which will be the count variable we're interested in
+in modeling and explaining with the previous variables.
+These are numbers of unique tools known historically in the islands,
+all made from local materials or materials that they traded for.
+Conceptually, the idea is that the more people you have, the more innovations you get,
+but you can also get innovations through contact and trade with other societies,
+and that these two factors then produce, one might say, cause tools.
+But tools are also lost over time.
+Societies do forget things.
+They stop using things.
+We know that also from the historical study of technology,
+and so these are the two processes that lead us to combine the innovation rate,
+and the elaboration of those innovations, and then the loss of old tool types.
+And these two things combine to produce the number of tools that we observe in different human societies,
+and those numbers of tools vary a lot.
+It'd be nice to think about this in terms of a DAG.
+Yeah, you're getting used to DAGs.
+We're going to do something much more detailed than this a little bit later,
+but for now, this is the kind of DAG that will give you night terrors,
+or arrows in every direction, but hey, that's just how things go in the human sciences.
+So we want to focus on the treatment population in the lower left,
+and that influences tools, maybe, at least theoretically,
+and we'd like to estimate that influence, that direct influence of population size on tools through the innovation rate.
+And contact may also produce innovation, so you see contact in the upper left having an influence on tools,
+and that influence may moderate the influence of population, right?
+It could make up for a low population.
+The population size may also influence contact.
+Larger populations will have wider trading networks, perhaps, so there are causes interwoven here,
+and then there's this confound issue of what I'm just going to call location for the moment.
+Some islands are in particularly good places, and they have lots of good raw materials,
+and so they will have more innovations anyway.
+They could also have more neighbors, and having more neighbors will increase the contact rate, right?
+So it's hard for Hawaii, historically, to have a lot of contact,
+because it was just really, really distant from the other Polynesian societies.
+So for our interest here, location is a confound, and we're not going to deal with it now.
+We're going to deal with it in a later lecture. I want you to keep it in mind.
+We don't yet have the statistical muscle to deal with location for a moment,
+but the adjustments that would include location, I want you to keep that in mind.
+We're not going to be able to do that today.
+So the results that we will produce will be potentially confounded by these unmeasured location-associated variables.
+What we are going to do is stratify our estimate of the influence of population size on tools by contact rate,
+and we're interested in that interaction or moderation effect.
+Okay, we can't just use a binomial variable for the tool count,
+because there's really no known maximum number of tools.
+Human societies can produce an infinite variety of kitchen gadgets, for example.
+This is a count variable that has no maximum, and the default distribution for this,
+the maximum entropy distribution for it, would be a Poisson distribution.
+This is count variables. That is, they're variables that are zeros and positive integer,
+but there's no clear maximum number.
+These are generated when you have like a binomial generating process.
+There's a very, very large number of possible tools.
+We don't know how many, and most of them are never discovered,
+and you would see Poisson distributed tools through a process like that.
+We need a link function, just like we needed a link function for the binomial.
+In the binomial, the canonical link function is the log odd, so the logit for the Poisson, it's the log.
+This works extremely well, because the only parameter of a Poisson distribution is a rate lambda,
+which is the expected number of events per unit time, and that has to be positive.
+We modeled the logarithm of it as our linear model.
+The inverse link function will be the exponentiation, and that's guaranteed to be positive,
+because if you exponentiate any real number, you get a positive real number.
+The thing about this is exponential scaling is well exponential,
+and so it can be quite shocking, the shapes it produces.
+You have to be careful about that when you specify priors. Let me show you what I mean.
+Imagine we just have the world's simplest Poisson distribution with log link on lambda and one parameter alpha.
+This is on the log scale. You think of this as the log rate, and we give that a normal 0, 10 prior.
+The Poisson distribution is centered on 0 with a variance of 100.
+This is a very common kind of default prior in lots of Bayesian software, but not in this course.
+The reason is because if you simulate the expected number of tools from this prior, this is the distribution you get.
+This is a very weird distribution with a very, very long tail of very, very high numbers of tools.
+This is what happens when you do exponential scaling.
+You get these really long, rightward tails that make the mean of the distribution much, much higher where in the tail than you anticipated.
+So almost all the probability mass here is above 20, actually.
+What you want instead is something with a slightly higher mean and a much lower variance.
+For example, for this lesson, I'm going to use a normal 3 with a standard deviation of half.
+Maybe you think that sounds really tight, like I'm baking in an answer, but once you exponentiate this distribution, you get the blue curve on the screen.
+This covers a very wide range of numbers of tools known archaeologically, both fewer and more than the islands in the dataset.
+There's no answer baked in here, but it will do the weak scientific regularization that we want.
+Once you add a slope into the mix, things can get really explosive as well.
+You can imagine a log linear model in the upper right there.
+We put a log on lambda and we make it an alpha plus beta xi, our linear model, generalize linear model strategy.
+On the left, the kind of default priors someone might go to where alpha is normal 0, 1, and beta is normal 0, 10,
+bakes in basically mostly explosive relationships with the x variable.
+This is not what we expect, actually.
+We'd like the prior to be a bit more moderated.
+We don't think the counts, if x goes up by one standard deviation, that the expected counts will go up 100.
+We want beta to have slope variables and Fauston models for standardized regression variables.
+Typically, we need to have quite tight standard deviations, like 0.5 or even 0.2 in this example, so that the prior has these gentle sloping relationships.
+Why is this true?
+Do we really think population is going to explain all the variation in tool diversity?
+I mean, really?
+Probably not, and we don't want to bake that relationship in.
+The code for performing a Fauston regression is not going to surprise you at all.
+You could use the quap function for this, so I'm going to keep using Oolong just so you get some exercise with Markov chains.
+The first thing I do is I load the data up top there.
+We're going to model the relationship between the number of tools here, t, and the logarithm of population size, not the population size itself.
+The reason for that is because the background theory expects diminishing returns from population size.
+We can get this in just by logging the population size and putting it in a logging linear model.
+This will make a little more sense a bit later and a few more slides because we're going to start plotting the relationships.
+I don't know what I mean by diminishing returns.
+I code the contact variable.
+I put them in a trim data list as always called dat, and we have two models.
+Just because I want you to get some practice doing model comparison, but this is, again, an inference task, so not a predictive task.
+The first model is the intercept-only model, and then the second model is what I call the interaction model where I bracket both alpha and beta by the contact index variable,
+so that we allow the relationship with population size or log population size p and the intercept of the baseline number of tools to vary by contact rate.
+Then at the bottom, I compare them using an important sampling.
+This is the result you get when you run this code.
+There's some warnings about Pareto k values being high.
+We're going to think about that in a moment.
+The first thing I want to point out about this is look at the ppsis column in the table at the top.
+It has the number 7.3 and 8 in it.
+You see it?
+Okay, so what is ppsis?
+This is the penalty.
+This is the effective overfitting penalty.
+How much worse the model is expected to do out of sample because of its flexibility.
+Sometimes these penalties are called the effective number of parameters.
+What I want you to notice is that model 11.10, which is the interaction model, which has four parameters,
+has a smaller penalty than model 11.9, which has exactly one parameter, just the intercept, which isn't bracketed by anything.
+How is it possible that a model with more parameters could have fewer effective parameters?
+This is not unusual with models.
+It is really not.
+Once you leave nice, smooth, linear, Gaussian models without any hierarchical relationships among parameters,
+all of those intuitions are gone.
+All of your intuitions from introductory statistics are gone and you just have to give up on them.
+I wanted to bring this clear example up even in a really simple data analysis context to drive that home for you.
+The reason is because what this penalty is actually measuring is how much of a difference it makes in the posterior distribution
+when you drop a society.
+It's averaged over dropping the different societies, but remember this is like a cross-validation metric.
+Model 11.9 with only intercept actually changes more.
+The posterior distribution of alpha changes more and therefore the probabilities of the observations
+change more dropping individual societies than does the other model.
+That's all.
+This happens all the time with nonlinear models.
+There's nothing exotic or broken about it.
+I just wanted to bring it to your attention.
+You're going to see examples in a couple weeks where we will add lots of parameters to models and the penalties will shrink.
+It's just a thing that it isn't the number of parameters that matters.
+It's how they're structured and how they relate to one another that matters.
+Let's plot the model predictions.
+The posterior predictions here so you can get an idea what this model thinks.
+There's a bunch of code on the left and there's nothing special there.
+It's just extracting the posterior distribution, plotting the raw data,
+and then using link functions to plot predicted posterior mean trends in red and blue here.
+In the red are the high contact societies.
+These are the oceanic societies that are known historically to have big kingdoms and trade networks.
+And then the blue trend are the lower contact oceanic societies known historically.
+Of course, these days all of these societies have high contact rates.
+And then the blue and red bow ties of uncertainty.
+Those are those 89% prediction envelopes that you've gotten used to.
+And you see that the model finds a strong relationship with log population.
+The standardized log population since standard deviations on the horizontal and a total number of tools for both types.
+It's weird to have log population size on the horizontal though because we don't usually think about population sizes in logarithms.
+Remember, when you log a variable, you're converting it to magnitudes.
+But most of us don't think that way unless we practice a particular kind of science.
+So let's convert this to the natural scale.
+So I've just taken the same plot and I've re-plotted it with the x-axis being raw population sizes.
+These are historical population sizes.
+And then you get better idea.
+There's this kind of quick increase of total tools with population size.
+But then the model expects it to level off quite rapidly.
+It's a bit weird what's going on here though.
+Let's zoom in on this model and look.
+The trend's crossed.
+So the solid trend is for the high contact islands that include Tonga there.
+Which the trend doesn't go anywhere near.
+And then there are faster diminishing returns for the high contact islands according to this model.
+Then for the low contact islands that include Hawaii.
+This is almost certainly what's going on here is that Hawaii which is the low contact island is also really big
+and had the most complex toolset at time of contact.
+And it's a high influence point that's dragging that blue curve up like this and producing this weird crossing.
+We can imagine that there would be quicker diminishing returns for high contact sure.
+But why would low contact islands eventually catch up and pass them?
+That's what's weird.
+But you can see that the red predictions are essentially useless that far out by the size of the 89% prediction envelope.
+It covers the whole top half of the graph.
+An even weirder anomaly about this model.
+You see I'm beating up on my own model.
+That's how I do my work and I encourage you to do the same.
+You know your model best so you're best equipped to critique it in principle.
+We look at the intercept.
+So a fact about the background theory is that when you have zero people you must have zero tools.
+I'll say that again.
+When you have zero people you must have zero tools.
+If there are no people there are no innovations.
+But this model being a generalized linear model doesn't have that information in it.
+We had a free intercept alpha and so the number of tools when there are no people can do anything.
+It is doing exactly that and that's one of the things that's generating this weird crossover relationship at larger population sizes.
+You can really see it.
+You look at zero on the x-axis and for high contact islands there is an island with no people is expected to have around 20 tools.
+That can't be right.
+Okay.
+This model is whack.
+There are two immediate ways I think we can improve this model.
+We're going to do the second one.
+The first one is shown in the book.
+The first would be to use some kind of robust regression model.
+A Gamble Poisson is the appropriate analog of the student T robust regression that I showed you in a previous lecture.
+Gamble Poisson allows for essentially thicker tails in the prediction envelopes.
+It's nearly always true that a Gamble Poisson model is better than an ordinary Poisson model.
+In the book I show you how to do it.
+Basically you just replace the word Poisson with Gamble Poisson.
+You've got to add one parameter for scaling for the thickness of the tails and then you go.
+In combination with that we really want a different structure to this model as well.
+The Gamble Poisson change will help.
+It will reduce the influence of Hawaii on the trend and that's something to worry about.
+But it's not going to fix the basic issue that there's not enough scientific information in the linear model here.
+Let's think about that.
+I'll show you this cartoon again.
+Remember the background theory is that people produce innovations and so we expect some relationship between the population size and innovations.
+We expect it to have some kind of diminishing returns of course because people will produce the same innovations and they will count as innovations.
+And contact can be another way that innovations in our society and these two things produce together tools.
+But then tools leak out the other side as loss.
+So why not just write a model that does this that has these two competing processes, the innovations and the losses?
+Well let's do that.
+We're going to write something called the difference equation which is a simple kind of equation of motion.
+Thinking about this in discrete time which I find is often easier for people who are not familiar with this wave modeling.
+You think about time as like a generation.
+So in one generation what's the change in tools?
+So it's labeled this weird equation and think it through.
+The big delta just means change.
+Read it as change.
+So delta t is the difference in tools.
+How many more or fewer in one generation?
+The amount of time is arbitrary but if it's easier for you to think about it, think of it as a generation.
+And then on the right hand side we have a term for innovation and the leading coefficient on it is this alpha.
+You can think of that as the per capita innovation rate.
+And then capital P is population, not log population but per person.
+And it's exponentiated by another parameter beta which measures the diminishing returns.
+Beta is going to be less than one which means that as you add more and more people they add effectively fewer innovations
+because they will end up producing some of the same innovations if left to their own devices.
+This is the innovation term which increases delta t and then what's subtracted from that is the loss.
+We have another parameter gamma which is the rate of loss and then times t, the number of tools.
+And so tools leak out.
+We can make all the parameters in this model moderated by other things that we can measure like contact rates.
+For example, we can just subset alpha and beta by contact rates and get the interaction into a model like this.
+Okay, how do you do stats with something like this?
+Well, we don't have, this model implies a time series, right?
+It's an equation of motion.
+So if we had a time series of the development of tools when people first arrived in each oceanic society, that would be ideal.
+But nobody has that and we're not going to.
+And this is the kind of question you can never study experimentally.
+But these equations of motions have implications for steady states as well if we run them out.
+So we can ask what's the equilibrium number of tools for different values of the parameters and for population sizes.
+And that's what we can derive.
+So be a bit more intuitive if we just simulate it out.
+There's just some code on the left here where I take that equation and I just run it forward.
+We start with zero tools at time zero.
+And we pick here, for example, I picked two population sizes, 10 to the third and 10 to the fourth.
+We have one order of magnitude difference in those two synthetic societies just for some arbitrary values of alpha, beta and gamma.
+And you'll see what happens is they initially increase and then they level off at the point at which the innovation rate matches the rate of tool loss, right?
+Because the more and more tools there are, the more that are lost and eventually the innovation rate and the tool loss will meet.
+And you have that equilibrium in flat lines.
+So that gives us an expectation that we want to compare against data.
+You can play with this code and see what other kinds of curves you can get.
+Okay, well, we're not going to run a simulation inside our stat model, although there are stat models where that's possible.
+And in the last week of this course I'll show you when we will do that where every update, we will actually run a simulation or we get a prediction.
+But we're not going to do that now.
+We're going to use a superpower called algebra.
+And using algebra, which is something you all learned in secondary school, we can simply solve this equation for its equilibrium value of t.
+And we can because when delta t equals zero, that means it's at equilibrium.
+And so we just set it equal to zero and solve for t.
+And after a little bit of algebra, this is the expression you get.
+It's alpha times p to the beta divided by gamma.
+So this is the expected value of tools for a given value of population size conditional on the parameters.
+And this will be inserted into our statistical model.
+So we'll still have a Poisson outcome variable.
+But lambda sub i will now equal this t with that circumflex over the top.
+I say it hat, t hat.
+It's a fancy t, it's got a hat.
+Okay.
+So here's the code to do this in Oolong.
+All that really changes here is the lambda line.
+I just make it equal to that t hat expression.
+The trick, the technical trick you have to observe is that all these parameters are positive.
+Alpha, beta, and gamma are strictly positive real values, right?
+Because they're rates.
+And so you need to get this model to run right.
+You have to constrain them to be positive somehow.
+And there's two ways to do that.
+And I show you both in this code just so you get used to it.
+The first is to exponentiate the parameter where you use it in the model.
+I do that for alpha.
+I give alpha a normal one, one prior.
+But then I exponentiate it inside the lambda line.
+And that makes it strictly positive.
+Yeah, makes it a rate.
+And then for beta, I do it the other way, which is just as good.
+I give it a prior, which is constrained to be positive.
+In this case, an exponential.
+I do the same for gamma.
+These techniques both work.
+The constrained prior approach using exponentials is a little bit more transparent.
+But in calculations, often the extension one works a little bit better.
+This model runs.
+And if you look at the precy output, it's not going to immediately jump out at you what's going on here
+because this model's rather complex.
+And we need to plot posterior predictions to know what it thinks.
+And so again, the same kind of graph and you can use the same kind of code as before to produce a graph like this.
+You'll see this model does not produce a weird crossover where the low contact islands eventually catch up and pass the high contact islands in tool complexity.
+The line is still passing through Hawaii out there.
+That's inevitable.
+But now the high contact island points actually go up towards Tona as well.
+And the intercepts, the intercept is forced to be zero because that's what theory forces it to be.
+And so we don't get this weird behavior towards the left-hand side of the x-axis.
+Okay.
+Oh yeah, I showed you this comparison.
+Much better.
+Of course, this model is still wrong.
+And it's a broken, whacked way.
+But it's a lot better than the previous one and it just took a little bit of scientific thinking instead of doing statistics.
+Right?
+And you can avoid doing statistics and do science instead.
+That's always the best thing to do.
+Now I want to remind you there's a confound here that I mentioned in the beginning that is location.
+Or rather, they're unobserved features of each location, which are potential confounds in these relationships.
+Right?
+Because there will be features of each society where it's physically located that will influence population size and technology.
+And we need to deal with those confounds potentially.
+We're going to do that in a later lecture.
+Okay.
+Let me try to sum this up a bit.
+I know it's been a lot.
+I've tried to present in this lecture and the previous one some interesting data analysis context to transport you into the world of generalized linear models.
+In particular, count generalized linear models, which are the most common ones that we need.
+Many, many scientific variables are discrete events and they're counted things and we need to model those responsibly.
+And count GLMs give us a lot of ability to observe a funny feature of these types of variables is that they are bounded both on the low end at zero and sometimes on the high end at some maximum.
+And those ceiling and floor effects affect the causal estimates.
+They fundamentally change the way the marginal effect simulations are going to work because as you approach a floor or a ceiling in some outcome space, the causal effect of changing any variable must get smaller.
+I'll say that again.
+As you approach the floor or ceiling of any outcome space, the causal effect of any variable in that system must get smaller.
+And so when we compute causal effects, we need to take that into account and so we can't use linear models.
+Okay.
+I tried to give you a crash course in the idea that selecting distributions for count variables is the easy part.
+The maximum entropy guides us.
+We just obey the constraints on the variable.
+And then there are link functions that are matched to those distributions.
+So that's not the big part.
+The big problem is still the causal modeling part.
+There are also robust regression types for all these count models, for binomial models, something called a beta binomial.
+I talked about this in the book.
+And for Poisson, there's the analog, the gamma Poisson.
+And these are robust regressions also in the sense that they introduce unobserved heterogeneity that produces thicker tails to the prediction distributions.
+And that reduces overfitting.
+Okay.
+Next week, we're going to talk about more kinds of generalized linear models.
+I'm going to introduce you to order categories in particular, which is a really common and important kind of outcome variable.
+But it will also be a chance for you to exercise even more thinking about how we get scientific hypotheses into these models.
+And I hope to see you there.
+If you're still there, I'm going to do a quick bonus.
+There's a statistical term called Simpson's Paradox, and many of you will have heard it before.
+And the UC Berkeley example in this lecture and the previous one is one of the more common textbook examples of it.
+So I often get asked about Simpson's Paradox and its relationship to that.
+I don't usually teach about Simpson's Paradox because I don't think there's any value in mentioning it.
+It's a purely statistical phenomenon, but maybe it's worth explaining that.
+So what is Simpson's Paradox?
+It is the reversal of some measured association when groups are combined or separated within the dataset.
+And the thing about this is the reversal of this association is purely statistical.
+There's no way to know which version of the association combined or separated is correct without specifying some background causal model.
+In fact, there isn't essentially infinite number of causal phenomena that can produce Simpson's Paradox.
+It's not a unitary thing, and we probably should just forget about it as a term because it doesn't distinguish anything.
+In the UC Berkeley Paradox example, if we measure the association between gender and admissions rate unconditional on departments,
+ignoring department, we find that overall women are admitted at a lower rate.
+If we condition on department or stratify by department, we find that women are admitted slightly more, averaging across the departments.
+So which is correct?
+There's no way to know without assumptions, and that's what I've spent really two lectures an entire week trying to convince you of.
+I showed you that there's a mediator effect of department.
+That could be an explanation or a more exotic, but I think very plausible in administrative data sets of this kind.
+Collider plus a confound like ability could also explain the phenomenon or some part of it.
+But regardless, just because the coefficient changes, when you stratify by something new, that doesn't necessarily reveal anything,
+and there's no paradox that that happens.
+That's ordinary behavior for a statistical model.
+And indeed, you've already seen from the elemental confounds, the fork, the pipe, and the collider, all three of them can produce such coefficient reversals or trend reversals.
+So just to remind you, the fork, there could be an association in this generative example between X and Y unconditional on group,
+but when we stratify by the groups Z here, that association vanishes.
+Yeah, that's Simpson's paradox.
+It's no paradox at all.
+Everybody understands this.
+And the same through for the pipe.
+The pipe can produce essentially the same phenomenon.
+You cannot distinguish a pipe from a fork, from data alone.
+So unconditional on groups here.
+There's an association between X and Y stratified by group C. There is not.
+And then the collider.
+Everybody's favorite.
+Unconditional on groups.
+There's no association.
+Conditional on groups.
+There is.
+It's also Simpson's paradox.
+Simpson's paradox is basically everything that happens has been called Simpson's paradox at some point or another.
+There's no paradox because there's no unitary phenomenon to understand.
+There's a bunch of different reasons that coefficients or associations can change when you stratify by something new.
+And that's what we, in order to understand those things, you have to do causal modeling.
+But there is something new to say, I think, on top of all that other stuff, the elemental confounds.
+In nonlinear models now, which I've introduced to you this week, there's another way we can get what is often called Simpson's paradox.
+And that is through, well, I jokingly call this nonlinear haunting because I'm always making up cute terms.
+But it arises also from a causal process, but the causal process is the way that counts scale.
+That is, that there are ceiling and floor effects.
+So I have an example here I want to walk you through as a bit of a bonus.
+And I think it'll be of great value because this is a very important feature of how nonlinear models work.
+And it's closely related to the original version of Simpson's paradox in Simpson's original paper.
+This big example uses base rate differences.
+What do I mean by that?
+There's some event y as an outcome and I'm going to model this as binary.
+You can think of it as survival.
+And there's some treatment x.
+We're interested in estimating the effect of this treatment x on survival y.
+There's also a covariate that we've measured.
+And this could, I think this is a group.
+It could be binary and it indicates presence or absence in some group.
+And this is not a confound z.
+It's just a competing cause of y.
+There's no confounding in the DAG on this slide.
+However, when you stratify by z in a nonlinear model, it can have effects like you're used to thinking of in the elemental confounds.
+I'll show you why this arises.
+So let's do a generative simulation.
+I'm going to simulate 1,000 outcomes.
+So we simulate x first.
+I'll just make a Gaussian.
+And then I'll simulate z.
+So it's binary.
+Just to make this easy to think about, it could also be continuous.
+You can get the same effect.
+And then I'll simulate some binary y's, some survival events if you want to think of it that way.
+And I want to want you to see in that line of code for p.
+I've wrapped it in inverse logit.
+So we're on the log odds scale inside the parentheses.
+And then x has no coefficient, but essentially the coefficient is 1, right?
+Because there's no coefficient there.
+So there's a positive effect of the treatment.
+Yeah, one standard deviation change in x increases the log odds of survival by 1.
+And then what's different for z equals 1,
+we subtract 1 from the log odds of survival.
+And for z equals 0, we add 5.
+So z equals 1, individuals have lower odds of survival, independent of x.
+And z equals 0, individuals have much greater odds of survival, independent of x.
+There's no confound.
+There's no interaction.
+But a kind of nonlinear confound arises because of the way ceiling effects work in this model.
+Let me show you what happens now.
+If we were a naive statistician and we just run a simple logistic regression here.
+I'm going to use quap here, but you could use oolong.
+You just change one word.
+And we have that the logit of the probability of survival is equal to alpha plus beta times x sub i.
+It's an ordinary logistic regression.
+And we're going to run one other model.
+I'm going to compare them to show you the differing inferences from them.
+And then we stratify by z.
+And there are different ways to do this.
+What I'm going to do is I'm going to estimate a different slope for each value of z.
+So estimate a different effect of survival.
+Disaggregate the groups.
+Okay.
+So here are these two models on the outcome scale.
+I'm going to represent these models this way because the coefficients in these models are just little bits of the tide machine engine.
+And remember, they're hardly ever interpretable on their own.
+You have to pull them all together and push them into the function to make predictions to have any sense of understanding what's going on.
+You can understand tides.
+You can't understand all the separate gears that produce the predictions about the tides.
+So that's what I've done on this slide.
+For both of the models on the previous slide, I've just drawn functions, logistic functions, prediction functions from the posterior distribution.
+And I think I've drawn 20 for each.
+So on the left, we have the simple model where it's collapsed, aggregated by groups.
+And you'll see that there's a positive relationship between the treatment and the outcome in the total sample.
+But then we disaggregate by groups and we find that z equals 1 has no effect.
+Now, how could this happen?
+Because you've simulated the data and you know that x has a positive effect on survival.
+What has gone wrong here?
+Yeah?
+The coefficient for the first group for z equals 1 has reversed or the effect has vanished.
+What is going on?
+Now, we can look at the posterior distributions of the coefficients and you can see that for z equals 1, that's right over 0.
+And the model seems quite confident that the effect is small.
+And for z equals 2, it's right over 1, which is correct.
+Actually, that's the correct coefficient.
+Okay, let's do one more model.
+And you can see what's going on.
+The problem here is that the intercepts are different.
+That's what happened in the simulation.
+It's not enough to just try to detect different slopes.
+And so we also want to bracket this.
+I had a new model at the bottom, bracket alpha by z.
+So now we get a separate intercept for each group and a separate slope estimating separate functions.
+And now you can see what's really going on here.
+This is the generative model we simulated on the right, recovered in the posterior distribution.
+There's a positive effect in both, but it cannot be estimated from this sample.
+I'll say that again.
+There's a positive effect of x in both.
+We know that because we simulated the data and that was the assumption.
+But it cannot be estimated from this sample.
+The plot on the left is really misleading because it looks like it gets the base rate strong.
+It misses the fact that one of the groups has much higher baseline survival,
+the red group than the other, the blue group.
+And so while the treatment helps, it can only help individuals who need help.
+Once your survival is already guaranteed and the treatment doesn't hurt you,
+being treated isn't going to help you anymore.
+And so this is the ceiling effect and you see this.
+The model on the left doesn't recover this because it doesn't estimate the different baselines of survival.
+That is the different intercepts alpha.
+The model on the right estimates the different baselines that recovers that.
+But it cannot tell if the treatment helped in the red group in z equals one.
+They find strong evidence the treatment helps in z equals two.
+This is a very common sort of thing in nonlinear models and nature is like this.
+So we just have to deal with it.
+I'll show you also here at the posterior distributions.
+You want to see at the bottom right, the posterior distributions from the new model.
+The blue posterior distribution is right where it should be.
+The red posterior distribution is very agnostic.
+This is not a posterior distribution which says there's no effect.
+You'll see how wide that is, right?
+And it's like this because it's maxed out on the top of the graph there, the ceiling effect.
+So the model cannot tell if larger values of x help individuals in the red group.
+It just can't tell and that's what it reports.
+It says, well, it could be slightly negative.
+It could be slightly positive.
+I just don't know.
+Yeah.
+This is another opportunity for me to remind you that just because some posterior distribution overlaps zero,
+that doesn't mean you should assume it's zero.
+You don't accept the null just because zero is inside your posterior distribution.
+Yeah.
+And that's not just a Bayesian complaint.
+This is also for frequentists.
+It's the same issue.
+And you shouldn't accept the null ever.
+You reject nulls.
+You can't accept them, at least not in any simple framework.
+Certainly not in Bayes because we're not doing error control.
+Okay.
+Let me sum this up.
+I think the important part of this lesson is to understand more about how nonlinear models work.
+The ceiling and floor effects really change how you interpret coefficients
+and you can get these coefficient changes or reversals just because of those scaling issues that happen on the log odd scale.
+It's not unusual at all.
+And so the best thing to do is not interpret parameters.
+You should push all the parameters back through your model and produce posterior predictions.
+That's the best thing to do.
+You should consider interactions or moderation effects basically as default, I think, is the safest thing to do.
+We've got the statistical power to do it.
+For Simpson's paradox, I think you can ignore it.
+There's no paradox because it's not a unitary explanation for it.
+So there's no puzzle to be solved here.
+It's perfectly ordinary.
+It's just describing statistics.
+You might as well say that statistics is paradoxical.
+And of course it is because people don't understand it.
+But it's not that it's a paradox because in a paradox, the idea is there's something that's counter to our intuition.
+People don't have intuitions about statistics and they don't have intuitions about coefficient reversals.
+So I prefer we didn't call these things paradoxes.
+But whatever, I don't usually like to be a definitional skull,
+but if people want to keep using this term, it's fine.
+But it's not really a gateway to learning anything unless we teach causal logic, scientific logic, as the cure to the paradoxical result.
+Okay.
+I'll see you next week.
